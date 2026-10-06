@@ -106,6 +106,9 @@ namespace KeeTheme.Decorators
                 {
                     using (var graphics = Graphics.FromHdc(dc))
                     {
+                        var date = _combo as DateTimePicker;
+                        if (date != null && !date.ContainsFocus)
+                            DrawDateField(graphics, date.ClientRectangle, date.Text, date.Font, date.Enabled);
                         if (_combo is ComboBox)
                         {
                             var info = new ComboInfo(); info.Size = Marshal.SizeOf(typeof(ComboInfo));
@@ -153,6 +156,16 @@ namespace KeeTheme.Decorators
             int x = bounds.Left + bounds.Width/2, y = bounds.Top + bounds.Height/2;
             using (var brush = new SolidBrush(Color.FromArgb(190,190,190)))
                 graphics.FillPolygon(brush, new Point[] { new Point(x-3,y-1), new Point(x+3,y-1), new Point(x,y+2) });
+        }
+        internal static void DrawDateField(Graphics graphics, Rectangle bounds, string text, Font font, bool enabled)
+        {
+            using (var brush = new SolidBrush(Color.FromArgb(37,37,38))) graphics.FillRectangle(brush, bounds);
+            int buttonWidth = SystemInformation.VerticalScrollBarWidth + 4;
+            var button = new Rectangle(bounds.Right-buttonWidth, bounds.Top, buttonWidth, bounds.Height);
+            var content = new Rectangle(bounds.Left+3,bounds.Top,Math.Max(0,bounds.Width-buttonWidth-6),bounds.Height);
+            TextRenderer.DrawText(graphics,text,font,content,enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+            DrawComboButton(graphics,button);
         }
     }
 }

@@ -134,3 +134,10 @@ if($bitmap.GetPixel(5,4).R -ne 37){throw 'Dropdown background incorrect'}
 if($bitmap.GetPixel(10,12).R -ne 190){throw 'Dropdown arrow missing'}
 $graphics.Dispose();$bitmap.Dispose()
 Write-Output 'PASS dark dropdown separator, background and visible arrow'
+$bitmap=New-Object Drawing.Bitmap(220,24);$graphics=[Drawing.Graphics]::FromImage($bitmap)
+$bounds=New-Object Drawing.Rectangle(0,0,220,24);$font=New-Object Drawing.Font('Segoe UI',9)
+$drawDate=$a.GetType('KeeTheme.Decorators.CenteredSearchDecorator').GetMethod('DrawDateField',$f)
+$drawDate.Invoke($null,@($graphics.PSObject.BaseObject,$bounds.PSObject.BaseObject,'01.01.2030',$font.PSObject.BaseObject,$true)) | Out-Null
+if($bitmap.GetPixel(160,12).R -ne 37){throw 'Date field background incorrect'}
+$graphics.Dispose();$bitmap.Dispose();$font.Dispose()
+Write-Output 'PASS dark date background'
