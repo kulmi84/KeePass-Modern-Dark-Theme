@@ -1,70 +1,34 @@
-## Modern Dark fork
+# KeeTheme Modern Dark
 
-Testversion im Branch feature/windows11-dark-v1. [Installation, Umfang und Grenzen](docs/ModernDark.md).
+Ein KeeTheme-Fork für KeePass 2 mit dunkler Oberfläche, einheitlichen Standardicons und einer aufgeräumten Symbolleiste.
 
 ![Modern Dark mit fiktiven Demo-Daten](docs/ModernDark-demo.png)
 
-Bearbeitete Demo-Abbildung mit ausschließlich fiktiven Ordnernamen, Einträgen und Zugangsdaten.
+Bearbeitete Originalansicht mit ausschließlich fiktiven Ordnernamen, Einträgen und Zugangsdaten.
 
 ![Moderne Standardicons und benutzerdefinierte Icons](docs/ModernDark-icons-demo.png)
 
-Icon-Auswahl mit modernen Standardicons; benutzerdefinierte Bilder bleiben erhalten. Die angezeigten Namen wurden durch neutrale Demo-Bezeichnungen ersetzt.
+Die Standardicons erscheinen im modernen Stil. Eigene Datenbankicons bleiben erhalten; die abgebildeten Namen wurden durch neutrale Demo-Bezeichnungen ersetzt.
 
-# KeeTheme
+## Funktionen
 
-[![Version](https://img.shields.io/github/release/xatupal/KeeTheme)](https://github.com/xatupal/KeeTheme/releases/latest)
-[![Releasedate](https://img.shields.io/github/release-date/xatupal/KeeTheme)](https://github.com/xatupal/KeeTheme/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/xatupal/KeeTheme/total)](https://github.com/xatupal/KeeTheme/releases/latest/download/KeeTheme.plgx)
+- Modern Dark mit dunklen Panels und Menüs sowie hellen Texten.
+- Einheitliche Icons in Symbolleiste, Gruppenbaum, Eintragsliste und Icon-Auswahl.
+- Breiteres Suchfeld, bei ausreichendem Platz mittig angeordnet.
+- Dunklere Zeilen und abschaltbare Spaltentrennlinien, auch in gruppierten Suchergebnissen.
+- Originales KeePass-Fensterlogo in Graustufen.
+- Moderne Icon-Vorschau und Passwortgenerator-Symbole im Eintragsdialog.
 
-KeePass Plugin
+Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und KDBX-Logik werden nicht verändert.
 
-This plugin changes the appearance of KeePass to make it look better at night.
+## Installation und Einstellungen
 
-You can enable it using the hotkey `CTRL+T` or through the menu `Tools -> DarkTheme`.
+[Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
-### Options
+Die aktuelle Version aus diesem Fork bauen und KeeTheme.dll in den KeePass-Plugins-Ordner kopieren. Vor dem Austausch KeePass schließen und vorherige KeeTheme.dll/KeeTheme.plgx sichern und aus dem Plugins-Ordner nehmen. Unter **Extras → Optionen → KeeTheme** das Theme **Modern Dark** auswählen.
 
-In [options](docs/KeePassDarkThemeCustomOptions.png) `Tools -> Options... -> KeeTheme` you can:
-* Select a theme
-* Create your own theme
-* Change the default hotkey
-* Auto-sync with the Windows 10 theme
+Der Eintragsdialog-Fix ist gebaut und automatisiert geprüft; die Bestätigung im laufenden KeePass steht noch aus.
 
-### Customizations
+## Ursprung
 
-You can use the built-in theme editor to create your own theme.
-Custom themes should be saved in the plugins folder.
-
-![Theme editor](docs/KeePassDarkThemeEditor.png)
-
-
-### Installation
-
-Copy [KeeTheme.dll](https://github.com/xatupal/KeeTheme/releases/latest/download/KeeTheme.dll) or [KeeTheme.plgx](https://github.com/xatupal/KeeTheme/releases/latest/download/KeeTheme.plgx) to the KeePass Plugins directory or install via [Chocolatey](https://chocolatey.org):
-
-```
-choco install keepass-plugin-keetheme
-```
-
-### Note
-
-KeePass was created using standard Windows controls, which unfortunately were not designed for easy customization. They are extremely resistant to any attempts to change their appearance, especially from a plugin that has no control over their creation.
-
-Therefore, the plugin is not perfect and never will be, but it is good enough to use.
-
-### Screenshots
-#### DarkTheme
-
-![Main form](docs/KeePassDarkTheme.png)
-
-![Open database](docs/KeePassDarkThemeOpenDatabase.png)
-
-![Options](docs/KeePassDarkThemeOptions.png)
-
-#### DarkThemeWin11
-
-![Main form](docs/KeePassDarkThemeWin11.png)
-
-![Open database](docs/KeePassDarkThemeWin11OpenDatabase.png)
-
-![Options](docs/KeePassDarkThemeWin11Options.png)
+Dieser Fork basiert auf [xatupal/KeeTheme](https://github.com/xatupal/KeeTheme). KeeTheme-Lizenz: [MIT](LICENSE). Das originale KeePass-Logo stammt aus KeePass; Quellenhinweise stehen in der Dokumentation.
