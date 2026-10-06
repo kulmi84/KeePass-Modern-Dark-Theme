@@ -6,6 +6,10 @@ Testversion im Branch feature/windows11-dark-v1. [Installation, Umfang und Grenz
 
 Bearbeitete Demo-Abbildung mit ausschließlich fiktiven Ordnernamen, Einträgen und Zugangsdaten.
 
+![Moderne Standardicons und benutzerdefinierte Icons](docs/ModernDark-icons-demo.png)
+
+Icon-Auswahl mit modernen Standardicons; benutzerdefinierte Bilder bleiben erhalten. Die angezeigten Namen wurden durch neutrale Demo-Bezeichnungen ersetzt.
+
 # KeeTheme
 
 [![Version](https://img.shields.io/github/release/xatupal/KeeTheme)](https://github.com/xatupal/KeeTheme/releases/latest)
