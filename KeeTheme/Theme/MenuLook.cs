@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Drawing;
 using KeeTheme.Editor;
 
@@ -8,5 +8,7 @@ namespace KeeTheme.Theme
 	class MenuLook : ControlLook
 	{
 		public Color HighlightColor { get; set; }
+        public Color DisabledForeColor { get; set; }
+        public bool ModernIcons { get; set; }
 	}
 }

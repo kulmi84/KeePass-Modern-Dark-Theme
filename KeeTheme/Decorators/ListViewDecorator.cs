@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using KeePass;
 using KeePass.UI;
+using KeePassLib;
 using KeePassLib.Utility;
 using KeeTheme.Theme;
 using CheckBoxState = System.Windows.Forms.VisualStyles.CheckBoxState;
@@ -307,8 +308,11 @@ namespace KeeTheme.Decorators
 			if (e.ColumnIndex == 0 && e.Item.ImageIndex > -1)
 			{
 				var image = e.Item.ImageList.Images[e.Item.ImageIndex];
-				e.Item.ImageList.Draw(e.Graphics, bounds.X + 4, bounds.Y + 1, image.Width, image.Height,
-					e.Item.ImageIndex);
+                // Paint only identified built-in entry icons. Custom icons start at PwIcon.Count.
+                if (!TryDrawModernStandardIcon(e.Graphics, e.Item,
+                    new Rectangle(bounds.X + 4, bounds.Y + 1, image.Width, image.Height)))
+                    e.Item.ImageList.Draw(e.Graphics, bounds.X + 4, bounds.Y + 1,
+                        image.Width, image.Height, e.Item.ImageIndex);
 
 				textBounds.Inflate(-image.Width - 4 - 2, 0);
 				text = text.Remove(0, 1);
@@ -330,7 +334,42 @@ namespace KeeTheme.Decorators
 				e.Graphics.DrawLine(pen, bounds.Right - 2, bounds.Y, bounds.Right - 2, bounds.Bottom);
 		}
 
-		private void HandleListViewDrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
+		        private bool TryDrawModernStandardIcon(Graphics graphics, ListViewItem item, Rectangle bounds)
+        {
+            var entry = item.Tag as PwListItem;
+            var index = item.ImageIndex;
+            if (!_theme.MenuItem.ModernIcons || _listView.Name != "m_lvEntries" ||
+                entry == null || !entry.Entry.CustomIconUuid.Equals(PwUuid.Zero) ||
+                index < 0 || index >= (int)PwIcon.Count ||
+                (index != (int)PwIcon.Key && index != (int)PwIcon.Folder &&
+                 index != (int)PwIcon.FolderOpen)) return false;
+            var state = graphics.Save();
+            try
+            {
+                graphics.TranslateTransform(bounds.X, bounds.Y);
+                graphics.ScaleTransform(bounds.Width / 16f, bounds.Height / 16f);
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                using (var pen = new Pen(_theme.ListView.ForeColor, 1.4f))
+                {
+                    if (index == (int)PwIcon.Key)
+                    {
+                        graphics.DrawEllipse(pen, 1, 2, 6, 6);
+                        graphics.DrawLine(pen, 6, 7, 13, 14);
+                        graphics.DrawLine(pen, 10, 11, 12, 9);
+                        graphics.DrawLine(pen, 12, 13, 14, 11);
+                    }
+                    else
+                    {
+                        graphics.DrawLines(pen, new PointF[] { new PointF(2,13),
+                            new PointF(2,4), new PointF(6,4), new PointF(8,6),
+                            new PointF(14,6), new PointF(14,13), new PointF(2,13) });
+                    }
+                }
+                return true;
+            }
+            finally { graphics.Restore(state); }
+        }
+        private void HandleListViewDrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
 		{
 			if (!_enabled)
 			{

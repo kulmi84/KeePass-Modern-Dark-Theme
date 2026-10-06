@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Drawing;
 using System.Reflection;
@@ -197,7 +197,7 @@ namespace KeeTheme
 
 		public override string UpdateUrl
 		{
-			get { return "https://nibiru.pl/keepass/plugins.php?name=KeeTheme"; }
+			get { return string.Empty; }
 		}
 
 		public override Image SmallIcon

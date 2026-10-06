@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -54,7 +54,7 @@ namespace KeeTheme.Decorators
 		private static Type GetType(string name)
 		{
 			return AppDomain.CurrentDomain.GetAssemblies()
-				.SelectMany(TryGetTypes).FirstOrDefault(x => x.FullName.StartsWith(name));
+				.SelectMany(assembly => TryGetTypes(assembly)).FirstOrDefault(x => x.FullName.StartsWith(name));
 		}
 
 		private static IEnumerable<Type> TryGetTypes(Assembly assembly)

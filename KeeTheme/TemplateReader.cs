@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,7 +10,7 @@ namespace KeeTheme
 {
 	public static class TemplateReader
 	{
-		public const string DefaultTemplatePath = "KeeTheme.Resources.DarkTheme.ini";
+		public const string DefaultTemplatePath = "KeeTheme.Resources.ModernDark.ini";
 
 		internal static IniFile GetDefaultTemplate()
 		{
