@@ -204,9 +204,21 @@ namespace KeeTheme
             bool unlock = banner.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm";
             using (var brush = new SolidBrush(_theme.Form.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
             int padding = Math.Max(12, banner.Height/5);
+            int textLeft = padding;
+            if (unlock)
+            {
+                int size = Math.Max(16, Math.Min(32, banner.Height-padding*2));
+                using (var stream = typeof(KeeTheme).Assembly.GetManifestResourceStream("KeeTheme.Resources.ModernWindow.ico"))
+                {
+                    if (stream != null)
+                        using (var icon = new Icon(stream, size, size))
+                            e.Graphics.DrawIcon(icon, new Rectangle(padding,(banner.Height-size)/2,size,size));
+                }
+                textLeft += size + padding;
+            }
             using (var font = new Font(banner.Font.FontFamily, banner.Font.Size * 1.3f, FontStyle.Bold))
                 TextRenderer.DrawText(e.Graphics, unlock ? KeePass.Resources.KPRes.EnterCompositeKey : KeePass.Resources.KPRes.EditEntry,
-                    font, new Rectangle(padding,padding,banner.Width-padding*2,banner.Height-padding*2), _theme.Form.ForeColor,
+                    font, new Rectangle(textLeft,padding,Math.Max(0,banner.Width-textLeft-padding),banner.Height-padding*2), _theme.Form.ForeColor,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
 
@@ -641,6 +653,8 @@ namespace KeeTheme
 			if (UseModernIcons && entryForm != null && entryForm.GetType().FullName == "KeePass.Forms.PwEntryForm" &&
 				(button.Name == "m_btnIcon" || button.Name == "m_btnGenPw" || button.Name == "m_btnStandardExpires"))
 				button.Paint += HandleModernEntryButtonPaint;
+            if (UseModernIcons && entryForm != null && entryForm.GetType().FullName == "KeePass.Forms.KeyPromptForm" && button.Name == "m_btnOpenKeyFile")
+                button.Paint += HandleModernEntryButtonPaint;
 			button.BackColor = _theme.Button.BackColor;
 			button.ForeColor = _theme.Button.ForeColor;
 			button.FlatAppearance.BorderColor = _theme.Button.BorderColor;
@@ -681,7 +695,9 @@ namespace KeeTheme
 				(button.ClientSize.Height - image.Height) / 2, image.Width, image.Height);
 			using (var brush = new SolidBrush(button.BackColor)) e.Graphics.FillRectangle(brush, bounds);
 			var color = button.Enabled ? button.ForeColor : Color.FromArgb(190,190,190);
-			if (button.Name == "m_btnStandardExpires")
+			if (button.Name == "m_btnOpenKeyFile")
+                ModernToolbarIcons.Draw(e.Graphics, bounds, "m_tbOpenDatabase", color);
+            else if (button.Name == "m_btnStandardExpires")
 				ModernToolbarIcons.Draw(e.Graphics, bounds, "m_tbViewsShowExpired", color);
 			else ModernStandardIcons.Draw(e.Graphics, bounds, icon, color);
 		}

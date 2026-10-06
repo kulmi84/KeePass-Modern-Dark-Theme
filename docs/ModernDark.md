@@ -80,3 +80,4 @@ Eintragsdialog-Rahmen: Textfelder, Kommentar-Rahmen und Ablaufdatum-Rahmen werde
 
 Datenbank öffnen: Dunkle Rahmen auch für Passwort und Schlüsseldatei-Auswahl. Die alten Banner-Grafiken in KeyPromptForm und PwEntryForm werden in Modern Dark durch einen flachen Hintergrund mit lokalisierter Überschrift ersetzt, ohne Originalbilder zu verändern. Native Dropdown-Buttons werden einschließlich Trenner und Pfeil dunkel nachgezeichnet; Eingabe und Auswahl bleiben nativ. Banner- und Dropdown-Pixeltests bestanden; Live-Test offen.
 Datumsfeld: Im Ruhezustand #252526 Hintergrund und #F1F1F1 Text. Beim Fokussieren bleibt die native Datumsbearbeitung mit Segmentmarkierung erhalten. Kalenderauswahl bleibt nativ. Bitte Live-Darstellung prüfen.
+Öffnen-Dialog: Originales KeePass-Logo in Graustufen vor der Überschrift Hauptschlüssel eingeben; Schlüsseldatei-Ordnerbutton mit modernem S/W-Symbol. Live-Test offen.
