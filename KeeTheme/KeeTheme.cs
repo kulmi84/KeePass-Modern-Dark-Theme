@@ -31,7 +31,9 @@ namespace KeeTheme
         private readonly Dictionary<ToolStripItem, bool> _searchAutoSize = new Dictionary<ToolStripItem, bool>();
         private readonly Dictionary<ToolStripItem, Padding> _toolbarPadding = new Dictionary<ToolStripItem, Padding>();
 
-		public bool Enabled
+		public bool UseModernIcons { get { return _enabled && _theme.MenuItem.ModernIcons; } }
+
+        public bool Enabled
 		{
 			get { return _enabled; }
 			set { SetEnable(value); }
