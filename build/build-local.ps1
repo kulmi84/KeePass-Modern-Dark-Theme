@@ -24,6 +24,7 @@ foreach ($resx in Get-ChildItem $sourceRoot -Recurse -Filter *.resx) {
 foreach ($ini in Get-ChildItem (Join-Path $sourceRoot Resources) -Filter *.ini) {
     $compilerArgs += '/resource:'+$ini.FullName+',KeeTheme.Resources.'+$ini.Name
 }
+$compilerArgs += '/resource:'+(Join-Path $sourceRoot 'Resources/ModernWindow.ico')+',KeeTheme.Resources.ModernWindow.ico'
 $compilerArgs += Get-ChildItem $sourceRoot -Recurse -Filter *.cs | Where-Object { $_.FullName -notmatch '\\(obj|bin)\\' } | ForEach-Object { $_.FullName }
 & "$env:WINDIR\Microsoft.NET\Framework\v3.5\csc.exe" $compilerArgs
 if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
