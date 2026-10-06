@@ -1,4 +1,4 @@
-param([string]$PluginPath)
+param([string]$PluginPath,[string]$PreviewPath)
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Windows.Forms
 [Reflection.Assembly]::LoadFrom('C:\Program Files\KeePass Password Safe 2\KeePass.exe') | Out-Null
@@ -52,8 +52,10 @@ $event=New-Object Windows.Forms.PaintEventArgs($graphics,$banner.ClientRectangle
 $paintBanner=$type.GetMethod('HandleModernBannerPaint',$f)
 $graphics.Clear([Drawing.Color]::Magenta)
 $paintBanner.Invoke($instance,@($banner.PSObject.BaseObject,$event.PSObject.BaseObject)) | Out-Null
-if($canvas.GetPixel(2,2).ToArgb() -ne $theme.Form.BackColor.ToArgb()){throw 'Old banner background remains'}
+if($canvas.GetPixel(2,2).ToArgb() -ne $theme.Control.BackColor.ToArgb()){throw 'Modern banner background incorrect'}
+if($canvas.GetPixel(2,$banner.Height-1).R -ne 65){throw 'Banner divider missing'}
 if(![Object]::ReferenceEquals($banner.Image,$original)){throw 'Banner source image altered'}
+if($PreviewPath){$canvas.Save($PreviewPath,[Drawing.Imaging.ImageFormat]::Png)}
 $type.GetField('_enabled',$f).SetValue($instance,$false)
 $graphics.Clear([Drawing.Color]::Magenta)
 $paintBanner.Invoke($instance,@($banner.PSObject.BaseObject,$event.PSObject.BaseObject)) | Out-Null

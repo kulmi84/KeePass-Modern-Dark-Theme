@@ -138,6 +138,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\ModernWindow.ico" />
+    <EmbeddedResource Include="Resources\ModernBanner.png" />
     <EmbeddedResource Include="Resources\ModernDark.ini" />
     <EmbeddedResource Include="Resources\DarkTheme.ini" />
     <EmbeddedResource Include="Resources\DarkThemeWin11.ini" />

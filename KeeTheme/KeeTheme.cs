@@ -25,6 +25,7 @@ namespace KeeTheme
 		private ITheme _customTheme;
 		private ITheme _theme;
 		private bool _enabled;
+        private Image _bannerArtwork;
         private readonly Dictionary<Control, IDisposable> _fieldBorders = new Dictionary<Control, IDisposable>();
         private readonly Dictionary<ToolStrip, CenteredSearchDecorator> _centeredSearch = new Dictionary<ToolStrip, CenteredSearchDecorator>();
         private readonly Dictionary<ToolStripItem, bool> _toolbarAvailable = new Dictionary<ToolStripItem, bool>();
@@ -202,7 +203,27 @@ namespace KeeTheme
             if (!UseModernIcons) return;
             var banner = (PictureBox)sender;
             bool unlock = banner.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm";
-            using (var brush = new SolidBrush(_theme.Form.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
+            using (var brush = new SolidBrush(_theme.Control.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
+            if (_bannerArtwork == null)
+                using (var stream = typeof(KeeTheme).Assembly.GetManifestResourceStream("KeeTheme.Resources.ModernBanner.png"))
+                    if (stream != null) using (var image = Image.FromStream(stream)) _bannerArtwork = new Bitmap(image);
+            if (_bannerArtwork != null)
+            {
+                int width = Math.Min(banner.Width/3, banner.Height*2);
+                var target = new Rectangle(banner.Width-width,0,width,banner.Height-1);
+                int sourceWidth = Math.Min(_bannerArtwork.Width, _bannerArtwork.Height*2);
+                using (var attributes = new System.Drawing.Imaging.ImageAttributes())
+                {
+                    var matrix = new System.Drawing.Imaging.ColorMatrix(); matrix.Matrix33 = 0.5f;
+                    attributes.SetColorMatrix(matrix);
+                    e.Graphics.DrawImage(_bannerArtwork,target,_bannerArtwork.Width-sourceWidth,0,sourceWidth,_bannerArtwork.Height,GraphicsUnit.Pixel,attributes);
+                }
+                var fade = new Rectangle(target.Left,0,Math.Max(1,width/3),target.Height);
+                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(fade,_theme.Control.BackColor,Color.FromArgb(0,_theme.Control.BackColor),0f))
+                    e.Graphics.FillRectangle(brush,fade);
+            }
+            using (var pen = new Pen(Color.FromArgb(65,65,65)))
+                e.Graphics.DrawLine(pen, 0, banner.Height-1, banner.Width-1, banner.Height-1);
             int padding = Math.Max(12, banner.Height/5);
             int textLeft = padding;
             if (unlock)
