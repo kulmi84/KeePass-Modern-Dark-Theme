@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Windows.Forms;
@@ -10,7 +10,10 @@ namespace KeeTheme.Theme
 	[TypeConverter(typeof(ListViewLookTypeConverter))]
 	class ListViewLook : ControlLook
 	{
-		public BorderStyle BorderStyle { get; set; }
+		public ListViewLook() { ShowColumnSeparators = true; }
+        public bool ShowColumnSeparators { get; set; }
+        public bool UseThemeAlternatingColors { get; set; }
+        public BorderStyle BorderStyle { get; set; }
 		public Color OddRowColor { get; set; }
 		public Color EvenRowColor { get; set; }
 		public Color ColumnBorderColor { get; set; }

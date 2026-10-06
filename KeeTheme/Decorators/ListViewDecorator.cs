@@ -91,7 +91,8 @@ namespace KeeTheme.Decorators
 				foreach (ColumnHeader column in _listView.Columns)
 				{
 					columnOffset += column.Width;
-					g.Graphics.DrawLine(columnPen, e.ClipRectangle.X + columnOffset, e.ClipRectangle.Y,
+					if (_theme.ListView.ShowColumnSeparators)
+                        g.Graphics.DrawLine(columnPen, e.ClipRectangle.X + columnOffset, e.ClipRectangle.Y,
 						e.ClipRectangle.X + columnOffset, e.ClipRectangle.Bottom);
 				}
 
@@ -182,7 +183,8 @@ namespace KeeTheme.Decorators
 				var offset = 0;
 				foreach (ColumnHeader column in listView.Columns)
 				{
-					g.DrawLine(pen, offset + column.Width - 2, 0, offset + column.Width - 2, bgSize.Height);
+					if (_theme.ListView.ShowColumnSeparators)
+                        g.DrawLine(pen, offset + column.Width - 2, 0, offset + column.Width - 2, bgSize.Height);
 					offset += column.Width;
 				}
 			}
@@ -265,7 +267,10 @@ namespace KeeTheme.Decorators
 
 		private Color GetAlternatingBackColor(int itemIndex)
 		{
-			if (!Program.Config.MainWindow.EntryListAlternatingBgColors) 
+			if (_theme.ListView.UseThemeAlternatingColors)
+                return !Program.Config.MainWindow.EntryListAlternatingBgColors || (itemIndex & 1) == 0
+                    ? _theme.ListView.EvenRowColor : _theme.ListView.OddRowColor;
+            if (!Program.Config.MainWindow.EntryListAlternatingBgColors)
 				return _theme.ListView.OddRowColor;
 
 			if ((itemIndex & 1) == 0) 
@@ -331,7 +336,8 @@ namespace KeeTheme.Decorators
 			TextRenderer.DrawText(e.Graphics, text, font, textBounds, color, flags | TextFormatFlags.NoPrefix);
 
 			using (var pen = new Pen(_theme.ListView.ColumnBorderColor))
-				e.Graphics.DrawLine(pen, bounds.Right - 2, bounds.Y, bounds.Right - 2, bounds.Bottom);
+				if (_theme.ListView.ShowColumnSeparators)
+                    e.Graphics.DrawLine(pen, bounds.Right - 2, bounds.Y, bounds.Right - 2, bounds.Bottom);
 		}
 
 		        private bool TryDrawModernStandardIcon(Graphics graphics, ListViewItem item, Rectangle bounds)
@@ -367,7 +373,8 @@ namespace KeeTheme.Decorators
 			using (var pen = new Pen(_theme.ListView.HeaderColumnBorderColor))
 			{
 				graphics.DrawLine(pen, r.X, r.Y, r.Right, r.Y);
-				graphics.DrawLine(pen, r.Right - 2, r.Y, r.Right - 2, r.Bottom);
+				if (_theme.ListView.ShowColumnSeparators)
+                    graphics.DrawLine(pen, r.Right - 2, r.Y, r.Right - 2, r.Bottom);
 			}
 
 			var flags = GetTextFormatFlags(e.Header.TextAlign);

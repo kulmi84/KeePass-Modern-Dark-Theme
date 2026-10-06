@@ -12,14 +12,14 @@ Hintergrund #1E1E1E, Controls/Panels #252526, Menüs #2D2D30, Text #F1F1F1, deak
 
 Einheitliche Linienicons für Neu, Öffnen, Speichern, Alle speichern, Eintrag hinzufügen, Benutzername, Passwort, URL öffnen/kopieren, Auto-Type, Suche, Ansichten, abgelaufene Einträge, Sperren und Tab schließen in der Haupttoolbar; Neu/Öffnen/Speichern auch im Hauptmenü, wenn dort ein Image vorhanden ist. Zeichnung skaliert mit dem vom Control gelieferten Bildrechteck. Es werden keine ToolStripItem.Images ersetzt; beim Theme-Wechsel gilt wieder der ursprüngliche Renderer. Unbekannte Kommandos und fremde Fenster erhalten ihre ursprünglichen Icons.
 
-Baum und Eintragsliste zeichnen viele Standardicons neu, darunter Schlüssel, Ordner, Benutzer, Server, E-Mail, Werkzeug, Monitor, Haus und Papierkorb. Für noch nicht unterstützte Standardicons bleibt das Originalbild erhalten. Nur m_lvEntries mit PwListItem-Tag, leerer CustomIconUuid und Index kleiner PwIcon.Count wird berücksichtigt. Alle eigenen Icons und alle anderen Standardicons bleiben unverändert. Keine Datenbankbilder oder ImageLists werden geschrieben.
+Baum und Eintragsliste zeichnen alle 69 Standardicons neu, darunter Schlüssel, Ordner, Benutzer, Server, E-Mail, Werkzeug, Monitor, Haus und Papierkorb. Für unbekannte zukünftige Icon-IDs bleibt das Originalbild erhalten. Nur m_lvEntries mit PwListItem-Tag, leerer CustomIconUuid und Index kleiner PwIcon.Count wird berücksichtigt. Alle eigenen Icons und alle anderen Standardicons bleiben unverändert. Keine Datenbankbilder oder ImageLists werden geschrieben.
 
 ## Erreichbarkeit und Grenzen
 
 | Oberfläche | Plugin-Zugang | Status dieser Version |
 | --- | --- | --- |
 | TreeView | OwnerDrawText, Farben, natives Dark-Theme | Farben und Selektion; moderne Standardsymbole und Chevron-Pfeile; eigene Icons original |
-| ListView | OwnerDraw, Header-/Gruppenzeichner, SmallImageList | Farben, Header und zahlreiche Standardicon-Typen beim Zeichnen |
+| ListView | OwnerDraw, Header-/Gruppenzeichner, SmallImageList | Farben, Header und alle 69 Standardicon-Typen beim Zeichnen |
 | Menu/ContextMenu | ToolStripRenderer, DropdownOpening | Farben, Hover, inaktive Texte; drei Hauptmenüicons |
 | Toolbar | ToolStripRenderer.OnRenderItemImage | Alle 15 Standardtoolbar-Icontypen als Linienicons |
 | Standard-/Custom-ImageLists | MainForm.ClientIcons ist öffentlich; ImageList.Images veränderbar | Bewusst keine Mutation der gemeinsamen Listen |
@@ -47,7 +47,13 @@ build/test-compact.ps1 prüft die vollständige Toolbar, breitere Suche, fremde 
 
 ## Icon-Auswahldialog
 
-Die Standard-Icon-Liste im IconPickerForm erhält eine eigene ImageList mit denselben Indizes und Schlüsseln. Unterstützte Standardicons zeigen dieselben Linienicons wie Baum/Liste; übrige Icons behalten ihr Original. Die gemeinsame KeePass-ImageList und die separate Liste benutzerdefinierter Datenbankicons werden nicht verändert. Vorschau wird nach dem Laden des Dialogs angewandt und bei Theme-Wechsel/Schließen sauber wiederhergestellt. Tests prüfen Vorschau, unveränderte Quellbilder und Custom-Slots, Wiederherstellung sowie Suchfeldzentrierung bei breiten und schmalen Fenstern.
+Die Standard-Icon-Liste im IconPickerForm erhält eine eigene ImageList mit denselben Indizes und Schlüsseln. Alle 69 Standardicons zeigen dieselben Linienicons wie Baum/Liste; unbekannte zukünftige IDs behalten ihr Original. Die gemeinsame KeePass-ImageList und die separate Liste benutzerdefinierter Datenbankicons werden nicht verändert. Vorschau wird nach dem Laden des Dialogs angewandt und bei Theme-Wechsel/Schließen sauber wiederhergestellt. Tests prüfen Vorschau, unveränderte Quellbilder und Custom-Slots, Wiederherstellung sowie Suchfeldzentrierung bei breiten und schmalen Fenstern.
+
+## Ruhigere Eintragsliste
+
+Modern Dark zeichnet keine senkrechten Spaltentrenner mehr in Listenzellen, Headern, Gruppen und Hintergrundbildern. Die abwechselnden Zeilen sind #1B1B1B und #202020. ShowColumnSeparators=False und UseThemeAlternatingColors=True sind im Theme-Editor einstellbar. Alte Themes behalten ihre bisherige Darstellung. Benutzerdefinierte Eintragsfarben bleiben erhalten; gespeicherte globale KeePass-Alternativfarben werden in diesem Theme durch die dezenten Theme-Farben ersetzt. Das Umschalten der alternierenden Zeilen über KeePass wird weiter respektiert.
+
+build/test-standard-icons.ps1 prüft alle 69 Standardicons bei 16/24/32px und kontrolliert durch Pixelprüfungen, dass die Spaltentrenner im Modern-Dark-Theme ausbleiben und im bisherigen Modus weiterhin gezeichnet werden. Alle Prüfungen bestanden. Standardicon-Indizes bleiben unverändert; keine Datenbankmigration ist erforderlich.
 
 ## Nächste Schritte
 
