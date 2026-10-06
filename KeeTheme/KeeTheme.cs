@@ -597,6 +597,11 @@ namespace KeeTheme
 
 		private void Apply(Button button)
 		{
+			button.Paint -= HandleModernEntryButtonPaint;
+			var entryForm = button.FindForm();
+			if (UseModernIcons && entryForm != null && entryForm.GetType().FullName == "KeePass.Forms.PwEntryForm" &&
+				(button.Name == "m_btnIcon" || button.Name == "m_btnGenPw" || button.Name == "m_btnStandardExpires"))
+				button.Paint += HandleModernEntryButtonPaint;
 			button.BackColor = _theme.Button.BackColor;
 			button.ForeColor = _theme.Button.ForeColor;
 			button.FlatAppearance.BorderColor = _theme.Button.BorderColor;
@@ -612,6 +617,34 @@ namespace KeeTheme
 
 			button.EnabledChanged -= HandleButtonEnabledChanged;
 			button.EnabledChanged += HandleButtonEnabledChanged;
+		}
+
+		private void HandleModernEntryButtonPaint(object sender, PaintEventArgs e)
+		{
+			var button = (Button)sender;
+			var form = button.FindForm();
+			if (!UseModernIcons || form == null || button.Image == null) return;
+			int icon = 0;
+			if (button.Name == "m_btnIcon")
+			{
+				var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+				var customField = form.GetType().GetField("m_pwCustomIconID", flags);
+				var iconField = form.GetType().GetField("m_pwEntryIcon", flags);
+				if (customField == null || iconField == null) return;
+				var custom = customField.GetValue(form) as PwUuid;
+				if (custom == null || !custom.IsZero) return;
+				icon = (int)(PwIcon)iconField.GetValue(form);
+				if (icon < 0 || icon >= (int)PwIcon.Count) return;
+			}
+			// Draw over the original button image without replacing or disposing KeePass images.
+			var image = button.Image;
+			var bounds = new Rectangle((button.ClientSize.Width - image.Width) / 2,
+				(button.ClientSize.Height - image.Height) / 2, image.Width, image.Height);
+			using (var brush = new SolidBrush(button.BackColor)) e.Graphics.FillRectangle(brush, bounds);
+			var color = button.Enabled ? button.ForeColor : Color.FromArgb(190,190,190);
+			if (button.Name == "m_btnStandardExpires")
+				ModernToolbarIcons.Draw(e.Graphics, bounds, "m_tbViewsShowExpired", color);
+			else ModernStandardIcons.Draw(e.Graphics, bounds, icon, color);
 		}
 
 		private void HandleButtonEnabledChanged(object sender, EventArgs e)

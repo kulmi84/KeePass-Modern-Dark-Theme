@@ -71,3 +71,5 @@ Linien-Fix: Der native leere Bereich unter den Einträgen wird nach WM_PAINT gle
 Logoquelle: KeePass/KeePass/Resources/Icons/KeePass.ico aus dlech/KeePass2.x; unveränderte Form, nur Graustufenumwandlung.
 
 Suchansicht: Der Hintergrund-Fix berücksichtigt nun gruppierte Suchtreffer. Alle Eintragszeilen und nativen Gruppenüberschriften werden vom überzeichneten Bereich ausgeschlossen, unabhängig von ihrer Indexreihenfolge. test-list-background.ps1 prüft native Gruppenüberschriften, umgekehrte Trefferreihenfolge und den freien Bereich unterhalb der Suche. Build und Prüfungen bestanden; Live-Prüfung dieser Suchansicht steht noch aus.
+
+Eintragsdialog: Modern Dark zeichnet Standardicon-Vorschau, Passwortgenerator und Ablaufdatum modern. Die Vorschau liest die aktuelle Standard-ID und CustomIconUuid bei jedem Zeichnen; eigene Icons und originale Button-Bilder bleiben erhalten. Fehlende interne Felder fallen auf KeePass-Darstellung zurück. test-entry-icons.ps1 prüft Standard-ID-Wechsel, monochrome Darstellung, Custom-Icon-Schutz und Theme-Abschaltung. Live-Test offen.
