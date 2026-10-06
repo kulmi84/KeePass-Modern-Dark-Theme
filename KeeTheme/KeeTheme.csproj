@@ -50,6 +50,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlVisitor.cs" />
+    <Compile Include="Decorators\StandardIconPickerDecorator.cs" />
+    <Compile Include="Decorators\CenteredSearchDecorator.cs" />
     <Compile Include="Decorators\ControlSnapshot.cs" />
     <Compile Include="Decorators\KnownColorsDecorator.cs" />
     <Compile Include="Decorators\ListViewGroupsPainter.cs" />

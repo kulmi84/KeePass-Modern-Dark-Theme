@@ -25,6 +25,7 @@ namespace KeeTheme
 		private ITheme _customTheme;
 		private ITheme _theme;
 		private bool _enabled;
+        private readonly Dictionary<ToolStrip, CenteredSearchDecorator> _centeredSearch = new Dictionary<ToolStrip, CenteredSearchDecorator>();
         private readonly Dictionary<ToolStripItem, bool> _toolbarAvailable = new Dictionary<ToolStripItem, bool>();
         private readonly Dictionary<ToolStripItem, Size> _searchSize = new Dictionary<ToolStripItem, Size>();
         private readonly Dictionary<ToolStripItem, bool> _searchAutoSize = new Dictionary<ToolStripItem, bool>();
@@ -398,10 +399,25 @@ namespace KeeTheme
 			toolStrip.BackColor = _theme.MenuItem.BackColor;
 			toolStrip.ForeColor = _theme.MenuItem.ForeColor;
 
-			Apply(toolStrip.Items);
+			            CenteredSearchDecorator centered;
+            if (_centeredSearch.TryGetValue(toolStrip, out centered))
+            { centered.Dispose(); _centeredSearch.Remove(toolStrip); }
+            Apply(toolStrip.Items);
+            var search = toolStrip.Items.OfType<ToolStripComboBox>().FirstOrDefault(x =>
+                x.Name == "m_tbQuickFind" || x.Name == "m_tbQuickSearch");
+            if (_enabled && _theme.MenuItem.ModernIcons && search != null &&
+                toolStrip.FindForm() != null && toolStrip.FindForm().GetType().FullName == "KeePass.Forms.MainForm")
+                {
+                _centeredSearch.Add(toolStrip,new CenteredSearchDecorator(toolStrip, search));
+                toolStrip.Disposed -= HandleCenteredStripDisposed;
+                toolStrip.Disposed += HandleCenteredStripDisposed;
+            }
 		}
 
-		private void Apply(ToolStripItemCollection toolStripItemCollection)
+		private void HandleCenteredStripDisposed(object sender, EventArgs e)
+        { _centeredSearch.Remove((ToolStrip)sender); }
+
+        private void Apply(ToolStripItemCollection toolStripItemCollection)
 		{
 			foreach (ToolStripItem item in toolStripItemCollection)
 			{
@@ -426,8 +442,7 @@ namespace KeeTheme
                             item.Disposed -= HandleToolbarItemDisposed;
                             item.Disposed += HandleToolbarItemDisposed;
                         }
-                        item.Available = available && (item.Name == "m_tbOpenDatabase" ||
-                            item.Name == "m_tbSaveDatabase" || item.Name == "m_tbAddEntry" || item.Name == "m_tbFind");
+                        item.Available = available;
                     }
                     else if (_toolbarAvailable.TryGetValue(item, out available))
                     {
@@ -753,7 +768,14 @@ namespace KeeTheme
 
 		private void Apply(ListView listView)
 		{
-			if (ObjectListViewDecorator.CanDecorate(listView))
+			            var form = listView.FindForm();
+            if (listView.Name == "m_lvIcons" && form != null && form.GetType().FullName == "KeePass.Forms.IconPickerForm")
+            {
+                var picker = listView.Controls.OfType<StandardIconPickerDecorator>().FirstOrDefault()
+                    ?? new StandardIconPickerDecorator(listView);
+                picker.Apply(_enabled, _theme);
+            }
+            if (ObjectListViewDecorator.CanDecorate(listView))
 			{
 				ObjectListViewDecorator.Apply(listView, _theme);
 				return;

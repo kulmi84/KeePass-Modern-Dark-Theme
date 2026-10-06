@@ -39,11 +39,15 @@ Manuell prüfen: Theme an/aus und Wechsel zu alten Themes; Menü-/Kontextmenü-H
 
 Neue Icons mit runden Linienenden, dezente Trenner und abgerundete Hover-/Pressed-Flächen. Zusätzliche horizontale und vertikale Polsterung wird beim Abschalten oder Theme-Wechsel auf die ursprünglichen Werte zurückgesetzt; wiederholtes Anwenden addiert keine weiteren Abstände. Unbekannte Plugin-Kommandos behalten ihr Bild. Der native Suchfeldrahmen bleibt original. ModernDark-toolbar.png ist eine aus dem Icon-Zeichner erzeugte Stilvorschau, kein Screenshot einer laufenden KeePass-Instanz. build/test-toolbar.ps1 prüft 15 Icontypen bei 16/20/24/32px, unbekannte Kommandos und die Wiederherstellung des Graphics-Zustands; bestanden.
 
-## Kompakte Toolbar und Gruppenbaum
+## Vollständige Toolbar, zentrierte Suche und Gruppenbaum
 
-In Modern Dark bleiben Öffnen, Speichern, Eintrag hinzufügen und Suche sichtbar. Benutzername kopieren, Passwort kopieren und Sperren sind ebenso ausgeblendet wie weitere Standardtoolbar-Buttons und Trenner. Die Funktionen bleiben in Menüs erreichbar. Fremde Plugin-Buttons bleiben erhalten. Das Suchfeld ist mindestens 320 Pixel breit bei normaler Skalierung. Bei Theme-Wechsel werden Verfügbarkeit, Polsterung, Suchfeldgröße und AutoSize wiederhergestellt. Der Gruppenbaum verwendet OwnerDrawAll mit Chevron-Pfeilen; Gruppentext, Auswahl, Fokus und eigene ImageList-Bilder bleiben erhalten. Die Standardicon-Auswahl ist nur bei leerer CustomIconUuid und Standardindex zulässig. Gemeinsame ImageLists werden weiterhin nicht verändert. Die Baumdarstellung setzt die übliche links-nach-rechts-Anordnung voraus.
+Die vollständige ursprüngliche Toolbar ist wieder sichtbar, mit den modernen Icons. Das breite Suchfeld wird mit einem dynamischen Abstand in der Toolbar zentriert, sobald Platz zwischen den Buttons und dem rechten Rand vorhanden ist. Bei schmalen Fenstern verkleinert es sich bis auf 100 Pixel und bleibt neben den Buttons; eine geometrische Zentrierung ist dort ohne Überlagerung nicht möglich. Bei Theme-Wechsel werden Polsterung, Suchfeldgröße und AutoSize wiederhergestellt. Der Gruppenbaum verwendet OwnerDrawAll mit Chevron-Pfeilen; Gruppentext, Auswahl, Fokus und eigene ImageList-Bilder bleiben erhalten. Die Standardicon-Auswahl ist nur bei leerer CustomIconUuid und Standardindex zulässig. Gemeinsame ImageLists werden weiterhin nicht verändert. Die Baumdarstellung setzt die übliche links-nach-rechts-Anordnung voraus.
 
-build/test-compact.ps1 prüft die reduzierte Toolbar, breitere Suche, fremde Buttons, wiederholtes Anwenden, Wiederherstellung sowie eigene Icons im Gruppenbaum. Alle Prüfungen bestanden. Live-Test im bestehenden KeePass-Fenster bleibt erforderlich; Plugin-Dateien werden nicht automatisch installiert.
+build/test-compact.ps1 prüft die vollständige Toolbar, breitere Suche, fremde Buttons, wiederholtes Anwenden, Wiederherstellung sowie eigene Icons im Gruppenbaum. Alle Prüfungen bestanden. Live-Test im bestehenden KeePass-Fenster bleibt erforderlich; Plugin-Dateien werden nicht automatisch installiert.
+
+## Icon-Auswahldialog
+
+Die Standard-Icon-Liste im IconPickerForm erhält eine eigene ImageList mit denselben Indizes und Schlüsseln. Unterstützte Standardicons zeigen dieselben Linienicons wie Baum/Liste; übrige Icons behalten ihr Original. Die gemeinsame KeePass-ImageList und die separate Liste benutzerdefinierter Datenbankicons werden nicht verändert. Vorschau wird nach dem Laden des Dialogs angewandt und bei Theme-Wechsel/Schließen sauber wiederhergestellt. Tests prüfen Vorschau, unveränderte Quellbilder und Custom-Slots, Wiederherstellung sowie Suchfeldzentrierung bei breiten und schmalen Fenstern.
 
 ## Nächste Schritte
 

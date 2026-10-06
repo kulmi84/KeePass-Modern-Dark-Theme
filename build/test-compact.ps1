@@ -25,7 +25,7 @@ $search.Name='m_tbQuickFind'; $search.Width=120; $toolbar.Items.Add($search) | O
 $originalWidth=$search.Width; $originalAuto=$search.AutoSize
 $apply=$type.GetMethods($f) | Where-Object {$_.Name -eq 'Apply' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.FullName -eq 'System.Windows.Forms.ToolStripItemCollection'}
 $apply.Invoke($instance,[object[]](,$toolbar.Items.PSObject.BaseObject)) | Out-Null
-foreach($name in @('m_tbCopyUserName','m_tbCopyPassword','m_tbLockWorkspace','m_tbSaveAll')) {if($toolbar.Items[$name].Available){throw ('Still visible '+$name)}}
+foreach($name in @('m_tbCopyUserName','m_tbCopyPassword','m_tbLockWorkspace','m_tbSaveAll')) {if(!$toolbar.Items[$name].Available){throw ('Original toolbar item hidden '+$name)}}
 foreach($name in @('m_tbOpenDatabase','m_tbSaveDatabase','m_tbAddEntry','m_tbFind','thirdPartyButton')) {if(!$toolbar.Items[$name].Available){throw ('Hidden '+$name)}}
 if($search.Width -lt 320){throw 'Search is too narrow'}
 $padding=$toolbar.Items['m_tbOpenDatabase'].Padding
@@ -44,7 +44,7 @@ foreach($icon in @('Folder','FolderOpen','UserCommunication','Key','NetworkServe
 }
 if($icons.Invoke($null,@($graphics.PSObject.BaseObject,$rect.PSObject.BaseObject,[int][KeePassLib.PwIcon]::Count,$color.PSObject.BaseObject))){throw 'Custom slot was replaced'}
 $graphics.Dispose(); $bitmap.Dispose()
-Write-Output 'PASS compact toolbar, third-party preservation, search width, repeated application, restoration and standard icon mapping'
+Write-Output 'PASS restored full toolbar, third-party preservation, search width, repeated application, restoration and standard icon mapping'
 $type.GetField('_enabled',$f).SetValue($instance,$true)
 $tree=New-Object Windows.Forms.TreeView
 $tree.Name='m_tvGroups'; $tree.Size=New-Object Drawing.Size(240,160)
@@ -69,3 +69,36 @@ $node.ImageIndex=[int][KeePassLib.PwIcon]::Folder
 $method.Invoke($instance,@($event.PSObject.BaseObject)) | Out-Null
 $cg.Dispose(); $canvas.Dispose(); $tree.Dispose(); $images.Dispose(); $original.Dispose()
 Write-Output 'PASS group tree renderer and custom UUID image preservation'
+$list=New-Object Windows.Forms.ListView
+$source=New-Object Windows.Forms.ImageList
+$source.ColorDepth=[Windows.Forms.ColorDepth]::Depth32Bit
+$img=New-Object Drawing.Bitmap(16,16); $gg=[Drawing.Graphics]::FromImage($img); $gg.Clear([Drawing.Color]::Magenta); $gg.Dispose()
+for($i=0;$i -lt 70;$i++){$source.Images.Add($img) | Out-Null}
+$list.SmallImageList=$source
+$picker=[Activator]::CreateInstance($a.GetType('KeeTheme.Decorators.StandardIconPickerDecorator'),$f,$null,@($list.PSObject.BaseObject),$null)
+$picker.GetType().GetMethod('Apply',$f).Invoke($picker,@($true,$theme.PSObject.BaseObject)) | Out-Null
+if([Object]::ReferenceEquals($source,$list.SmallImageList)){throw 'Picker preview was not created'}
+if(([Drawing.Bitmap]$source.Images[0]).GetPixel(8,8).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Shared source changed'}
+Write-Output ('Source count '+$source.Images.Count+' Preview count '+$list.SmallImageList.Images.Count);
+if(([Drawing.Bitmap]$list.SmallImageList.Images[69]).GetPixel(8,8).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Custom slot changed'}
+$picker.GetType().GetMethod('Apply',$f).Invoke($picker,@($false,$theme.PSObject.BaseObject)) | Out-Null
+if(![Object]::ReferenceEquals($source,$list.SmallImageList)){throw 'Picker restoration failed'}
+$list.Dispose(); $source.Dispose(); $img.Dispose()
+$hostForm=New-Object Windows.Forms.Form
+$hostForm.ClientSize=New-Object Drawing.Size(1200,150)
+$strip=New-Object Windows.Forms.ToolStrip
+$strip.GripStyle=[Windows.Forms.ToolStripGripStyle]::Hidden
+$hostForm.Controls.Add($strip)
+$strip.Items.Add('Open') | Out-Null
+$combo=New-Object Windows.Forms.ToolStripComboBox
+$combo.AutoSize=$false; $strip.Items.Add($combo) | Out-Null
+$center=[Activator]::CreateInstance($a.GetType('KeeTheme.Decorators.CenteredSearchDecorator'),$f,$null,@($strip.PSObject.BaseObject,$combo.PSObject.BaseObject),$null)
+$strip.PerformLayout()
+$expected=($strip.ClientSize.Width-$combo.Width)/2
+if([Math]::Abs($combo.Bounds.X-$expected) -gt 5){throw ('Not centered: '+$combo.Bounds.X+' vs '+$expected)}
+$hostForm.ClientSize=New-Object Drawing.Size(400,150); $strip.PerformLayout()
+if($combo.Width -lt 100){throw 'Search became unusable'}
+$center.Dispose()
+if($strip.Items.ContainsKey('KeeThemeCenterSearchSpacer')){throw 'Spacer leaked'}
+$hostForm.Dispose()
+Write-Output 'PASS icon picker preview/source preservation/restoration and responsive centered search'
