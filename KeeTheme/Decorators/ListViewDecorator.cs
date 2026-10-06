@@ -337,37 +337,10 @@ namespace KeeTheme.Decorators
 		        private bool TryDrawModernStandardIcon(Graphics graphics, ListViewItem item, Rectangle bounds)
         {
             var entry = item.Tag as PwListItem;
-            var index = item.ImageIndex;
-            if (!_theme.MenuItem.ModernIcons || _listView.Name != "m_lvEntries" ||
-                entry == null || !entry.Entry.CustomIconUuid.Equals(PwUuid.Zero) ||
-                index < 0 || index >= (int)PwIcon.Count ||
-                (index != (int)PwIcon.Key && index != (int)PwIcon.Folder &&
-                 index != (int)PwIcon.FolderOpen)) return false;
-            var state = graphics.Save();
-            try
-            {
-                graphics.TranslateTransform(bounds.X, bounds.Y);
-                graphics.ScaleTransform(bounds.Width / 16f, bounds.Height / 16f);
-                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var pen = new Pen(_theme.ListView.ForeColor, 1.4f))
-                {
-                    if (index == (int)PwIcon.Key)
-                    {
-                        graphics.DrawEllipse(pen, 1, 2, 6, 6);
-                        graphics.DrawLine(pen, 6, 7, 13, 14);
-                        graphics.DrawLine(pen, 10, 11, 12, 9);
-                        graphics.DrawLine(pen, 12, 13, 14, 11);
-                    }
-                    else
-                    {
-                        graphics.DrawLines(pen, new PointF[] { new PointF(2,13),
-                            new PointF(2,4), new PointF(6,4), new PointF(8,6),
-                            new PointF(14,6), new PointF(14,13), new PointF(2,13) });
-                    }
-                }
-                return true;
-            }
-            finally { graphics.Restore(state); }
+            if (!_theme.MenuItem.ModernIcons || _listView.Name != "m_lvEntries" || entry == null ||
+                !entry.Entry.CustomIconUuid.Equals(PwUuid.Zero) || item.ImageIndex < 0 ||
+                item.ImageIndex >= (int)PwIcon.Count) return false;
+            return ModernStandardIcons.Draw(graphics, bounds, item.ImageIndex, _theme.ListView.ForeColor);
         }
         private void HandleListViewDrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
 		{

@@ -12,14 +12,14 @@ Hintergrund #1E1E1E, Controls/Panels #252526, Menüs #2D2D30, Text #F1F1F1, deak
 
 Einheitliche Linienicons für Neu, Öffnen, Speichern, Alle speichern, Eintrag hinzufügen, Benutzername, Passwort, URL öffnen/kopieren, Auto-Type, Suche, Ansichten, abgelaufene Einträge, Sperren und Tab schließen in der Haupttoolbar; Neu/Öffnen/Speichern auch im Hauptmenü, wenn dort ein Image vorhanden ist. Zeichnung skaliert mit dem vom Control gelieferten Bildrechteck. Es werden keine ToolStripItem.Images ersetzt; beim Theme-Wechsel gilt wieder der ursprüngliche Renderer. Unbekannte Kommandos und fremde Fenster erhalten ihre ursprünglichen Icons.
 
-Die Eintragsliste zeichnet die Standardicons Schlüssel, Ordner und offener Ordner neu. Nur m_lvEntries mit PwListItem-Tag, leerer CustomIconUuid und Index kleiner PwIcon.Count wird berücksichtigt. Alle eigenen Icons und alle anderen Standardicons bleiben unverändert. Keine Datenbankbilder oder ImageLists werden geschrieben.
+Baum und Eintragsliste zeichnen viele Standardicons neu, darunter Schlüssel, Ordner, Benutzer, Server, E-Mail, Werkzeug, Monitor, Haus und Papierkorb. Für noch nicht unterstützte Standardicons bleibt das Originalbild erhalten. Nur m_lvEntries mit PwListItem-Tag, leerer CustomIconUuid und Index kleiner PwIcon.Count wird berücksichtigt. Alle eigenen Icons und alle anderen Standardicons bleiben unverändert. Keine Datenbankbilder oder ImageLists werden geschrieben.
 
 ## Erreichbarkeit und Grenzen
 
 | Oberfläche | Plugin-Zugang | Status dieser Version |
 | --- | --- | --- |
-| TreeView | OwnerDrawText, Farben, natives Dark-Theme | Farben und Selektion; Gruppenicons noch original |
-| ListView | OwnerDraw, Header-/Gruppenzeichner, SmallImageList | Farben, Header und drei Standardicon-Typen beim Zeichnen |
+| TreeView | OwnerDrawText, Farben, natives Dark-Theme | Farben und Selektion; moderne Standardsymbole und Chevron-Pfeile; eigene Icons original |
+| ListView | OwnerDraw, Header-/Gruppenzeichner, SmallImageList | Farben, Header und zahlreiche Standardicon-Typen beim Zeichnen |
 | Menu/ContextMenu | ToolStripRenderer, DropdownOpening | Farben, Hover, inaktive Texte; drei Hauptmenüicons |
 | Toolbar | ToolStripRenderer.OnRenderItemImage | Alle 15 Standardtoolbar-Icontypen als Linienicons |
 | Standard-/Custom-ImageLists | MainForm.ClientIcons ist öffentlich; ImageList.Images veränderbar | Bewusst keine Mutation der gemeinsamen Listen |
@@ -37,8 +37,14 @@ Manuell prüfen: Theme an/aus und Wechsel zu alten Themes; Menü-/Kontextmenü-H
 
 ## Toolbar-Verfeinerung
 
-Neue Icons mit runden Linienenden, dezente Trenner und abgerundete Hover-/Pressed-Flächen. Zusätzliche horizontale und vertikale Polsterung wird beim Abschalten oder Theme-Wechsel auf die ursprünglichen Werte zurückgesetzt; wiederholtes Anwenden addiert keine weiteren Abstände. Unbekannte Plugin-Kommandos behalten ihr Bild. Der native Suchfeldrahmen und das Gruppenicon im Baum sind weiterhin original. ModernDark-toolbar.png ist eine aus dem Icon-Zeichner erzeugte Stilvorschau, kein Screenshot einer laufenden KeePass-Instanz. build/test-toolbar.ps1 prüft 15 Icontypen bei 16/20/24/32px, unbekannte Kommandos und die Wiederherstellung des Graphics-Zustands; bestanden.
+Neue Icons mit runden Linienenden, dezente Trenner und abgerundete Hover-/Pressed-Flächen. Zusätzliche horizontale und vertikale Polsterung wird beim Abschalten oder Theme-Wechsel auf die ursprünglichen Werte zurückgesetzt; wiederholtes Anwenden addiert keine weiteren Abstände. Unbekannte Plugin-Kommandos behalten ihr Bild. Der native Suchfeldrahmen bleibt original. ModernDark-toolbar.png ist eine aus dem Icon-Zeichner erzeugte Stilvorschau, kein Screenshot einer laufenden KeePass-Instanz. build/test-toolbar.ps1 prüft 15 Icontypen bei 16/20/24/32px, unbekannte Kommandos und die Wiederherstellung des Graphics-Zustands; bestanden.
+
+## Kompakte Toolbar und Gruppenbaum
+
+In Modern Dark bleiben Öffnen, Speichern, Eintrag hinzufügen und Suche sichtbar. Benutzername kopieren, Passwort kopieren und Sperren sind ebenso ausgeblendet wie weitere Standardtoolbar-Buttons und Trenner. Die Funktionen bleiben in Menüs erreichbar. Fremde Plugin-Buttons bleiben erhalten. Das Suchfeld ist mindestens 320 Pixel breit bei normaler Skalierung. Bei Theme-Wechsel werden Verfügbarkeit, Polsterung, Suchfeldgröße und AutoSize wiederhergestellt. Der Gruppenbaum verwendet OwnerDrawAll mit Chevron-Pfeilen; Gruppentext, Auswahl, Fokus und eigene ImageList-Bilder bleiben erhalten. Die Standardicon-Auswahl ist nur bei leerer CustomIconUuid und Standardindex zulässig. Gemeinsame ImageLists werden weiterhin nicht verändert. Die Baumdarstellung setzt die übliche links-nach-rechts-Anordnung voraus.
+
+build/test-compact.ps1 prüft die reduzierte Toolbar, breitere Suche, fremde Buttons, wiederholtes Anwenden, Wiederherstellung sowie eigene Icons im Gruppenbaum. Alle Prüfungen bestanden. Live-Test im bestehenden KeePass-Fenster bleibt erforderlich; Plugin-Dateien werden nicht automatisch installiert.
 
 ## Nächste Schritte
 
-Gruppenicons über einen eigenen, sauber rücksetzbaren TreeView-Zeichner; weitere Standardicons und Toolbar-Kommandos; explizite Listen-Auswahlfarben und vollständigerer deaktivierter Text. Vor einer stabilen Veröffentlichung ist die manuelle Matrix mit mehreren KeePass-Versionen erforderlich.
+Weitere Standardicons; explizite Listen-Auswahlfarben und vollständigerer deaktivierter Text. Vor einer stabilen Veröffentlichung ist die manuelle Matrix mit mehreren KeePass-Versionen erforderlich.

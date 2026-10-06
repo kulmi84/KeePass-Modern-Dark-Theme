@@ -89,6 +89,7 @@
     <Compile Include="Theme\CustomThemeTemplate.cs" />
     <Compile Include="Theme\CustomToolStripRenderer.cs" />
     <Compile Include="Theme\ModernToolbarIcons.cs" />
+    <Compile Include="Theme\ModernStandardIcons.cs" />
     <Compile Include="Theme\LinkLabelLook.cs" />
     <Compile Include="Theme\ListViewLook.cs" />
     <Compile Include="Theme\MenuLook.cs" />

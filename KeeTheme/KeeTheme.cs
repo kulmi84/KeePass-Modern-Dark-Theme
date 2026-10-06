@@ -10,6 +10,7 @@ using System.Windows.Forms.VisualStyles;
 using KeePass.App;
 using KeePass.UI;
 using KeePassLib.Utility;
+using KeePassLib;
 using KeeTheme.Decorators;
 using KeeTheme.Options;
 using KeeTheme.Theme;
@@ -24,6 +25,9 @@ namespace KeeTheme
 		private ITheme _customTheme;
 		private ITheme _theme;
 		private bool _enabled;
+        private readonly Dictionary<ToolStripItem, bool> _toolbarAvailable = new Dictionary<ToolStripItem, bool>();
+        private readonly Dictionary<ToolStripItem, Size> _searchSize = new Dictionary<ToolStripItem, Size>();
+        private readonly Dictionary<ToolStripItem, bool> _searchAutoSize = new Dictionary<ToolStripItem, bool>();
         private readonly Dictionary<ToolStripItem, Padding> _toolbarPadding = new Dictionary<ToolStripItem, Padding>();
 
 		public bool Enabled
@@ -407,6 +411,51 @@ namespace KeeTheme
                     owner != null && !(owner is ToolStripDropDown) && !(owner is MenuStrip) &&
                     !(owner is StatusStrip) && mainForm != null &&
                     mainForm.GetType().FullName == "KeePass.Forms.MainForm";
+                                bool knownToolbarItem = item.Name.StartsWith("m_tb") &&
+                    (item is ToolStripButton || item is ToolStripSplitButton ||
+                     item is ToolStripDropDownButton || item is ToolStripSeparator);
+                if (knownToolbarItem)
+                {
+                    bool available;
+                    if (modernToolbar)
+                    {
+                        if (!_toolbarAvailable.TryGetValue(item, out available))
+                        {
+                            available = item.Available;
+                            _toolbarAvailable.Add(item, available);
+                            item.Disposed -= HandleToolbarItemDisposed;
+                            item.Disposed += HandleToolbarItemDisposed;
+                        }
+                        item.Available = available && (item.Name == "m_tbOpenDatabase" ||
+                            item.Name == "m_tbSaveDatabase" || item.Name == "m_tbAddEntry" || item.Name == "m_tbFind");
+                    }
+                    else if (_toolbarAvailable.TryGetValue(item, out available))
+                    {
+                        item.Available = available;
+                        _toolbarAvailable.Remove(item);
+                    }
+                }
+                if (item is ToolStripComboBox && (item.Name == "m_tbQuickFind" || item.Name == "m_tbQuickSearch"))
+                {
+                    if (modernToolbar)
+                    {
+                        if (!_searchSize.ContainsKey(item))
+                        {
+                            _searchSize.Add(item,item.Size);
+                            _searchAutoSize.Add(item,item.AutoSize);
+                            item.Disposed -= HandleToolbarItemDisposed;
+                            item.Disposed += HandleToolbarItemDisposed;
+                        }
+                        item.AutoSize = false;
+                        item.Width = System.Math.Max(_searchSize[item].Width,owner.ImageScalingSize.Width * 20);
+                    }
+                    else if (_searchSize.ContainsKey(item))
+                    {
+                        item.AutoSize = _searchAutoSize[item];
+                        item.Size = _searchSize[item];
+                        _searchSize.Remove(item); _searchAutoSize.Remove(item);
+                    }
+                }
                 if (item is ToolStripButton || item is ToolStripSplitButton || item is ToolStripDropDownButton)
                 {
                     Padding original;
@@ -443,7 +492,9 @@ namespace KeeTheme
 
 		private void HandleToolbarItemDisposed(object sender, EventArgs e)
         {
-            _toolbarPadding.Remove((ToolStripItem)sender);
+            var item=(ToolStripItem)sender;
+            _toolbarPadding.Remove(item); _toolbarAvailable.Remove(item);
+            _searchSize.Remove(item); _searchAutoSize.Remove(item);
         }
 
         private void HandleMenuItemOnDropDownOpening(object sender, EventArgs e)
@@ -585,7 +636,8 @@ namespace KeeTheme
 
 			if (!MonoWorkarounds.IsRequired())
 			{
-				treeView.DrawMode = _theme.TreeViewDrawMode;
+				treeView.DrawMode = _enabled && _theme.MenuItem.ModernIcons && treeView.Name == "m_tvGroups"
+                    ? TreeViewDrawMode.OwnerDrawAll : _theme.TreeViewDrawMode;
 				treeView.DrawNode -= HandleTreeViewDrawNode;
 				treeView.DrawNode += HandleTreeViewDrawNode;
 			}
@@ -613,6 +665,7 @@ namespace KeeTheme
 		{
 			// DrawDefault = true does not have TextFormatFlags.NoPrefix flag set
 			var node = e.Node;
+            if (node.TreeView.DrawMode == TreeViewDrawMode.OwnerDrawAll && DrawModernGroup(e)) return;
 
 			var isNodeSelected = (e.State & TreeNodeStates.Selected) == TreeNodeStates.Selected;
 			var foreColor = isNodeSelected && node.TreeView.Focused
@@ -637,7 +690,57 @@ namespace KeeTheme
 			TextRenderer.DrawText(e.Graphics, node.Text, font, rectangle, foreColor, TextFormatFlags.NoPrefix);
 		}
 
-		private void Apply(RichTextBox richTextBox)
+		        private bool DrawModernGroup(DrawTreeNodeEventArgs e)
+        {
+            var node = e.Node;
+            var group = node.Tag as PwGroup;
+            if (group == null) { e.DrawDefault = true; return true; }
+            var tree = node.TreeView;
+            var textBounds = node.Bounds;
+            bool selected = (e.State & TreeNodeStates.Selected) != 0;
+            var back = selected ? _theme.TreeView.SelectionBackColor : _theme.TreeView.BackColor;
+            var fore = selected ? _theme.TreeView.SelectionColor : _theme.TreeView.ForeColor;
+            using (var brush = new SolidBrush(back))
+                e.Graphics.FillRectangle(brush, new Rectangle(0,textBounds.Y,tree.ClientSize.Width,textBounds.Height));
+            var images = tree.ImageList;
+            int imageWidth = images == null ? 0 : images.ImageSize.Width;
+            int imageHeight = images == null ? 0 : images.ImageSize.Height;
+            var iconBounds = new Rectangle(textBounds.X-imageWidth-3,
+                textBounds.Y+(textBounds.Height-imageHeight)/2,imageWidth,imageHeight);
+            if (images != null)
+            {
+                string key = selected ? node.SelectedImageKey : node.ImageKey;
+                int index = selected ? node.SelectedImageIndex : node.ImageIndex;
+                if (!string.IsNullOrEmpty(key)) index = images.Images.IndexOfKey(key);
+                if (index < 0) index = selected ? tree.SelectedImageIndex : tree.ImageIndex;
+                if (index >= 0 && index < images.Images.Count &&
+                    (!group.CustomIconUuid.Equals(PwUuid.Zero) || index >= (int)PwIcon.Count ||
+                     !ModernStandardIcons.Draw(e.Graphics,iconBounds,index,fore)))
+                    images.Draw(e.Graphics,iconBounds.Location,index);
+            }
+            if (tree.ShowPlusMinus && node.Nodes.Count > 0)
+            {
+                float x = iconBounds.Left-tree.Indent/2f;
+                float y = textBounds.Y+textBounds.Height/2f;
+                float d = System.Math.Max(3f,imageWidth/5f);
+                var state=e.Graphics.Save();
+                try
+                {
+                    e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                    using(var pen=new Pen(fore,1.4f))
+                    {
+                        if(node.IsExpanded) e.Graphics.DrawLines(pen,new PointF[]{new PointF(x-d,y-d/2),new PointF(x,y+d/2),new PointF(x+d,y-d/2)});
+                        else e.Graphics.DrawLines(pen,new PointF[]{new PointF(x-d/2,y-d),new PointF(x+d/2,y),new PointF(x-d/2,y+d)});
+                    }
+                }
+                finally {e.Graphics.Restore(state);}
+            }
+            TextRenderer.DrawText(e.Graphics,node.Text,node.NodeFont ?? tree.Font,textBounds,fore,
+                TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter);
+            if(selected && tree.Focused) ControlPaint.DrawFocusRectangle(e.Graphics,textBounds,fore,back);
+            return true;
+        }
+        private void Apply(RichTextBox richTextBox)
 		{
 			var decorator = richTextBox.Parent as RichTextBoxDecorator;
 			if (decorator == null)

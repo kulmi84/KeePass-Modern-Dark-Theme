@@ -26,6 +26,12 @@ namespace KeeTheme.Theme
                 case "m_tbViewsShowExpired": glyph = "clock"; break;
                 case "m_tbLockWorkspace": glyph = "lock"; break;
                 case "m_tbCloseTab": glyph = "close"; break;
+                case "standardServer": glyph = "server"; break;
+                case "standardHome": glyph = "home"; break;
+                case "standardMail": glyph = "mail"; break;
+                case "standardTool": glyph = "tool"; break;
+                case "standardMonitor": glyph = "monitor"; break;
+                case "standardTrash": glyph = "trash"; break;
                 default: return false;
             }
             if (bounds.Width <= 0 || bounds.Height <= 0) return false;
@@ -66,6 +72,12 @@ namespace KeeTheme.Theme
                             for(int y=4;y<=16;y+=6) { g.DrawLine(p,3,y,4,y); g.DrawLine(p,8,y,17,y); } break;
                         case "clock": g.DrawEllipse(p,3,3,14,14); g.DrawLine(p,10,6,10,10); g.DrawLine(p,10,10,13,12); break;
                         case "lock": g.DrawArc(p,6,2,8,10,180,180); g.DrawRectangle(p,4,8,12,9); g.DrawLine(p,10,11,10,14); break;
+                        case "server": g.DrawRectangle(p,3,3,14,6); g.DrawRectangle(p,3,11,14,6); g.DrawLine(p,6,6,7,6); g.DrawLine(p,6,14,7,14); break;
+                        case "home": g.DrawLines(p,new PointF[]{new PointF(2,9),new PointF(10,3),new PointF(18,9)}); g.DrawLines(p,new PointF[]{new PointF(4,8),new PointF(4,17),new PointF(16,17),new PointF(16,8)}); g.DrawRectangle(p,8,11,4,6); break;
+                        case "mail": g.DrawRectangle(p,2,4,16,12); g.DrawLines(p,new PointF[]{new PointF(2,5),new PointF(10,11),new PointF(18,5)}); break;
+                        case "tool": g.DrawLines(p,new PointF[]{new PointF(5,3),new PointF(8,6),new PointF(6,8),new PointF(3,5),new PointF(3,9),new PointF(7,11),new PointF(14,18),new PointF(18,14),new PointF(11,7),new PointF(9,3),new PointF(5,3)}); break;
+                        case "monitor": g.DrawRectangle(p,2,3,16,11); g.DrawLine(p,10,14,10,17); g.DrawLine(p,6,17,14,17); break;
+                        case "trash": g.DrawLine(p,3,5,17,5); g.DrawLine(p,7,2,13,2); g.DrawLines(p,new PointF[]{new PointF(5,5),new PointF(6,17),new PointF(14,17),new PointF(15,5)}); g.DrawLine(p,9,8,9,14); g.DrawLine(p,12,8,12,14); break;
                         case "close": g.DrawLine(p,5,5,15,15); g.DrawLine(p,5,15,15,5); break;
                     }
                 }
