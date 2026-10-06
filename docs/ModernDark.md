@@ -10,7 +10,7 @@ KeePass schließen. Bisherige KeeTheme.dll/KeeTheme.plgx sichern und aus Plugins
 
 Hintergrund #1E1E1E, Controls/Panels #252526, Menüs #2D2D30, Text #F1F1F1, deaktivierte Menütexte #BEBEBE. Baumselektion und Menü-Hover #3E3E42, Listenheader #252526. Die vorhandenen ListView-/TreeView-Zeichner und Windows-Dark-Scrollbar-Unterstützung bleiben erhalten. Inaktive Texte außerhalb von Menüs verwenden teilweise weiterhin die native Windows-/KeeTheme-Darstellung.
 
-Neue Linienicons für Neu, Öffnen, Speichern, Eintrag hinzufügen und Sperren in der Haupttoolbar; Neu/Öffnen/Speichern auch im Hauptmenü, wenn dort ein Image vorhanden ist. Zeichnung skaliert mit dem vom Control gelieferten Bildrechteck. Es werden keine ToolStripItem.Images ersetzt; beim Theme-Wechsel gilt wieder der ursprüngliche Renderer. Unbekannte Kommandos und fremde Fenster erhalten ihre ursprünglichen Icons.
+Einheitliche Linienicons für Neu, Öffnen, Speichern, Alle speichern, Eintrag hinzufügen, Benutzername, Passwort, URL öffnen/kopieren, Auto-Type, Suche, Ansichten, abgelaufene Einträge, Sperren und Tab schließen in der Haupttoolbar; Neu/Öffnen/Speichern auch im Hauptmenü, wenn dort ein Image vorhanden ist. Zeichnung skaliert mit dem vom Control gelieferten Bildrechteck. Es werden keine ToolStripItem.Images ersetzt; beim Theme-Wechsel gilt wieder der ursprüngliche Renderer. Unbekannte Kommandos und fremde Fenster erhalten ihre ursprünglichen Icons.
 
 Die Eintragsliste zeichnet die Standardicons Schlüssel, Ordner und offener Ordner neu. Nur m_lvEntries mit PwListItem-Tag, leerer CustomIconUuid und Index kleiner PwIcon.Count wird berücksichtigt. Alle eigenen Icons und alle anderen Standardicons bleiben unverändert. Keine Datenbankbilder oder ImageLists werden geschrieben.
 
@@ -21,7 +21,7 @@ Die Eintragsliste zeichnet die Standardicons Schlüssel, Ordner und offener Ordn
 | TreeView | OwnerDrawText, Farben, natives Dark-Theme | Farben und Selektion; Gruppenicons noch original |
 | ListView | OwnerDraw, Header-/Gruppenzeichner, SmallImageList | Farben, Header und drei Standardicon-Typen beim Zeichnen |
 | Menu/ContextMenu | ToolStripRenderer, DropdownOpening | Farben, Hover, inaktive Texte; drei Hauptmenüicons |
-| Toolbar | ToolStripRenderer.OnRenderItemImage | Fünf bekannte Kommandos als Linienicons |
+| Toolbar | ToolStripRenderer.OnRenderItemImage | Alle 15 Standardtoolbar-Icontypen als Linienicons |
 | Standard-/Custom-ImageLists | MainForm.ClientIcons ist öffentlich; ImageList.Images veränderbar | Bewusst keine Mutation der gemeinsamen Listen |
 | Native Dialoge/Checkboxen/Comboboxen | Teilweise Windows-eigene Zeichnung | Keine vollständige WinUI-3-/Windows-11-Umstellung |
 
@@ -34,6 +34,10 @@ KeePass MainForm_Functions.cs (UpdateImageLists) baut die Listen bei Icon-Update
 Build erfolgreich, nur bestehende Warnungen zu ungenutzten Variablen/Feldern. build/test-smoke.ps1 prüft alle drei eingebetteten Themes, Farben, Theme-Editor-Roundtrip, Standardicon-Zeichnung und Ausschluss eigener UUIDs/Slots sowie Rückfall bei ausgeschalteten modernen Icons. Diese Tests sind bestanden. Eine visuelle Prüfung in einer laufenden KeePass-Instanz ist noch offen; der Build ist eine Testversion.
 
 Manuell prüfen: Theme an/aus und Wechsel zu alten Themes; Menü-/Kontextmenü-Hover und deaktivierte Befehle; Toolbar bei 100/125/150/200%; Standard-/eigene Icons in Baum, Liste und Eintragsdialog; zwei Datenbanken wechseln; Sperren/Entsperren; Theme-Editor speichern/laden; Windows-Synchronisierung und Hotkey. Keine echte Passwortdatenbank für den ersten Test erforderlich.
+
+## Toolbar-Verfeinerung
+
+Neue Icons mit runden Linienenden, dezente Trenner und abgerundete Hover-/Pressed-Flächen. Zusätzliche horizontale und vertikale Polsterung wird beim Abschalten oder Theme-Wechsel auf die ursprünglichen Werte zurückgesetzt; wiederholtes Anwenden addiert keine weiteren Abstände. Unbekannte Plugin-Kommandos behalten ihr Bild. Der native Suchfeldrahmen und das Gruppenicon im Baum sind weiterhin original. ModernDark-toolbar.png ist eine aus dem Icon-Zeichner erzeugte Stilvorschau, kein Screenshot einer laufenden KeePass-Instanz. build/test-toolbar.ps1 prüft 15 Icontypen bei 16/20/24/32px, unbekannte Kommandos und die Wiederherstellung des Graphics-Zustands; bestanden.
 
 ## Nächste Schritte
 

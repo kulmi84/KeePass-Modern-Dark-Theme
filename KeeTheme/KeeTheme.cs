@@ -24,6 +24,7 @@ namespace KeeTheme
 		private ITheme _customTheme;
 		private ITheme _theme;
 		private bool _enabled;
+        private readonly Dictionary<ToolStripItem, Padding> _toolbarPadding = new Dictionary<ToolStripItem, Padding>();
 
 		public bool Enabled
 		{
@@ -400,7 +401,35 @@ namespace KeeTheme
 		{
 			foreach (ToolStripItem item in toolStripItemCollection)
 			{
-				item.ForeColor = _theme.MenuItem.ForeColor;
+				                var owner = item.Owner;
+                var mainForm = owner == null ? null : owner.FindForm();
+                bool modernToolbar = _enabled && _theme.MenuItem.ModernIcons &&
+                    owner != null && !(owner is ToolStripDropDown) && !(owner is MenuStrip) &&
+                    !(owner is StatusStrip) && mainForm != null &&
+                    mainForm.GetType().FullName == "KeePass.Forms.MainForm";
+                if (item is ToolStripButton || item is ToolStripSplitButton || item is ToolStripDropDownButton)
+                {
+                    Padding original;
+                    if (modernToolbar)
+                    {
+                        if (!_toolbarPadding.TryGetValue(item, out original))
+                        {
+                            original = item.Padding;
+                            _toolbarPadding.Add(item, original);
+                            item.Disposed += HandleToolbarItemDisposed;
+                        }
+                        int inset = System.Math.Max(2, owner.ImageScalingSize.Width / 8);
+                        item.Padding = new Padding(original.Left + inset, original.Top + 2,
+                            original.Right + inset, original.Bottom + 2);
+                    }
+                    else if (_toolbarPadding.TryGetValue(item, out original))
+                    {
+                        item.Padding = original;
+                        _toolbarPadding.Remove(item);
+                        item.Disposed -= HandleToolbarItemDisposed;
+                    }
+                }
+                item.ForeColor = _theme.MenuItem.ForeColor;
 				item.BackColor = _theme.MenuItem.BackColor;
 
 				var menuItem = item as ToolStripMenuItem;
@@ -412,7 +441,12 @@ namespace KeeTheme
 			}
 		}
 
-		private void HandleMenuItemOnDropDownOpening(object sender, EventArgs e)
+		private void HandleToolbarItemDisposed(object sender, EventArgs e)
+        {
+            _toolbarPadding.Remove((ToolStripItem)sender);
+        }
+
+        private void HandleMenuItemOnDropDownOpening(object sender, EventArgs e)
 		{
 			var menuItem = (ToolStripMenuItem) sender;
 			Apply(menuItem.DropDownItems);
