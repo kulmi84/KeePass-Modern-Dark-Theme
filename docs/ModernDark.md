@@ -67,5 +67,7 @@ Weitere Standardicons; explizite Listen-Auswahlfarben und vollständigerer deakt
 
 Spaltentrennlinien: Im KeeTheme-Theme-Editor unter ListView die Eigenschaft ShowColumnSeparators auf False setzen. Modern Dark setzt dies bereits voraus. Native GridLines werden ebenfalls abgeschaltet und beim Deaktivieren wiederhergestellt; der Hintergrund wird beim Theme-Wechsel erneuert.
 
-Linien-Fix: Der native leere Bereich unter den Einträgen wird nach WM_PAINT gleichfarbig nachgezeichnet. Dieser zusätzliche Schritt gilt für ungegliederte Detail-Listen mit einfachem Theme-Hintergrund; gruppierte Listen und Bildhintergründe bleiben davon ausgenommen. test-list-background.ps1 prüft leere/kurze/lange Listen, Überschriften, Einträge und Theme-Abschaltung. Live-Prüfung beim Nutzer steht noch aus.
+Linien-Fix: Der native leere Bereich unter den Einträgen wird nach WM_PAINT gleichfarbig nachgezeichnet. Dieser zusätzliche Schritt gilt für ungegliederte und gruppierte Detail-Listen mit einfachem Theme-Hintergrund; Bildhintergründe bleiben davon ausgenommen. test-list-background.ps1 prüft leere/kurze/lange Listen, Überschriften, Einträge und Theme-Abschaltung. Live-Prüfung beim Nutzer steht noch aus.
 Logoquelle: KeePass/KeePass/Resources/Icons/KeePass.ico aus dlech/KeePass2.x; unveränderte Form, nur Graustufenumwandlung.
+
+Suchansicht: Der Hintergrund-Fix berücksichtigt nun gruppierte Suchtreffer. Alle Eintragszeilen und nativen Gruppenüberschriften werden vom überzeichneten Bereich ausgeschlossen, unabhängig von ihrer Indexreihenfolge. test-list-background.ps1 prüft native Gruppenüberschriften, umgekehrte Trefferreihenfolge und den freien Bereich unterhalb der Suche. Build und Prüfungen bestanden; Live-Prüfung dieser Suchansicht steht noch aus.

@@ -1,6 +1,7 @@
 param([string]$PluginPath)
 $ErrorActionPreference='Stop'
 Add-Type -AssemblyName System.Windows.Forms
+[Windows.Forms.Application]::EnableVisualStyles()
 [Reflection.Assembly]::LoadFrom('C:\Program Files\KeePass Password Safe 2\KeePass.exe') | Out-Null
 $a=[Reflection.Assembly]::LoadFrom($PluginPath)
 $f=[Reflection.BindingFlags]'Public,NonPublic,Instance,Static'
@@ -31,7 +32,34 @@ foreach($count in @(0,1,50)){
   if($count -eq 1 -and $bmp.GetPixel(50,$lv.Items[0].Bounds.Top+2).ToArgb() -ne $sentinel.ToArgb()){throw 'Entry overwritten'}
  }elseif($bmp.GetPixel(98,220).ToArgb() -ne $sentinel.ToArgb()){throw 'Visible rows overwritten in long list'}
 }
-$lv.Items.Clear(); $theme.ListView.ShowColumnSeparators=$true
+$lv.Items.Clear()
+$first=New-Object Windows.Forms.ListViewGroup('First search group')
+$second=New-Object Windows.Forms.ListViewGroup('Second search group')
+$empty=New-Object Windows.Forms.ListViewGroup('Empty group')
+$lv.Groups.Add($first) | Out-Null; $lv.Groups.Add($second) | Out-Null; $lv.Groups.Add($empty) | Out-Null
+# Deliberately reverse item index order relative to group display order.
+$bottom=$lv.Items.Add('Bottom result'); $bottom.Group=$second
+$upper=$lv.Items.Add('Upper result'); $upper.Group=$first
+$lv.CreateControl(); $lv.Update()
+$native=$d.GetType().GetField('_groupsPainter',$f).GetValue($d)
+$headerMethod=$native.GetType().GetMethod('TryGetHeaderRectangle',$f)
+$headers=@()
+for($i=0;$i -le $lv.Groups.Count;$i++){
+ $args=@($i,[Drawing.Rectangle]::Empty)
+ if($headerMethod.Invoke($native,$args)){$headers+=,$args[1]}
+}
+if($headers.Count -lt 2){throw 'Native grouped search headers unavailable'}
+$g.Clear($sentinel); $paint.Invoke($d,@($null,$event.PSObject.BaseObject)) | Out-Null
+foreach($item in $lv.Items){
+ $y=$item.Bounds.Top+2
+ if($y -ge 0 -and $y -lt 250 -and $bmp.GetPixel(50,$y).ToArgb() -ne $sentinel.ToArgb()){throw 'Grouped search result overwritten'}
+}
+foreach($header in $headers){
+ $y=$header.Top+2
+ if($y -ge 0 -and $y -lt 250 -and $bmp.GetPixel(50,$y).ToArgb() -ne $sentinel.ToArgb()){throw 'Search group header overwritten'}
+}
+if($bmp.GetPixel(98,220).ToArgb() -ne $theme.ListView.BackColor.ToArgb()){throw 'Grouped search divider not covered'}
+$lv.Groups.Clear(); $lv.Items.Clear(); $theme.ListView.ShowColumnSeparators=$true
 $g.Clear($sentinel); $paint.Invoke($d,@($null,$event.PSObject.BaseObject)) | Out-Null
 if($bmp.GetPixel(98,220).ToArgb() -ne $sentinel.ToArgb()){throw 'Legacy theme altered'}
 $theme.ListView.ShowColumnSeparators=$false
@@ -39,4 +67,4 @@ $enable.Invoke($d,@($false,$theme.PSObject.BaseObject)) | Out-Null
 $g.Clear($sentinel); $paint.Invoke($d,@($null,$event.PSObject.BaseObject)) | Out-Null
 if($bmp.GetPixel(98,220).ToArgb() -ne $sentinel.ToArgb()){throw 'Disabled theme altered'}
 $g.Dispose();$bmp.Dispose();$form.Dispose()
-Write-Output 'PASS unused report area covered, headers/entries/long lists/legacy/disabled themes preserved'
+Write-Output 'PASS plain and grouped search backgrounds, reordered results and group headers preserved, legacy/disabled themes preserved'

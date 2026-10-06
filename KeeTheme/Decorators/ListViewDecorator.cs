@@ -44,19 +44,31 @@ namespace KeeTheme.Decorators
 			// Windows can paint themed column dividers after owner-drawn rows.
 			// Cover only the unused report area; never overwrite entries or group headers.
 			if (!_enabled || _theme.ListView.ShowColumnSeparators ||
-				_listView.View != View.Details || _listView.Groups.Count != 0 ||
+				_listView.View != View.Details ||
 				!_theme.ListViewBackgroundTiled || _theme.ListView.BackColor.IsEmpty)
 				return;
 
 			int top = _listView.HeaderStyle == ColumnHeaderStyle.None ? 0 : _headerPainter.HeaderHeight;
-			if (_listView.Items.Count != 0)
-				top = Math.Max(top, _listView.Items[_listView.Items.Count - 1].Bounds.Bottom);
-			Rectangle area = Rectangle.Intersect(e.ClipRectangle,
-				new Rectangle(0, Math.Min(top, _listView.ClientSize.Height),
-					_listView.ClientSize.Width, Math.Max(0, _listView.ClientSize.Height - top)));
-			if (area.Width > 0 && area.Height > 0)
+			using (var area = new Region(Rectangle.Intersect(e.ClipRectangle,
+				new Rectangle(0, top, _listView.ClientSize.Width, Math.Max(0, _listView.ClientSize.Height - top)))))
+			{
+				// Grouped search results need not follow Items index order.
+				foreach (ListViewItem item in _listView.Items)
+				{
+					Rectangle bounds = item.Bounds;
+					if (bounds.Height > 0)
+						area.Exclude(new Rectangle(0, bounds.Top, _listView.ClientSize.Width, bounds.Height));
+				}
+				if (_listView.ShowGroups && _listView.Groups.Count != 0)
+					for (int i = 0; i <= _listView.Groups.Count; i++)
+					{
+						Rectangle header;
+						if (_groupsPainter.TryGetHeaderRectangle(i, out header))
+							area.Exclude(new Rectangle(0, header.Top, _listView.ClientSize.Width, header.Height));
+					}
 				using (var brush = new SolidBrush(_theme.ListView.BackColor))
-					e.Graphics.FillRectangle(brush, area);
+					e.Graphics.FillRegion(brush, area);
+			}
 		}
 
 		private void HandleHeaderPaint(object sender, PaintEventArgs e)

@@ -95,7 +95,17 @@ namespace KeeTheme.Decorators
 
 		private void PaintGroup(int i)
 		{
+			Rectangle groupRect;
+			if (!TryGetHeaderRectangle(i, out groupRect)) return;
+			using (var g = Graphics.FromHwnd(_listView.Handle))
+				OnPaint(new GroupPaintEventArgs(i - 1, g, groupRect));
+		}
+
+		internal bool TryGetHeaderRectangle(int i, out Rectangle rectangle)
+		{
+			rectangle = Rectangle.Empty;
 			var groupId = GetGroupId(i);
+			if (groupId < 0) return false;
 			var rect = new RECT { Top = LVGGR_HEADER };
 			var rectSize = Marshal.SizeOf(typeof(RECT));
 			var lParam = Marshal.AllocHGlobal(rectSize);
@@ -105,18 +115,12 @@ namespace KeeTheme.Decorators
 				var retVal = SendMessage(_listView.Handle, LVM_GETGROUPRECT, new IntPtr(groupId), lParam);
 				if (retVal == IntPtr.Zero)
 				{
-					return;
+					return false;
 				}
 
 				var retRc = (RECT)Marshal.PtrToStructure(lParam, typeof(RECT));
-				using (var g = Graphics.FromHwnd(_listView.Handle))
-				{
-					var groupRect =
-						new Rectangle(retRc.Left, retRc.Top, retRc.Right - retRc.Left, retRc.Bottom - retRc.Top);
-
-					var args = new GroupPaintEventArgs(i - 1, g, groupRect);
-					OnPaint(args);
-				}
+				rectangle = new Rectangle(retRc.Left, retRc.Top, retRc.Right - retRc.Left, retRc.Bottom - retRc.Top);
+				return rectangle.Width > 0 && rectangle.Height > 0;
 			}
 			finally
 			{
