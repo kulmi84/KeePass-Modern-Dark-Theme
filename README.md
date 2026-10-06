@@ -2,6 +2,10 @@
 
 Testversion im Branch feature/windows11-dark-v1. [Installation, Umfang und Grenzen](docs/ModernDark.md).
 
+![Modern Dark mit fiktiven Demo-Daten](docs/ModernDark-demo.png)
+
+Bearbeitete Demo-Abbildung mit ausschließlich fiktiven Ordnernamen, Einträgen und Zugangsdaten.
+
 # KeeTheme
 
 [![Version](https://img.shields.io/github/release/xatupal/KeeTheme)](https://github.com/xatupal/KeeTheme/releases/latest)
