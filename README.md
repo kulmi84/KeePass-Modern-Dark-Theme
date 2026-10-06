@@ -12,12 +12,17 @@ Die Standardicons erscheinen im modernen Stil. Eigene Datenbankicons bleiben erh
 
 ## Funktionen
 
+![Moderner S/W-Banner in Originalhöhe](docs/ModernDark-banner-demo.png)
+
+Aktueller Banner: S/W-KeePass-Logo, scharfe lokalisierte Überschrift und dezentes Tresormotiv rechts. Die Vorschau stammt aus dem Plugin-Zeichner und enthält keine privaten Daten.
+
 - Modern Dark mit dunklen Panels und Menüs sowie hellen Texten.
 - Einheitliche Icons in Symbolleiste, Gruppenbaum, Eintragsliste und Icon-Auswahl.
 - Breiteres Suchfeld, bei ausreichendem Platz mittig angeordnet.
 - Dunklere Zeilen und abschaltbare Spaltentrennlinien, auch in gruppierten Suchergebnissen.
 - Originales KeePass-Fensterlogo in Graustufen.
 - Moderne Icon-Vorschau und Passwortgenerator-Symbole im Eintragsdialog.
+- Dunkle Eingabefeld- und Suchfeldrahmen sowie ein kompakter S/W-Banner.
 
 Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und KDBX-Logik werden nicht verändert.
 
@@ -27,7 +32,7 @@ Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und
 
 Die aktuelle Version aus diesem Fork bauen und KeeTheme.dll in den KeePass-Plugins-Ordner kopieren. Vor dem Austausch KeePass schließen und vorherige KeeTheme.dll/KeeTheme.plgx sichern und aus dem Plugins-Ordner nehmen. Unter **Extras → Optionen → KeeTheme** das Theme **Modern Dark** auswählen.
 
-Der Eintragsdialog-Fix ist gebaut und automatisiert geprüft; die Bestätigung im laufenden KeePass steht noch aus.
+Die dunklen Rahmen und das neue Banner wurden im laufenden KeePass vom Nutzer bestätigt. Automatisierte Prüfungen ergänzen die praktischen Tests; Details und verbleibende Grenzen stehen in der Dokumentation.
 
 ## Ursprung
 
