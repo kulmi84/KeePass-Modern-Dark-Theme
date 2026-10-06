@@ -8,6 +8,8 @@ namespace KeeTheme.Theme
     {
         internal static bool Draw(Graphics g, Rectangle bounds, string name, Color color)
         {
+            // KeePass context-menu copies use m_ctx instead of m_menu.
+            if (name != null && (name.StartsWith("m_ctxGroup") || name.StartsWith("m_ctxEntry")) && name != "m_ctxGroupFind") name = "m_menu" + name.Substring(5);
             string glyph;
             switch (name)
             {
@@ -26,6 +28,35 @@ namespace KeeTheme.Theme
                 case "m_tbViewsShowExpired": glyph = "clock"; break;
                 case "m_tbLockWorkspace": glyph = "lock"; break;
                 case "m_tbCloseTab": glyph = "close"; break;
+                case "m_menuGroupAdd": glyph = "folderAdd"; break;
+                case "m_menuGroupEdit": glyph = "folderEdit"; break;
+                case "m_menuGroupDelete": glyph = "trash"; break;
+                case "m_menuGroupEmptyRB": glyph = "trash"; break;
+                case "m_menuGroupDuplicate": case "m_menuEntryDuplicate":
+                case "m_menuGroupClipCopy": case "m_menuGroupClipCopyPlain":
+                case "m_menuEntryClipCopy": case "m_menuEntryClipCopyPlain":
+                case "m_menuEntryCopyUrl": glyph = "copy"; break;
+                case "modernMoreCommands": glyph = "more"; break;
+                case "m_ctxGroupFind": glyph = "search"; break;
+                case "m_menuGroupMoveToTop": case "m_menuEntryMoveToTop": glyph = "top"; break;
+                case "m_menuGroupMoveOneUp": case "m_menuEntryMoveOneUp": glyph = "up"; break;
+                case "m_menuGroupMoveOneDown": case "m_menuEntryMoveOneDown": glyph = "down"; break;
+                case "m_menuGroupMoveToBottom": case "m_menuEntryMoveToBottom": glyph = "bottom"; break;
+                case "m_menuGroupMoveToPreviousParent": case "m_menuEntryMoveToPreviousParent": glyph = "back"; break;
+                case "m_menuGroupSort": case "m_menuGroupSortRec": glyph = "sort"; break;
+                case "m_menuGroupExpand": glyph = "expand"; break;
+                case "m_menuGroupCollapse": glyph = "collapse"; break;
+                case "m_menuGroupDX": case "m_menuEntryDX": glyph = "export"; break;
+                case "m_menuGroupExport": case "m_menuEntryExport": glyph = "export"; break;
+                case "m_menuGroupPrint": case "m_menuEntryPrint": glyph = "print"; break;
+                case "m_menuGroupClipPaste": case "m_menuEntryClipPaste": glyph = "paste"; break;
+                case "m_menuEntryCopyUserName": glyph = "user"; break;
+                case "m_menuEntryCopyPassword": glyph = "key"; break;
+                case "m_menuEntryOpenUrl": glyph = "globe"; break;
+                case "m_menuEntryPerformAutoType": glyph = "keyboard"; break;
+                case "m_menuEntryAdd": glyph = "add"; break;
+                case "m_menuEntryEdit": glyph = "edit"; break;
+                case "m_menuEntryDelete": glyph = "trash"; break;
                 case "standardServer": glyph = "server"; break;
                 case "standardHome": glyph = "home"; break;
                 case "standardMail": glyph = "mail"; break;
@@ -47,6 +78,25 @@ namespace KeeTheme.Theme
                     p.LineJoin = LineJoin.Round;
                     switch (glyph)
                     {
+                        case "more": g.DrawLine(p,4,10,4.3f,10);g.DrawLine(p,10,10,10.3f,10);g.DrawLine(p,16,10,16.3f,10);break;
+                        case "folderAdd": case "folderEdit":
+                            g.DrawLines(p,new PointF[]{new PointF(3,16),new PointF(3,5),new PointF(8,5),new PointF(10,7),new PointF(17,7),new PointF(17,10)});
+                            g.DrawLine(p,3,16,10,16);
+                            if(glyph == "folderAdd") { g.DrawLine(p,14,11,14,17); g.DrawLine(p,11,14,17,14); }
+                            else { g.DrawLine(p,11,17,17,11); g.DrawLine(p,11,17,14,16); } break;
+                        case "edit": g.DrawPolygon(p,new PointF[]{new PointF(3,17),new PointF(4,13),new PointF(14,3),new PointF(17,6),new PointF(7,16)}); g.DrawLine(p,12,5,15,8); break;
+                        case "top": g.DrawLine(p,4,3,16,3); goto case "up";
+                        case "up": g.DrawLines(p,new PointF[]{new PointF(4,12),new PointF(10,6),new PointF(16,12)}); g.DrawLine(p,10,6,10,17); break;
+                        case "bottom": g.DrawLine(p,4,17,16,17); goto case "down";
+                        case "down": g.DrawLines(p,new PointF[]{new PointF(4,8),new PointF(10,14),new PointF(16,8)}); g.DrawLine(p,10,3,10,14); break;
+                        case "back": g.DrawLines(p,new PointF[]{new PointF(8,4),new PointF(3,9),new PointF(8,14)}); g.DrawLines(p,new PointF[]{new PointF(3,9),new PointF(13,9),new PointF(17,13),new PointF(17,17)}); break;
+                        case "sort": g.DrawLine(p,5,3,5,17); g.DrawLines(p,new PointF[]{new PointF(2,14),new PointF(5,17),new PointF(8,14)}); g.DrawLine(p,11,4,14,4);g.DrawLine(p,11,9,16,9);g.DrawLine(p,11,14,18,14); break;
+                        case "expand": case "collapse":
+                            g.DrawRectangle(p,3,5,14,12); g.DrawLine(p,3,5,8,5); g.DrawLine(p,8,5,10,7); g.DrawLine(p,7,12,13,12);
+                            if(glyph == "expand")g.DrawLine(p,10,9,10,15); break;
+                        case "export": g.DrawLines(p,new PointF[]{new PointF(4,4),new PointF(4,17),new PointF(16,17),new PointF(16,12)}); g.DrawLine(p,9,11,17,3);g.DrawLines(p,new PointF[]{new PointF(11,3),new PointF(17,3),new PointF(17,9)}); break;
+                        case "print": g.DrawRectangle(p,5,2,10,5);g.DrawRectangle(p,2,7,16,8);g.DrawRectangle(p,5,12,10,6);break;
+                        case "paste": g.DrawRectangle(p,4,4,12,14);g.DrawRectangle(p,7,2,6,4);g.DrawLine(p,7,10,13,10);g.DrawLine(p,7,14,12,14);break;
                         case "new":
                             g.DrawLines(p, new PointF[] { new PointF(4,17), new PointF(4,3), new PointF(11,3), new PointF(16,8), new PointF(16,17), new PointF(4,17) });
                             g.DrawLines(p, new PointF[] { new PointF(11,3), new PointF(11,8), new PointF(16,8) });

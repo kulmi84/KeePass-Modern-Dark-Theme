@@ -176,7 +176,7 @@ namespace KeeTheme
                 var target = control is RichTextBox && control.Parent is RichTextBoxDecorator ? control.Parent : control;
                 var owner = target.FindForm();
                 IDisposable border;
-                bool modern = UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.PwGroupForm" || owner.GetType().FullName == "KeePass.Forms.DatabaseSettingsForm");
+                bool modern = UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.GroupForm" || owner.GetType().FullName == "KeePass.Forms.DatabaseSettingsForm");
                 if (modern && !_fieldBorders.ContainsKey(target))
                 {
                     _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target, true));
@@ -198,7 +198,7 @@ namespace KeeTheme
             {
                 banner.Paint -= HandleModernBannerPaint;
                 var owner = banner.FindForm();
-                if (UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.PwEntryForm"))
+                if (UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.GroupForm"))
                     banner.Paint += HandleModernBannerPaint;
                 banner.Invalidate();
             }
@@ -208,6 +208,7 @@ namespace KeeTheme
         {
             if (!UseModernIcons) return;
             var banner = (PictureBox)sender;
+            bool group = banner.FindForm().GetType().FullName == "KeePass.Forms.GroupForm";
             bool unlock = banner.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm";
             using (var brush = new SolidBrush(_theme.Control.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
             if (_bannerArtwork == null)
@@ -244,7 +245,7 @@ namespace KeeTheme
                 textLeft += size + padding;
             }
             using (var font = new Font(banner.Font.FontFamily, banner.Font.Size * 1.3f, FontStyle.Bold))
-                TextRenderer.DrawText(e.Graphics, unlock ? KeePass.Resources.KPRes.EnterCompositeKey : KeePass.Resources.KPRes.EditEntry,
+                TextRenderer.DrawText(e.Graphics, unlock ? KeePass.Resources.KPRes.EnterCompositeKey : group ? KeePass.Resources.KPRes.EditGroup : KeePass.Resources.KPRes.EditEntry,
                     font, new Rectangle(textLeft,padding,Math.Max(0,banner.Width-textLeft-padding),banner.Height-padding*2), _theme.Form.ForeColor,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
@@ -715,7 +716,7 @@ namespace KeeTheme
 		{
 			button.Paint -= HandleModernEntryButtonPaint;
 			var entryForm = button.FindForm();
-			if (UseModernIcons && entryForm != null && entryForm.GetType().FullName == "KeePass.Forms.PwEntryForm" &&
+			if (UseModernIcons && entryForm != null && (entryForm.GetType().FullName == "KeePass.Forms.PwEntryForm" || entryForm.GetType().FullName == "KeePass.Forms.GroupForm") &&
 				(button.Name == "m_btnIcon" || button.Name == "m_btnGenPw" || button.Name == "m_btnStandardExpires"))
 				button.Paint += HandleModernEntryButtonPaint;
             if (UseModernIcons && entryForm != null && entryForm.GetType().FullName == "KeePass.Forms.KeyPromptForm" && button.Name == "m_btnOpenKeyFile")
@@ -747,7 +748,7 @@ namespace KeeTheme
 			{
 				var flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
 				var customField = form.GetType().GetField("m_pwCustomIconID", flags);
-				var iconField = form.GetType().GetField("m_pwEntryIcon", flags);
+				var iconField = form.GetType().GetField(form.GetType().FullName == "KeePass.Forms.GroupForm" ? "m_pwIconIndex" : "m_pwEntryIcon", flags);
 				if (customField == null || iconField == null) return;
 				var custom = customField.GetValue(form) as PwUuid;
 				if (custom == null || !custom.IsZero) return;

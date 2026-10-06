@@ -30,15 +30,34 @@ namespace KeeTheme.Theme
                 owner = dropdown.OwnerItem.Owner;
                 dropdown = owner as ToolStripDropDown;
             }
-            var form = owner == null ? null : owner.FindForm();
+            var context = owner as ContextMenuStrip;
+            var form = context != null && context.SourceControl != null ? context.SourceControl.FindForm() : owner == null ? null : owner.FindForm();
+            bool mainMenu = form != null && form.GetType().FullName == "KeePass.Forms.MainForm";
+            if (context != null && (context.Name == "m_ctxGroupList" || context.Name == "m_ctxPwList")) mainMenu = true;
+            string name = mainMenu && context != null && string.IsNullOrEmpty(e.Item.Name) && e.Item.Text == KeePass.Resources.KPRes.MoreCommands ? "modernMoreCommands" : e.Item.Name;
             var color = e.Item.Enabled ? _customTheme.MenuItem.ForeColor : _customTheme.MenuItem.DisabledForeColor;
             if (color.IsEmpty) color = Color.FromArgb(190, 190, 190);
-            if (!_customTheme.MenuItem.ModernIcons || form == null ||
-                form.GetType().FullName != "KeePass.Forms.MainForm" ||
-                !ModernToolbarIcons.Draw(e.Graphics, e.ImageRectangle, e.Item.Name, color))
+            if (!_customTheme.MenuItem.ModernIcons || !mainMenu ||
+                !ModernToolbarIcons.Draw(e.Graphics, e.ImageRectangle, name, color))
                 base.OnRenderItemImage(e);
         }
 
+        protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
+        {
+            if (!_customTheme.MenuItem.ModernIcons) { base.OnRenderImageMargin(e); return; }
+            using(var brush = new SolidBrush(_customTheme.MenuItem.BackColor)) e.Graphics.FillRectangle(brush,e.AffectedBounds);
+        }
+        protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
+        {
+            if (!_customTheme.MenuItem.ModernIcons || !(e.ToolStrip is ToolStripDropDown)) { base.OnRenderToolStripBorder(e); return; }
+            using(var pen = new Pen(Color.FromArgb(65,65,65))) e.Graphics.DrawRectangle(pen,0,0,e.ToolStrip.Width-1,e.ToolStrip.Height-1);
+        }
+        protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
+        {
+            if (!_customTheme.MenuItem.ModernIcons) { base.OnRenderMenuItemBackground(e); return; }
+            if (!e.Item.Enabled || (!e.Item.Selected && !e.Item.Pressed)) return;
+            using(var brush = new SolidBrush(Color.FromArgb(56,101,138))) e.Graphics.FillRectangle(brush,new Rectangle(3,1,e.Item.Width-6,e.Item.Height-2));
+        }
         private bool DrawToolbarButton(ToolStripItemRenderEventArgs e, bool isChecked)
         {
             if (!_customTheme.MenuItem.ModernIcons || e.ToolStrip is ToolStripDropDown || e.ToolStrip is MenuStrip)
