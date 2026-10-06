@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -51,6 +51,7 @@ namespace KeeTheme.Decorators
 		private readonly ListView _listView;
 
 		internal event GroupPaintEventHandler Paint;
+		internal event PaintEventHandler BackgroundPaint;
 
 		public ListViewGroupsPainter(ListView listView)
 		{
@@ -78,6 +79,12 @@ namespace KeeTheme.Decorators
 
 			if (m.Msg != WM_PAINT)
 				return;
+
+			if (BackgroundPaint != null)
+			{
+				using (var graphics = Graphics.FromHwnd(_listView.Handle))
+					BackgroundPaint(this, new PaintEventArgs(graphics, _listView.ClientRectangle));
+			}
 
 			// The first group is without header
 			for (int i = 1; i <= _listView.Groups.Count; i++)

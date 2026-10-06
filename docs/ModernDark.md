@@ -57,10 +57,15 @@ build/test-standard-icons.ps1 prüft alle 69 Standardicons bei 16/24/32px und ko
 
 ## Weißes Fensterschloss
 
-Das laufende KeePass-Hauptfenster erhält in Modern Dark ein weißes Schloss für Titelleiste und Windows-Fenstersymbol. UIStateUpdated wendet es nach KeePass-Icon-Updates erneut an. Beim Theme-Wechsel/Abschalten und Plugin-Terminierung wird das zuletzt von KeePass gesetzte Icon wiederhergestellt. EXE, Tray-Statussymbol und Datenbankicons werden nicht verändert.
+Das laufende KeePass-Hauptfenster erhält in Modern Dark das originale KeePass-Logo in Graustufen für Titelleiste und Windows-Fenstersymbol. UIStateUpdated wendet es nach KeePass-Icon-Updates erneut an. Beim Theme-Wechsel/Abschalten und Plugin-Terminierung wird das zuletzt von KeePass gesetzte Icon wiederhergestellt. EXE, Tray-Statussymbol und Datenbankicons werden nicht verändert.
 
-Eine angeheftete Taskleisten-Verknüpfung kann weiterhin das EXE-Icon anzeigen. Dafür liegt KeePass-Lock.ico bei: in den Eigenschaften der Verknüpfung unter Anderes Symbol auswählen. Das ICO enthält 16/32/48/64/128/256 Pixel; bis 128 Pixel werden klassische Windows-DIB-Bilder für saubere .NET-/WinForms-Kompatibilität verwendet. test-window-icon.ps1 prüft ICO-Größen, monochrome Windows-Zeichnung und Wiederherstellung.
+Eine angeheftete Taskleisten-Verknüpfung kann weiterhin das EXE-Icon anzeigen. Dafür liegt KeePass-SW.ico bei: in den Eigenschaften der Verknüpfung unter Anderes Symbol auswählen. Das ICO enthält 16/32/48/64/128/256 Pixel; bis 128 Pixel werden klassische Windows-DIB-Bilder für saubere .NET-/WinForms-Kompatibilität verwendet. test-window-icon.ps1 prüft ICO-Größen, monochrome Windows-Zeichnung und Wiederherstellung.
 
 ## Nächste Schritte
 
 Weitere Standardicons; explizite Listen-Auswahlfarben und vollständigerer deaktivierter Text. Vor einer stabilen Veröffentlichung ist die manuelle Matrix mit mehreren KeePass-Versionen erforderlich.
+
+Spaltentrennlinien: Im KeeTheme-Theme-Editor unter ListView die Eigenschaft ShowColumnSeparators auf False setzen. Modern Dark setzt dies bereits voraus. Native GridLines werden ebenfalls abgeschaltet und beim Deaktivieren wiederhergestellt; der Hintergrund wird beim Theme-Wechsel erneuert.
+
+Linien-Fix: Der native leere Bereich unter den Einträgen wird nach WM_PAINT gleichfarbig nachgezeichnet. Dieser zusätzliche Schritt gilt für ungegliederte Detail-Listen mit einfachem Theme-Hintergrund; gruppierte Listen und Bildhintergründe bleiben davon ausgenommen. test-list-background.ps1 prüft leere/kurze/lange Listen, Überschriften, Einträge und Theme-Abschaltung. Live-Prüfung beim Nutzer steht noch aus.
+Logoquelle: KeePass/KeePass/Resources/Icons/KeePass.ico aus dlech/KeePass2.x; unveränderte Form, nur Graustufenumwandlung.

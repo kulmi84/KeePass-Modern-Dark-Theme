@@ -19,6 +19,7 @@ namespace KeeTheme.Decorators
 
 		private ITheme _theme;
 		private bool _enabled;
+		private bool? _originalGridLines;
 
 		public ListViewDecorator(ListView listView, ITheme theme)
 		{
@@ -32,9 +33,30 @@ namespace KeeTheme.Decorators
 
 				_groupsPainter = new ListViewGroupsPainter(_listView);
 				_groupsPainter.Paint += HandleGroupsPaint;
+				_groupsPainter.BackgroundPaint += HandleBackgroundPaint;
 			}
 
 			_listView.Controls.Add(this);
+		}
+
+		private void HandleBackgroundPaint(object sender, PaintEventArgs e)
+		{
+			// Windows can paint themed column dividers after owner-drawn rows.
+			// Cover only the unused report area; never overwrite entries or group headers.
+			if (!_enabled || _theme.ListView.ShowColumnSeparators ||
+				_listView.View != View.Details || _listView.Groups.Count != 0 ||
+				!_theme.ListViewBackgroundTiled || _theme.ListView.BackColor.IsEmpty)
+				return;
+
+			int top = _listView.HeaderStyle == ColumnHeaderStyle.None ? 0 : _headerPainter.HeaderHeight;
+			if (_listView.Items.Count != 0)
+				top = Math.Max(top, _listView.Items[_listView.Items.Count - 1].Bounds.Bottom);
+			Rectangle area = Rectangle.Intersect(e.ClipRectangle,
+				new Rectangle(0, Math.Min(top, _listView.ClientSize.Height),
+					_listView.ClientSize.Width, Math.Max(0, _listView.ClientSize.Height - top)));
+			if (area.Width > 0 && area.Height > 0)
+				using (var brush = new SolidBrush(_theme.ListView.BackColor))
+					e.Graphics.FillRectangle(brush, area);
 		}
 
 		private void HandleHeaderPaint(object sender, PaintEventArgs e)
@@ -131,6 +153,18 @@ namespace KeeTheme.Decorators
 				listView.BorderStyle = _theme.ListView.BorderStyle;
 
 			listView.BackColor = _theme.ListView.BackColor;
+
+			// Native grid lines also extend into the empty area below entries.
+			if (_enabled && !_theme.ListView.ShowColumnSeparators)
+			{
+				if (!_originalGridLines.HasValue) _originalGridLines = listView.GridLines;
+				listView.GridLines = false;
+			}
+			else if (_originalGridLines.HasValue)
+			{
+				listView.GridLines = _originalGridLines.Value;
+				_originalGridLines = null;
+			}
 
 			if (_theme.ListViewBackgroundTiled)
 			{
@@ -399,6 +433,8 @@ namespace KeeTheme.Decorators
 			_theme = theme;
 
 			Apply(_listView);
+			HandleListViewResize(_listView, EventArgs.Empty);
+			_listView.Invalidate();
 		}
 	}
 }

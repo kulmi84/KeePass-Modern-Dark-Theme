@@ -50,7 +50,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ControlVisitor.cs" />
-    <Compile Include="Decorators\WindowIconDecorator.cs" />
     <Compile Include="Decorators\StandardIconPickerDecorator.cs" />
     <Compile Include="Decorators\CenteredSearchDecorator.cs" />
     <Compile Include="Decorators\ControlSnapshot.cs" />
@@ -137,7 +136,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ModernWindow.ico" />
     <EmbeddedResource Include="Resources\ModernDark.ini" />
     <EmbeddedResource Include="Resources\DarkTheme.ini" />
     <EmbeddedResource Include="Resources\DarkThemeWin11.ini" />

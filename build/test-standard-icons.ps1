@@ -26,6 +26,11 @@ $form.Controls.Add($lv); $lv.View=[Windows.Forms.View]::Details
 $header=New-Object Windows.Forms.ColumnHeader; $header.Width=100; $lv.Columns.Add($header) | Out-Null
 $item=New-Object Windows.Forms.ListViewItem(''); $lv.Items.Add($item) | Out-Null
 $decorator=[Activator]::CreateInstance($a.GetType('KeeTheme.Decorators.ListViewDecorator'),$f,$null,@($lv.PSObject.BaseObject,$theme.PSObject.BaseObject),$null)
+$lv.GridLines=$true
+$decorator.GetType().GetMethod('EnableTheme',$f).Invoke($decorator,@($true,$theme.PSObject.BaseObject)) | Out-Null
+if($lv.GridLines){throw 'Native grid lines still enabled'}
+$decorator.GetType().GetMethod('EnableTheme',$f).Invoke($decorator,@($false,$theme.PSObject.BaseObject)) | Out-Null
+if(!$lv.GridLines){throw 'Native grid lines not restored'}
 $decorator.GetType().GetMethod('EnableTheme',$f).Invoke($decorator,@($true,$theme.PSObject.BaseObject)) | Out-Null
 $bmp=New-Object Drawing.Bitmap(100,30); $g=[Drawing.Graphics]::FromImage($bmp)
 $sentinel=[Drawing.Color]::FromArgb(10,12,14); $g.Clear($sentinel)

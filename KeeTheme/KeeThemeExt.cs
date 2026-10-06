@@ -31,7 +31,6 @@ namespace KeeTheme
 		private OptionsPanel _optionsPanel;
 		private Win10ThemeMonitor _win10ThemeMonitor;
 		private bool _initialized;
-        private WindowIconDecorator _windowIcon;
 
 		public override bool Initialize(IPluginHost host)
 		{
@@ -43,8 +42,6 @@ namespace KeeTheme
 			_options = new KeeThemeOptions(host);
 			_controlVisitor = new ControlVisitor(HandleControlVisit);
 			_theme = new KeeTheme(_options);
-            _windowIcon = new WindowIconDecorator(host.MainWindow);
-            host.MainWindow.UIStateUpdated += HandleMainWindowStateUpdated;
 
 			_win10ThemeMonitor = new Win10ThemeMonitor(_options);
 			_win10ThemeMonitor.Initialize();
@@ -156,19 +153,7 @@ namespace KeeTheme
 			_initialized = true;
 		}
 
-		        private void HandleMainWindowStateUpdated(object sender, EventArgs e)
-        {
-            if (_windowIcon != null) _windowIcon.Apply(_theme.UseModernIcons);
-        }
-
-        public override void Terminate()
-        {
-            if (_host != null) _host.MainWindow.UIStateUpdated -= HandleMainWindowStateUpdated;
-            if (_windowIcon != null) { _windowIcon.Dispose(); _windowIcon = null; }
-            base.Terminate();
-        }
-
-        public override ToolStripMenuItem GetMenuItem(PluginMenuType t)
+		public override ToolStripMenuItem GetMenuItem(PluginMenuType t)
 		{
 			if (t == PluginMenuType.Main)
 			{
@@ -197,7 +182,6 @@ namespace KeeTheme
 				_controlVisitor.Visit(openForm);
 			}
 			Program.MainForm.RefreshEntriesList();
-            _windowIcon.Apply(_theme.UseModernIcons);
 		}
 
 		private void HandleControlVisit(Control control)
