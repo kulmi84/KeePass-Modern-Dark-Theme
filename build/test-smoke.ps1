@@ -44,5 +44,3 @@ foreach($resource in $a.GetManifestResourceNames() | Where-Object { $_.EndsWith(
     Write-Output ('PASS '+$resource)
 }
 Write-Output 'PASS custom UUID / custom slot preservation, standard drawing, theme roundtrip and legacy fallback'
-
-
