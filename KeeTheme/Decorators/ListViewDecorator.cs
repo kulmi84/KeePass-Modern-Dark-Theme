@@ -348,6 +348,11 @@ namespace KeeTheme.Decorators
 			var font = e.ItemIndex == -1 ? e.Item.Font : e.SubItem.Font;
 			var color = e.ItemIndex == -1 ? e.Item.ForeColor : e.SubItem.ForeColor;
 			var textBounds = new Rectangle(bounds.Location, bounds.Size);
+            if (_theme.MenuItem.ModernIcons && e.Item.Selected)
+            {
+                using (var brush = new SolidBrush(Color.FromArgb(56,101,138))) e.Graphics.FillRectangle(brush,bounds);
+                color = Color.FromArgb(241,241,241);
+            }
 
 			var listItem = e.Item.Tag as PwListItem;
 			if (listItem != null && !listItem.Entry.ForegroundColor.IsEmpty)

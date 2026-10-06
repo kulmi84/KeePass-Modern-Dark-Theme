@@ -176,7 +176,7 @@ namespace KeeTheme
                 var target = control is RichTextBox && control.Parent is RichTextBoxDecorator ? control.Parent : control;
                 var owner = target.FindForm();
                 IDisposable border;
-                bool modern = UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.KeyPromptForm");
+                bool modern = UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.PwGroupForm" || owner.GetType().FullName == "KeePass.Forms.DatabaseSettingsForm");
                 if (modern && !_fieldBorders.ContainsKey(target))
                 {
                     _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target, true));
@@ -186,6 +186,12 @@ namespace KeeTheme
                 {
                     border.Dispose(); _fieldBorders.Remove(target);
                 }
+            }
+            var datePicker = control as DateTimePicker;
+            if (datePicker != null)
+            {
+                datePicker.DropDown -= HandleModernCalendarDropDown;
+                if (UseModernIcons) datePicker.DropDown += HandleModernCalendarDropDown;
             }
             var banner = control as PictureBox;
             if (banner != null && banner.Name == "m_bannerImage")
@@ -241,6 +247,19 @@ namespace KeeTheme
                 TextRenderer.DrawText(e.Graphics, unlock ? KeePass.Resources.KPRes.EnterCompositeKey : KeePass.Resources.KPRes.EditEntry,
                     font, new Rectangle(textLeft,padding,Math.Max(0,banner.Width-textLeft-padding),banner.Height-padding*2), _theme.Form.ForeColor,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+        }
+        private void HandleModernCalendarDropDown(object sender, EventArgs e)
+        {
+            if (!UseModernIcons || MonoWorkarounds.IsRequired()) return;
+            var picker = (DateTimePicker)sender;
+            IntPtr calendar = ListViewNativeWindow.SendMessage(picker.Handle,0x1008,IntPtr.Zero,IntPtr.Zero);
+            if (calendar == IntPtr.Zero) return;
+            TrySetWindowTheme(calendar,true);
+            // DTM_SETMCCOLOR: supported fallback when the Windows calendar honors colors.
+            int[] colors = { ColorTranslator.ToWin32(Color.FromArgb(37,37,38)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
+                ColorTranslator.ToWin32(Color.FromArgb(56,101,138)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
+                ColorTranslator.ToWin32(Color.FromArgb(37,37,38)), ColorTranslator.ToWin32(Color.FromArgb(190,190,190)) };
+            for (int i=0;i<colors.Length;i++) ListViewNativeWindow.SendMessage(picker.Handle,0x1006,new IntPtr(i),new IntPtr(colors[i]));
         }
 
 		private void OverrideScrollBarsSetExplorerTheme(Control control)
@@ -345,7 +364,32 @@ namespace KeeTheme
 
 			checkBox.EnabledChanged -= HandleCheckBoxEnabledChanged;
 			checkBox.EnabledChanged += HandleCheckBoxEnabledChanged;
+            checkBox.Paint -= HandleModernCheckBoxPaint;
+            if (UseModernIcons && checkBox.Appearance == Appearance.Normal)
+                checkBox.Paint += HandleModernCheckBoxPaint;
 		}
+
+        private void HandleModernCheckBoxPaint(object sender, PaintEventArgs e)
+        {
+            if (!UseModernIcons) return;
+            var box = (CheckBox)sender;
+            Size glyph = CheckBoxRenderer.GetGlyphSize(e.Graphics,CheckBoxState.UncheckedNormal);
+            bool right = box.CheckAlign == System.Drawing.ContentAlignment.TopRight || box.CheckAlign == System.Drawing.ContentAlignment.MiddleRight || box.CheckAlign == System.Drawing.ContentAlignment.BottomRight;
+            bool center = box.CheckAlign == System.Drawing.ContentAlignment.TopCenter || box.CheckAlign == System.Drawing.ContentAlignment.MiddleCenter || box.CheckAlign == System.Drawing.ContentAlignment.BottomCenter;
+            int x = right ? box.Width-glyph.Width : center ? (box.Width-glyph.Width)/2 : 0;
+            int y = (box.Height-glyph.Height)/2;
+            if (box.CheckAlign == System.Drawing.ContentAlignment.TopLeft || box.CheckAlign == System.Drawing.ContentAlignment.TopCenter || box.CheckAlign == System.Drawing.ContentAlignment.TopRight) y = 0;
+            if (box.CheckAlign == System.Drawing.ContentAlignment.BottomLeft || box.CheckAlign == System.Drawing.ContentAlignment.BottomCenter || box.CheckAlign == System.Drawing.ContentAlignment.BottomRight) y = box.Height-glyph.Height;
+            var r = new Rectangle(x,y,glyph.Width,glyph.Height);
+            using (var brush = new SolidBrush(box.BackColor)) e.Graphics.FillRectangle(brush,r);
+            using (var brush = new SolidBrush(box.Checked ? Color.FromArgb(56,101,138) : Color.FromArgb(37,37,38))) e.Graphics.FillRectangle(brush,r);
+            using (var pen = new Pen(box.Enabled ? Color.FromArgb(110,110,110) : Color.FromArgb(65,65,65))) e.Graphics.DrawRectangle(pen,r.X,r.Y,r.Width-1,r.Height-1);
+            if (box.CheckState == CheckState.Indeterminate)
+                using (var brush = new SolidBrush(Color.FromArgb(190,190,190))) e.Graphics.FillRectangle(brush,r.X+3,r.Y+r.Height/2-1,r.Width-6,2);
+            else if (box.Checked)
+                using (var pen = new Pen(box.Enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),1.7f))
+                    e.Graphics.DrawLines(pen,new Point[]{new Point(r.X+3,r.Y+r.Height/2),new Point(r.X+r.Width/2-1,r.Bottom-4),new Point(r.Right-3,r.Y+3)});
+        }
 
 		private void HandleCheckBoxEnabledChanged(object sender, EventArgs e)
 		{

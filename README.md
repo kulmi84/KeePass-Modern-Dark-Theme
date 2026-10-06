@@ -28,6 +28,8 @@ Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und
 
 ## Installation und Einstellungen
 
+[**Version 1.1.0 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.0) – das ZIP enthält die fertige KeeTheme.dll.
+
 [Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
 Die aktuelle Version aus diesem Fork bauen und KeeTheme.dll in den KeePass-Plugins-Ordner kopieren. Vor dem Austausch KeePass schließen und vorherige KeeTheme.dll/KeeTheme.plgx sichern und aus dem Plugins-Ordner nehmen. Unter **Extras → Optionen → KeeTheme** das Theme **Modern Dark** auswählen.
