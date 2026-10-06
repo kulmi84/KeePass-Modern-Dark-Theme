@@ -102,3 +102,12 @@ $center.Dispose()
 if($strip.Items.ContainsKey('KeeThemeCenterSearchSpacer')){throw 'Spacer leaked'}
 $hostForm.Dispose()
 Write-Output 'PASS icon picker preview/source preservation/restoration and responsive centered search'
+$borderBitmap=New-Object Drawing.Bitmap(320,24)
+$borderGraphics=[Drawing.Graphics]::FromImage($borderBitmap)
+$borderGraphics.Clear([Drawing.Color]::Magenta)
+$borderDraw=$a.GetType('KeeTheme.Decorators.CenteredSearchDecorator').GetMethod('DrawSearchBorder',$f)
+$borderDraw.Invoke($null,@($borderGraphics.PSObject.BaseObject,(New-Object Drawing.Size(320,24)))) | Out-Null
+if($borderBitmap.GetPixel(0,0).R -ne 65 -or $borderBitmap.GetPixel(319,23).R -ne 65){throw 'Search border color incorrect'}
+if($borderBitmap.GetPixel(10,10).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Search interior overwritten'}
+$borderGraphics.Dispose(); $borderBitmap.Dispose()
+Write-Output 'PASS dark search border and preserved interior'

@@ -37,7 +37,7 @@ Manuell prüfen: Theme an/aus und Wechsel zu alten Themes; Menü-/Kontextmenü-H
 
 ## Toolbar-Verfeinerung
 
-Neue Icons mit runden Linienenden, dezente Trenner und abgerundete Hover-/Pressed-Flächen. Zusätzliche horizontale und vertikale Polsterung wird beim Abschalten oder Theme-Wechsel auf die ursprünglichen Werte zurückgesetzt; wiederholtes Anwenden addiert keine weiteren Abstände. Unbekannte Plugin-Kommandos behalten ihr Bild. Der native Suchfeldrahmen bleibt original. ModernDark-toolbar.png ist eine aus dem Icon-Zeichner erzeugte Stilvorschau, kein Screenshot einer laufenden KeePass-Instanz. build/test-toolbar.ps1 prüft 15 Icontypen bei 16/20/24/32px, unbekannte Kommandos und die Wiederherstellung des Graphics-Zustands; bestanden.
+Neue Icons mit runden Linienenden, dezente Trenner und abgerundete Hover-/Pressed-Flächen. Zusätzliche horizontale und vertikale Polsterung wird beim Abschalten oder Theme-Wechsel auf die ursprünglichen Werte zurückgesetzt; wiederholtes Anwenden addiert keine weiteren Abstände. Unbekannte Plugin-Kommandos behalten ihr Bild. Der Suchfeldrahmen wird in Modern Dark dunkel (#414141) nachgezeichnet. ModernDark-toolbar.png ist eine aus dem Icon-Zeichner erzeugte Stilvorschau, kein Screenshot einer laufenden KeePass-Instanz. build/test-toolbar.ps1 prüft 15 Icontypen bei 16/20/24/32px, unbekannte Kommandos und die Wiederherstellung des Graphics-Zustands; bestanden.
 
 ## Vollständige Toolbar, zentrierte Suche und Gruppenbaum
 
@@ -73,3 +73,5 @@ Logoquelle: KeePass/KeePass/Resources/Icons/KeePass.ico aus dlech/KeePass2.x; un
 Suchansicht: Der Hintergrund-Fix berücksichtigt nun gruppierte Suchtreffer. Alle Eintragszeilen und nativen Gruppenüberschriften werden vom überzeichneten Bereich ausgeschlossen, unabhängig von ihrer Indexreihenfolge. test-list-background.ps1 prüft native Gruppenüberschriften, umgekehrte Trefferreihenfolge und den freien Bereich unterhalb der Suche. Build und Prüfungen bestanden; Live-Prüfung dieser Suchansicht steht noch aus.
 
 Eintragsdialog: Modern Dark zeichnet Standardicon-Vorschau, Passwortgenerator und Ablaufdatum modern. Die Vorschau liest die aktuelle Standard-ID und CustomIconUuid bei jedem Zeichnen; eigene Icons und originale Button-Bilder bleiben erhalten. Fehlende interne Felder fallen auf KeePass-Darstellung zurück. test-entry-icons.ps1 prüft Standard-ID-Wechsel, monochrome Darstellung, Custom-Icon-Schutz und Theme-Abschaltung. Live-Test offen.
+
+Suchfeldrahmen: Native WM_PAINT/WM_NCPAINT-Nachzeichnung nur am zentrierten Modern-Dark-Suchfeld. Eingabe und Dropdown bleiben nativ. Hook wird bei Theme-Abschaltung entfernt; Handle-Neuerstellung berücksichtigt. Build, Layout-/Wiederherstellungs- und Rahmen-Pixeltests bestanden; Live-Prüfung offen.

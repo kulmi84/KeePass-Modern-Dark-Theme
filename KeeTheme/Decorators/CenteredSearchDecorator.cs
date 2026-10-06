@@ -1,5 +1,7 @@
 using System;
 using System.Windows.Forms;
+using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace KeeTheme.Decorators
 {
@@ -9,9 +11,11 @@ namespace KeeTheme.Decorators
         private readonly ToolStripComboBox _search;
         private readonly ToolStripLabel _space = new ToolStripLabel();
         private bool _layingOut;
+        private readonly SearchBorderWindow _border;
         internal CenteredSearchDecorator(ToolStrip strip, ToolStripComboBox search)
         {
             _strip = strip; _search = search;
+            _border = new SearchBorderWindow(search.ComboBox);
             _space.Name = "KeeThemeCenterSearchSpacer";
             _space.AutoSize = false;
             _space.Margin = Padding.Empty;
@@ -57,8 +61,53 @@ namespace KeeTheme.Decorators
                 _strip.Disposed -= OnStripDisposed;
                 if (!_strip.IsDisposed) _strip.Items.Remove(_space);
                 _space.Dispose();
+                _border.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        private sealed class SearchBorderWindow : NativeWindow, IDisposable
+        {
+            private readonly ComboBox _combo;
+            [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
+            [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
+            internal SearchBorderWindow(ComboBox combo)
+            {
+                _combo = combo;
+                combo.HandleCreated += OnCreated;
+                combo.HandleDestroyed += OnDestroyed;
+                IntPtr handle = combo.Handle;
+                if (Handle == IntPtr.Zero) AssignHandle(handle);
+            }
+            private void OnCreated(object sender, EventArgs e) { AssignHandle(_combo.Handle); }
+            private void OnDestroyed(object sender, EventArgs e) { ReleaseHandle(); }
+            protected override void WndProc(ref Message m)
+            {
+                base.WndProc(ref m);
+                if (m.Msg != 0x000F && m.Msg != 0x0085) return;
+                IntPtr dc = GetWindowDC(m.HWnd);
+                if (dc == IntPtr.Zero) return;
+                try
+                {
+                    using (var graphics = Graphics.FromHdc(dc))
+                        DrawSearchBorder(graphics, _combo.Size);
+                }
+                finally { ReleaseDC(m.HWnd, dc); }
+            }
+            public void Dispose()
+            {
+                _combo.HandleCreated -= OnCreated;
+                _combo.HandleDestroyed -= OnDestroyed;
+                ReleaseHandle();
+                if (!_combo.IsDisposed) _combo.Invalidate(true);
+            }
+        }
+
+        internal static void DrawSearchBorder(Graphics graphics, Size size)
+        {
+            if (size.Width < 2 || size.Height < 2) return;
+            using (var pen = new Pen(Color.FromArgb(65,65,65)))
+                graphics.DrawRectangle(pen, 0, 0, size.Width - 1, size.Height - 1);
         }
     }
 }
