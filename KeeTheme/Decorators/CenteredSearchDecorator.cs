@@ -70,6 +70,11 @@ namespace KeeTheme.Decorators
         {
             private readonly Control _combo;
             private readonly bool _field;
+            private readonly IntPtr _backgroundBrush = CreateSolidBrush(0x00262525);
+            [DllImport("gdi32.dll")] private static extern IntPtr CreateSolidBrush(int color);
+            [DllImport("gdi32.dll")] private static extern bool DeleteObject(IntPtr obj);
+            [DllImport("gdi32.dll")] private static extern int SetBkColor(IntPtr dc, int color);
+            [DllImport("gdi32.dll")] private static extern int SetTextColor(IntPtr dc, int color);
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
             [StructLayout(LayoutKind.Sequential)] private struct ComboInfo
@@ -98,7 +103,20 @@ namespace KeeTheme.Decorators
             private void OnFocus(object sender, EventArgs e) { _combo.Invalidate(); }
             protected override void WndProc(ref Message m)
             {
-                base.WndProc(ref m);
+                // The disabled edit child of a ComboBox asks its parent for colors.
+                // Returning a dark brush also covers the modal login/locked state.
+                if (_combo is ComboBox && (m.Msg == 0x0133 || m.Msg == 0x0138))
+                {
+                    SetBkColor(m.WParam, 0x00262525);
+                    SetTextColor(m.WParam, _combo.Enabled ? 0x00F1F1F1 : 0x00BEBEBE);
+                    m.Result = _backgroundBrush;
+                    return;
+                }
+                // Do not let the native edit border flash white before our border.
+                // Caret and mouse messages can request non-client paint independently.
+                if (_field && _combo is TextBoxBase && m.Msg == 0x0085)
+                    m.Result = IntPtr.Zero;
+                else base.WndProc(ref m);
                 if (m.Msg != 0x000F && m.Msg != 0x0085) return;
                 IntPtr dc = GetWindowDC(m.HWnd);
                 if (dc == IntPtr.Zero) return;
