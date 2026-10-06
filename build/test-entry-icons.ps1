@@ -41,3 +41,22 @@ $g.Clear([Drawing.Color]::Magenta);$paint.Invoke($instance,@($button.PSObject.Ba
 if($bmp.GetPixel(16,10).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Disabled theme painted'}
 $g.Dispose();$bmp.Dispose();$form.Dispose();$source.Dispose()
 Write-Output 'PASS standard entry preview refresh, monochrome drawing, custom image and disabled theme preserved'
+$type.GetField('_enabled',$f).SetValue($instance,$true)
+$keyForm=New-Object KeePass.Forms.KeyPromptForm
+$banner=$keyForm.Controls.Find('m_bannerImage',$true)[0]
+$original=New-Object Drawing.Bitmap(417,60)
+$banner.Image=$original
+$canvas=New-Object Drawing.Bitmap($banner.Width,$banner.Height)
+$graphics=[Drawing.Graphics]::FromImage($canvas)
+$event=New-Object Windows.Forms.PaintEventArgs($graphics,$banner.ClientRectangle)
+$paintBanner=$type.GetMethod('HandleModernBannerPaint',$f)
+$graphics.Clear([Drawing.Color]::Magenta)
+$paintBanner.Invoke($instance,@($banner.PSObject.BaseObject,$event.PSObject.BaseObject)) | Out-Null
+if($canvas.GetPixel(2,2).ToArgb() -ne $theme.Form.BackColor.ToArgb()){throw 'Old banner background remains'}
+if(![Object]::ReferenceEquals($banner.Image,$original)){throw 'Banner source image altered'}
+$type.GetField('_enabled',$f).SetValue($instance,$false)
+$graphics.Clear([Drawing.Color]::Magenta)
+$paintBanner.Invoke($instance,@($banner.PSObject.BaseObject,$event.PSObject.BaseObject)) | Out-Null
+if($canvas.GetPixel(2,2).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Disabled banner painted'}
+$graphics.Dispose();$canvas.Dispose();$keyForm.Dispose();$original.Dispose()
+Write-Output 'PASS flat unlock banner, original image and disabled theme preserved'

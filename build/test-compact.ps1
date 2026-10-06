@@ -124,3 +124,13 @@ foreach($focused in @($false,$true)){
 }
 $graphics.Dispose();$bitmap.Dispose()
 Write-Output 'PASS dark field border, subtle focus and preserved interior'
+$bitmap=New-Object Drawing.Bitmap(20,24);$graphics=[Drawing.Graphics]::FromImage($bitmap)
+$buttonBounds=New-Object Drawing.Rectangle(0,0,20,24)
+$buttonDraw=$a.GetType('KeeTheme.Decorators.CenteredSearchDecorator').GetMethod('DrawComboButton',$f)
+$graphics.Clear([Drawing.Color]::Magenta)
+$buttonDraw.Invoke($null,@($graphics.PSObject.BaseObject,$buttonBounds.PSObject.BaseObject)) | Out-Null
+if($bitmap.GetPixel(0,10).R -ne 65){throw 'Dropdown separator not dark'}
+if($bitmap.GetPixel(5,4).R -ne 37){throw 'Dropdown background incorrect'}
+if($bitmap.GetPixel(10,12).R -ne 190){throw 'Dropdown arrow missing'}
+$graphics.Dispose();$bitmap.Dispose()
+Write-Output 'PASS dark dropdown separator, background and visible arrow'

@@ -170,12 +170,12 @@ namespace KeeTheme
 
 			OverrideResetBackground(control);
 			OverrideScrollBarsSetExplorerTheme(control);
-            if (control is TextBoxBase || control is DateTimePicker)
+			if (control is TextBoxBase || control is DateTimePicker || control is ComboBox)
             {
                 var target = control is RichTextBox && control.Parent is RichTextBoxDecorator ? control.Parent : control;
                 var owner = target.FindForm();
                 IDisposable border;
-                bool modern = UseModernIcons && owner != null && owner.GetType().FullName == "KeePass.Forms.PwEntryForm";
+                bool modern = UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.KeyPromptForm");
                 if (modern && !_fieldBorders.ContainsKey(target))
                 {
                     _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target, true));
@@ -186,7 +186,29 @@ namespace KeeTheme
                     border.Dispose(); _fieldBorders.Remove(target);
                 }
             }
+            var banner = control as PictureBox;
+            if (banner != null && banner.Name == "m_bannerImage")
+            {
+                banner.Paint -= HandleModernBannerPaint;
+                var owner = banner.FindForm();
+                if (UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.PwEntryForm"))
+                    banner.Paint += HandleModernBannerPaint;
+                banner.Invalidate();
+            }
 		}
+
+        private void HandleModernBannerPaint(object sender, PaintEventArgs e)
+        {
+            if (!UseModernIcons) return;
+            var banner = (PictureBox)sender;
+            bool unlock = banner.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm";
+            using (var brush = new SolidBrush(_theme.Form.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
+            int padding = Math.Max(12, banner.Height/5);
+            using (var font = new Font(banner.Font.FontFamily, banner.Font.Size * 1.3f, FontStyle.Bold))
+                TextRenderer.DrawText(e.Graphics, unlock ? KeePass.Resources.KPRes.EnterCompositeKey : KeePass.Resources.KPRes.EditEntry,
+                    font, new Rectangle(padding,padding,banner.Width-padding*2,banner.Height-padding*2), _theme.Form.ForeColor,
+                    TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+        }
 
 		private void OverrideScrollBarsSetExplorerTheme(Control control)
 		{

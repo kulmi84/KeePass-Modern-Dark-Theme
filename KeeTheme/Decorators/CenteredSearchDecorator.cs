@@ -72,6 +72,15 @@ namespace KeeTheme.Decorators
             private readonly bool _field;
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
+            [StructLayout(LayoutKind.Sequential)] private struct ComboInfo
+            {
+                public int Size;
+                public RectangleNative Item, Button;
+                public int State;
+                public IntPtr Combo, Edit, List;
+            }
+            [StructLayout(LayoutKind.Sequential)] private struct RectangleNative { public int Left, Top, Right, Bottom; }
+            [DllImport("user32.dll")] private static extern bool GetComboBoxInfo(IntPtr hwnd, ref ComboInfo info);
             internal SearchBorderWindow(Control combo) : this(combo, false) { }
             internal SearchBorderWindow(Control combo, bool field)
             {
@@ -96,8 +105,16 @@ namespace KeeTheme.Decorators
                 try
                 {
                     using (var graphics = Graphics.FromHdc(dc))
+                    {
+                        if (_combo is ComboBox)
+                        {
+                            var info = new ComboInfo(); info.Size = Marshal.SizeOf(typeof(ComboInfo));
+                            if (GetComboBoxInfo(m.HWnd, ref info))
+                                DrawComboButton(graphics, Rectangle.FromLTRB(info.Button.Left, info.Button.Top, info.Button.Right, info.Button.Bottom));
+                        }
                         if (_field) DrawFieldBorder(graphics, _combo.Size, _combo.ContainsFocus);
                         else DrawSearchBorder(graphics, _combo.Size);
+                    }
                 }
                 finally { ReleaseDC(m.HWnd, dc); }
             }
@@ -126,6 +143,16 @@ namespace KeeTheme.Decorators
                 graphics.DrawRectangle(pen, 0, 0, size.Width-1, size.Height-1);
                 graphics.DrawRectangle(pen, 1, 1, size.Width-3, size.Height-3);
             }
+        }
+        internal static void DrawComboButton(Graphics graphics, Rectangle bounds)
+        {
+            if (bounds.Width < 4 || bounds.Height < 4) return;
+            using (var brush = new SolidBrush(Color.FromArgb(37,37,38))) graphics.FillRectangle(brush, bounds);
+            using (var pen = new Pen(Color.FromArgb(65,65,65)))
+                graphics.DrawLine(pen, bounds.Left, bounds.Top, bounds.Left, bounds.Bottom-1);
+            int x = bounds.Left + bounds.Width/2, y = bounds.Top + bounds.Height/2;
+            using (var brush = new SolidBrush(Color.FromArgb(190,190,190)))
+                graphics.FillPolygon(brush, new Point[] { new Point(x-3,y-1), new Point(x+3,y-1), new Point(x,y+2) });
         }
     }
 }

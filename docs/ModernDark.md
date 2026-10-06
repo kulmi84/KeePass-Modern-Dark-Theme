@@ -77,3 +77,5 @@ Eintragsdialog: Modern Dark zeichnet Standardicon-Vorschau, Passwortgenerator un
 Suchfeldrahmen: Native WM_PAINT/WM_NCPAINT-Nachzeichnung nur am zentrierten Modern-Dark-Suchfeld. Eingabe und Dropdown bleiben nativ. Hook wird bei Theme-Abschaltung entfernt; Handle-Neuerstellung berücksichtigt. Build, Layout-/Wiederherstellungs- und Rahmen-Pixeltests bestanden; Live-Prüfung offen.
 
 Eintragsdialog-Rahmen: Textfelder, Kommentar-Rahmen und Ablaufdatum-Rahmen werden in Modern Dark mit #414141 nachgezeichnet; Fokus mit #38658A. Inhalte und native Bedienung bleiben erhalten. Rahmen-Pixeltests und Suchfeld-Layouttests bestanden; Live-Prüfung offen.
+
+Datenbank öffnen: Dunkle Rahmen auch für Passwort und Schlüsseldatei-Auswahl. Die alten Banner-Grafiken in KeyPromptForm und PwEntryForm werden in Modern Dark durch einen flachen Hintergrund mit lokalisierter Überschrift ersetzt, ohne Originalbilder zu verändern. Native Dropdown-Buttons werden einschließlich Trenner und Pfeil dunkel nachgezeichnet; Eingabe und Auswahl bleiben nativ. Banner- und Dropdown-Pixeltests bestanden; Live-Test offen.
