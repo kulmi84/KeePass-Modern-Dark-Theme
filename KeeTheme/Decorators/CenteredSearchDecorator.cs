@@ -66,21 +66,27 @@ namespace KeeTheme.Decorators
             base.Dispose(disposing);
         }
 
-        private sealed class SearchBorderWindow : NativeWindow, IDisposable
+        internal sealed class SearchBorderWindow : NativeWindow, IDisposable
         {
-            private readonly ComboBox _combo;
+            private readonly Control _combo;
+            private readonly bool _field;
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
-            internal SearchBorderWindow(ComboBox combo)
+            internal SearchBorderWindow(Control combo) : this(combo, false) { }
+            internal SearchBorderWindow(Control combo, bool field)
             {
                 _combo = combo;
+                _field = field;
                 combo.HandleCreated += OnCreated;
                 combo.HandleDestroyed += OnDestroyed;
+                combo.GotFocus += OnFocus;
+                combo.LostFocus += OnFocus;
                 IntPtr handle = combo.Handle;
                 if (Handle == IntPtr.Zero) AssignHandle(handle);
             }
             private void OnCreated(object sender, EventArgs e) { AssignHandle(_combo.Handle); }
             private void OnDestroyed(object sender, EventArgs e) { ReleaseHandle(); }
+            private void OnFocus(object sender, EventArgs e) { _combo.Invalidate(); }
             protected override void WndProc(ref Message m)
             {
                 base.WndProc(ref m);
@@ -90,7 +96,8 @@ namespace KeeTheme.Decorators
                 try
                 {
                     using (var graphics = Graphics.FromHdc(dc))
-                        DrawSearchBorder(graphics, _combo.Size);
+                        if (_field) DrawFieldBorder(graphics, _combo.Size, _combo.ContainsFocus);
+                        else DrawSearchBorder(graphics, _combo.Size);
                 }
                 finally { ReleaseDC(m.HWnd, dc); }
             }
@@ -98,6 +105,8 @@ namespace KeeTheme.Decorators
             {
                 _combo.HandleCreated -= OnCreated;
                 _combo.HandleDestroyed -= OnDestroyed;
+                _combo.GotFocus -= OnFocus;
+                _combo.LostFocus -= OnFocus;
                 ReleaseHandle();
                 if (!_combo.IsDisposed) _combo.Invalidate(true);
             }
@@ -108,6 +117,15 @@ namespace KeeTheme.Decorators
             if (size.Width < 2 || size.Height < 2) return;
             using (var pen = new Pen(Color.FromArgb(65,65,65)))
                 graphics.DrawRectangle(pen, 0, 0, size.Width - 1, size.Height - 1);
+        }
+        internal static void DrawFieldBorder(Graphics graphics, Size size, bool focused)
+        {
+            if (size.Width < 4 || size.Height < 4) return;
+            using (var pen = new Pen(focused ? Color.FromArgb(56,101,138) : Color.FromArgb(65,65,65)))
+            {
+                graphics.DrawRectangle(pen, 0, 0, size.Width-1, size.Height-1);
+                graphics.DrawRectangle(pen, 1, 1, size.Width-3, size.Height-3);
+            }
         }
     }
 }

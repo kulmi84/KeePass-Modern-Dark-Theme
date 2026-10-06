@@ -106,8 +106,21 @@ $borderBitmap=New-Object Drawing.Bitmap(320,24)
 $borderGraphics=[Drawing.Graphics]::FromImage($borderBitmap)
 $borderGraphics.Clear([Drawing.Color]::Magenta)
 $borderDraw=$a.GetType('KeeTheme.Decorators.CenteredSearchDecorator').GetMethod('DrawSearchBorder',$f)
-$borderDraw.Invoke($null,@($borderGraphics.PSObject.BaseObject,(New-Object Drawing.Size(320,24)))) | Out-Null
+$borderSize=New-Object Drawing.Size(320,24)
+$borderDraw.Invoke($null,@($borderGraphics.PSObject.BaseObject,$borderSize.PSObject.BaseObject)) | Out-Null
 if($borderBitmap.GetPixel(0,0).R -ne 65 -or $borderBitmap.GetPixel(319,23).R -ne 65){throw 'Search border color incorrect'}
 if($borderBitmap.GetPixel(10,10).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Search interior overwritten'}
 $borderGraphics.Dispose(); $borderBitmap.Dispose()
 Write-Output 'PASS dark search border and preserved interior'
+$fieldDraw=$a.GetType('KeeTheme.Decorators.CenteredSearchDecorator').GetMethod('DrawFieldBorder',$f)
+$bitmap=New-Object Drawing.Bitmap(320,24); $graphics=[Drawing.Graphics]::FromImage($bitmap)
+foreach($focused in @($false,$true)){
+ $graphics.Clear([Drawing.Color]::Magenta)
+ $fieldDraw.Invoke($null,@($graphics.PSObject.BaseObject,$borderSize.PSObject.BaseObject,$focused)) | Out-Null
+ $p=$bitmap.GetPixel(1,1)
+ if(!$focused -and ($p.R -ne 65 -or $p.G -ne 65)){throw 'Field border incorrect'}
+ if($focused -and ($p.R -ne 56 -or $p.G -ne 101 -or $p.B -ne 138)){throw 'Field focus color incorrect'}
+ if($bitmap.GetPixel(10,10).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Field interior overwritten'}
+}
+$graphics.Dispose();$bitmap.Dispose()
+Write-Output 'PASS dark field border, subtle focus and preserved interior'

@@ -75,3 +75,5 @@ Suchansicht: Der Hintergrund-Fix berücksichtigt nun gruppierte Suchtreffer. All
 Eintragsdialog: Modern Dark zeichnet Standardicon-Vorschau, Passwortgenerator und Ablaufdatum modern. Die Vorschau liest die aktuelle Standard-ID und CustomIconUuid bei jedem Zeichnen; eigene Icons und originale Button-Bilder bleiben erhalten. Fehlende interne Felder fallen auf KeePass-Darstellung zurück. test-entry-icons.ps1 prüft Standard-ID-Wechsel, monochrome Darstellung, Custom-Icon-Schutz und Theme-Abschaltung. Live-Test offen.
 
 Suchfeldrahmen: Native WM_PAINT/WM_NCPAINT-Nachzeichnung nur am zentrierten Modern-Dark-Suchfeld. Eingabe und Dropdown bleiben nativ. Hook wird bei Theme-Abschaltung entfernt; Handle-Neuerstellung berücksichtigt. Build, Layout-/Wiederherstellungs- und Rahmen-Pixeltests bestanden; Live-Prüfung offen.
+
+Eintragsdialog-Rahmen: Textfelder, Kommentar-Rahmen und Ablaufdatum-Rahmen werden in Modern Dark mit #414141 nachgezeichnet; Fokus mit #38658A. Inhalte und native Bedienung bleiben erhalten. Rahmen-Pixeltests und Suchfeld-Layouttests bestanden; Live-Prüfung offen.

@@ -25,6 +25,7 @@ namespace KeeTheme
 		private ITheme _customTheme;
 		private ITheme _theme;
 		private bool _enabled;
+        private readonly Dictionary<Control, IDisposable> _fieldBorders = new Dictionary<Control, IDisposable>();
         private readonly Dictionary<ToolStrip, CenteredSearchDecorator> _centeredSearch = new Dictionary<ToolStrip, CenteredSearchDecorator>();
         private readonly Dictionary<ToolStripItem, bool> _toolbarAvailable = new Dictionary<ToolStripItem, bool>();
         private readonly Dictionary<ToolStripItem, Size> _searchSize = new Dictionary<ToolStripItem, Size>();
@@ -169,6 +170,22 @@ namespace KeeTheme
 
 			OverrideResetBackground(control);
 			OverrideScrollBarsSetExplorerTheme(control);
+            if (control is TextBoxBase || control is DateTimePicker)
+            {
+                var target = control is RichTextBox && control.Parent is RichTextBoxDecorator ? control.Parent : control;
+                var owner = target.FindForm();
+                IDisposable border;
+                bool modern = UseModernIcons && owner != null && owner.GetType().FullName == "KeePass.Forms.PwEntryForm";
+                if (modern && !_fieldBorders.ContainsKey(target))
+                {
+                    _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target, true));
+                    target.Disposed += delegate { if (_fieldBorders.TryGetValue(target, out border)) { border.Dispose(); _fieldBorders.Remove(target); } };
+                }
+                else if (!modern && _fieldBorders.TryGetValue(target, out border))
+                {
+                    border.Dispose(); _fieldBorders.Remove(target);
+                }
+            }
 		}
 
 		private void OverrideScrollBarsSetExplorerTheme(Control control)
