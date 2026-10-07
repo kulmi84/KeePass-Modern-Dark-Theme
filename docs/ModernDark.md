@@ -2,6 +2,10 @@
 
 KeePass selbst wird nicht verändert.
 
+## Release 1.1.19: Einheitliche Extras-Icons
+
+Der Nutzer bestätigt die neuen S/W-Symbole für Passwortgenerator, Passwortliste, TAN-Assistent, Trigger, Plugins und Optionen. Zusatzplugin-Logos im Extras-Menü werden in Graustufen gezeichnet, ohne die Originalbilder zu verändern. Der Modern-Dark-Menühaken ist neutral. Andere Themes behalten ihre bisherige Darstellung. Menü-, Theme-/Icon- und Suchfeld-Prüfungen bestehen. Die bestätigte Suchfeld-Korrektur aus 1.1.18 bleibt enthalten.
+
 ## Release 1.1.18: Fertiger Modern-Dark-Stand
 
 Version 1.1.18 veröffentlicht den bestätigten stabilen Modern-Dark-Stand mit der zusätzlichen Suchfeld-Korrektur unten. Die Plugin-Metadaten nennen nun **KeeTheme Modern Dark** sowie **Marcin Kulmaczewski (kulmi84)** als Maintainer des Forks; Krzysztof Łaputa bleibt als ursprünglicher Autor von KeeTheme ausdrücklich genannt.
