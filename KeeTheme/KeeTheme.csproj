@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="ControlVisitor.cs" />
     <Compile Include="Decorators\WindowIconDecorator.cs" />
+    <Compile Include="Decorators\FirstFrameDecorator.cs" />
     <Compile Include="Decorators\StandardIconPickerDecorator.cs" />
     <Compile Include="Decorators\CenteredSearchDecorator.cs" />
     <Compile Include="Decorators\ControlSnapshot.cs" />

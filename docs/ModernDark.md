@@ -2,6 +2,14 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.7: Erstes vollständiges Fensterbild vor der Einblendung
+
+Der Nutzer bestätigt: 1.1.6 verändert den Start, beseitigt aber die weiße Fläche weder beim Start noch beim Öffnen von Dialogen. Der Rahmen-Fix allein löst das Problem also nicht.
+
+1.1.7 hält neu geöffnete KeePass-Haupt-, Eintrags-, Gruppen-, Hauptschlüssel- und Datenbankeinstellungsfenster während ihres ersten synchronen Zeichenlaufs transparent. Erst wenn alle Kindfenster und Theme-Nachzeichnungen zurückgekehrt sind, wird die ursprüngliche Fensterdeckkraft wiederhergestellt. Bereits sichtbare Fenster werden nicht ausgeblendet. Es gibt keine Wartezeiten, Timer oder Fade-Animationen im Plugin. Theme-Abschaltung beim Start, Mono und fremde Plugin-Fenster sind ausgenommen.
+
+`build/test-first-frame-presentation.ps1` prüft mit eigenen synthetischen Fenstern, dass das erste native Zeichnen mit Schutz bei Deckkraft 0 statt 1 erfolgt und danach eine vollständig gezeichnete dunkle Fläche sichtbar ist. Abbruch stellt auch eine ursprüngliche Deckkraft von 0,75 wieder her. Der Test reproduziert den konkreten KeePass-Fehler aus der Aufnahme nicht; er belegt die geänderte Einblendereihenfolge. Die Live-Prüfung des Starts und der Dialoge bleibt offen, ebenso ein möglicher separater Neu-Zeichenfehler im bereits sichtbaren Hauptfenster beim Öffnen modaler Dialoge. Dieser Build ist ausdrücklich ein Teststand.
+
 ## Testbuild 1.1.6: Fensterrahmen beim Theming stabil halten
 
 Der bisherige Titelleisten-Workaround setzte FormBorderStyle kurz auf None und anschließend zurück. Das änderte beim Öffnen und erneuten Theming die Fensterstruktur und die Größe des Inhalts. Die neue Fassung setzt ausschließlich das DWM-Attribut für die dunkle Titelleiste, wie in der [Microsoft-Dokumentation](https://learn.microsoft.com/de-de/windows/apps/desktop/modernize/ui/apply-windows-themes) beschrieben.

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection;
 using System.Windows.Forms;
@@ -32,6 +33,7 @@ namespace KeeTheme
 		private Win10ThemeMonitor _win10ThemeMonitor;
 		private bool _initialized;
         private WindowIconDecorator _windowIcon;
+        private readonly Dictionary<Form, FirstFrameDecorator> _firstFrames = new Dictionary<Form, FirstFrameDecorator>();
 
 		public override bool Initialize(IPluginHost host)
 		{
@@ -48,6 +50,7 @@ namespace KeeTheme
 
 			_win10ThemeMonitor = new Win10ThemeMonitor(_options);
 			_win10ThemeMonitor.Initialize();
+            PrepareFirstFrame(host.MainWindow);
 
 			if (Program.TriggerSystem.Enabled)
 			{
@@ -78,6 +81,7 @@ namespace KeeTheme
 
 		private void HandleOpenFormsAdded(object sender, FormAddedEventArgs args)
 		{
+            PrepareFirstFrame(args.Form);
 			if (!_initialized)
 				InitializeTheme();
 			
@@ -112,6 +116,17 @@ namespace KeeTheme
 		{
 			PwGeneratorMenuDecorator.TryFindAndDecorate(sender, _theme);
 		}
+
+        private void PrepareFirstFrame(Form form)
+        {
+            if (!_options.Enabled || MonoWorkarounds.IsRequired() || form.Visible || _firstFrames.ContainsKey(form)) return;
+            string name = form.GetType().FullName;
+            if (name != "KeePass.Forms.MainForm" && name != "KeePass.Forms.PwEntryForm" && name != "KeePass.Forms.GroupForm" &&
+                name != "KeePass.Forms.KeyPromptForm" && name != "KeePass.Forms.DatabaseSettingsForm") return;
+            FirstFrameDecorator frame = new FirstFrameDecorator(form);
+            _firstFrames.Add(form, frame);
+            form.Disposed += delegate { frame.Dispose(); _firstFrames.Remove(form); };
+        }
 
 		private void HandleEditStringFormLoad(object sender, EventArgs e)
 		{
@@ -163,6 +178,8 @@ namespace KeeTheme
 
         public override void Terminate()
         {
+            foreach (FirstFrameDecorator frame in _firstFrames.Values) frame.Dispose();
+            _firstFrames.Clear();
             if (_host != null) _host.MainWindow.UIStateUpdated -= HandleMainWindowStateUpdated;
             if (_windowIcon != null) { _windowIcon.Dispose(); _windowIcon = null; }
             base.Terminate();
