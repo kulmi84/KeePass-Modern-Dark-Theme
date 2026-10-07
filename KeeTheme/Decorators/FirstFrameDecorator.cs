@@ -15,11 +15,21 @@ namespace KeeTheme.Decorators
         [DllImport("user32.dll")]
         private static extern bool RedrawWindow(IntPtr window, IntPtr rectangle, IntPtr region, uint flags);
 
+        [DllImport("user32.dll", ExactSpelling = true)]
+        private static extern bool IsWindowVisible(IntPtr window);
+
+        internal static bool IsNativeVisible(Form form)
+        {
+            // WinForms Visible is already true during KeePass Load/WindowAdded.
+            // Do not create a handle just to test native presentation state.
+            return form.IsHandleCreated && IsWindowVisible(form.Handle);
+        }
+
         internal FirstFrameDecorator(Form form)
         {
             _form = form;
             _opacity = form.Opacity;
-            if (form.Visible) return;
+            if (IsNativeVisible(form)) return;
             _armed = true;
             form.Shown += OnShown;
             form.Opacity = 0;

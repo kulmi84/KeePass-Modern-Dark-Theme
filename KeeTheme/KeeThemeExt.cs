@@ -119,7 +119,7 @@ namespace KeeTheme
 
         private void PrepareFirstFrame(Form form)
         {
-            if (!_options.Enabled || MonoWorkarounds.IsRequired() || form.Visible || _firstFrames.ContainsKey(form)) return;
+            if (!_options.Enabled || MonoWorkarounds.IsRequired() || FirstFrameDecorator.IsNativeVisible(form) || _firstFrames.ContainsKey(form)) return;
             string name = form.GetType().FullName;
             if (name != "KeePass.Forms.MainForm" && name != "KeePass.Forms.PwEntryForm" && name != "KeePass.Forms.GroupForm" &&
                 name != "KeePass.Forms.KeyPromptForm" && name != "KeePass.Forms.DatabaseSettingsForm") return;

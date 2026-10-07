@@ -2,6 +2,14 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.8: Native Sichtbarkeit statt WinForms-Visible
+
+Das Nutzerprotokoll von 1.1.7 zeigt beim Anhängen an MainForm, KeyPromptForm und PwEntryForm bereits `Visible=True`, aber noch `nativeVisible=False` und `Opacity=1`. Beide bisherigen Visible-Prüfungen übersprangen damit den Schutz vor dem ersten sichtbaren Zeichenlauf. 1.1.8 prüft stattdessen `IsWindowVisible`, ohne einen Fensterhandle vorzeitig anzulegen. Bereits tatsächlich sichtbare Fenster bleiben ausgenommen.
+
+`build/test-keepass-first-frame.ps1` startet eine separate echte KeePass-Kopie mit eigener Konfiguration und ausschließlich fiktiven Daten. Der Test prüft, dass die ersten nativen Zeichenläufe von Eintrags-, Gruppen- und Hauptschlüsseldialogen bei Deckkraft 0 erfolgen und die Deckkraft anschließend wieder 1 ist. Auch das Hauptfenster muss nach Shown wieder Deckkraft 1 erreichen. Die Testkopie berührt keine Nutzerinstallation und keine echten Datenbanken. Der Testaktor darf nicht als Plugin beim Nutzer installiert werden.
+
+Der Integrationstest belegt die Korrektur des übersprungenen Schutzes; die Dialoge liegen außerhalb des Bildschirms. Er beweist daher nicht, dass sämtliche im Nutzervideo sichtbaren weißen Flächen verschwunden sind. 1.1.8 bleibt bis zur Bestätigung am betroffenen Rechner ein Testbuild. Das private Nutzerprotokoll wird nicht veröffentlicht.
+
 ## Testbuild 1.1.7: Erstes vollständiges Fensterbild vor der Einblendung
 
 Diagnose-Zusatzplugin 1.0.2: Den Fassungen 1.0.0/1.0.1 fehlte `AssemblyProduct("KeePass Plugin")`. KeePass ignoriert solche DLLs vor der Initialisierung; deshalb fehlten Menüpunkt und Logdatei trotz korrekter Installation. Die Kennung ist ergänzt, und der Startup-Test prüft nun auch die Loader-Metadaten. Eine getrennte echte KeePass-2.61.1-Testkopie mit eigener Konfiguration und fiktiven Eintrags-, Gruppen- und Hauptschlüsseldialogen hat das Zusatzplugin geladen und das Zeichenprotokoll erstellt. Die Nutzerdateien und vorhandene Installation wurden dabei nicht verändert.
