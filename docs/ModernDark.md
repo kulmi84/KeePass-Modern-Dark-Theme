@@ -2,11 +2,11 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
-## Testbuild 1.1.18: Suchfeld ohne hellen Zwischenrahmen
+## Release 1.1.18: Suchfeld ohne hellen Zwischenrahmen
 
 Die neue Aufnahme zeigt einen weißen Hover-/Fokusrahmen im Suchfeld des Hauptfensters. Die bisherige Überzeichnung nach dem nativen WM_PAINT lässt diesen Zwischenstand kurz sichtbar werden. Der Suchfeld-Decorator zeichnet den nativen Client über WM_PRINTCLIENT in einen Speicherpuffer, ergänzt den dunklen Rahmen und Pfeil und zeigt erst das fertige Bild. Separates Löschen und Non-Client-Zeichnen sind dort unterdrückt. Die Änderung betrifft nur das moderne Toolbar-Suchfeld; die Schlüsseldatei und übrigen Dialogfelder verwenden ihre bisherigen Zeichenwege.
 
-`test-search-flicker.ps1` verwendet eine echte ToolStripComboBox und einen absichtlich verlangsamten weißen Zwischenrahmen: der Kontrollfall zeigt ihn, der gepufferte Fall nicht. Hover, Fokus, Texteingabezustand, Suchverlauf-Auswahl und Aktivierung werden geprüft. Native Feld-, Schlüsseldatei-, Theme-/Icon- und Toolbar-Prüfungen bestehen ebenfalls. Eine isolierte Suchfeld-Aufnahme mit fiktiven Testdaten wurde geprüft. Der Test reproduziert nicht vollständig die Nutzeraufnahme; Bestätigung auf dem betroffenen Rechner steht aus. Das stabile Release bleibt zunächst 1.1.17.
+`test-search-flicker.ps1` verwendet eine echte ToolStripComboBox und einen absichtlich verlangsamten weißen Zwischenrahmen: der Kontrollfall zeigt ihn, der gepufferte Fall nicht. Hover, Fokus, Texteingabezustand, Suchverlauf-Auswahl und Aktivierung werden geprüft. Native Feld-, Schlüsseldatei-, Theme-/Icon- und Toolbar-Prüfungen bestehen ebenfalls. Eine isolierte Suchfeld-Aufnahme mit fiktiven Testdaten wurde geprüft. Der Nutzer bestätigt die Korrektur am betroffenen Rechner. 1.1.18 wird als stabiles Release mit aktualisierter ZIP veröffentlicht.
 
 ## Release 1.1.17: Bestätigte Schlüsseldatei-Korrektur
 

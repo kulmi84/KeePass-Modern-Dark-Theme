@@ -30,7 +30,7 @@ Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und
 
 ## Installation und Einstellungen
 
-[**Version 1.1.17 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.17) – das ZIP enthält die fertige KeeTheme.dll.
+[**Version 1.1.18 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.18) – das ZIP enthält die fertige KeeTheme.dll.
 
 [Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
