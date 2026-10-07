@@ -2,11 +2,17 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Release 1.1.17: Bestätigte Schlüsseldatei-Korrektur
+
+Der Nutzer bestätigt die korrigierte Pfeilfläche ohne helle Trennkante. Version 1.1.17 wird als stabiles Release mit fertiger DLL im ZIP veröffentlicht und bündelt die bisherigen Dialog-, Kalender- und Icon-Korrekturen. Direkte Aktualisierung von vorherigen Testversionen ist möglich.
+
+Die README enthält vier aktualisierte, per Bildbearbeitung mit fiktiven Demo-Daten erstellte Ansichten: Hauptfenster, Hauptschlüssel, Eintragsdialog mit Kalender und Eintragsmenü. Private Namen, Pfade, Zugangsdaten, URLs und TOTP-Werte wurden ersetzt; PNG-Provenienz und Textmetadaten wurden entfernt. Die Ansichten sind Dokumentationsillustrationen und keine unveränderten Testaufnahmen. Private Originale und Diagnoseprotokolle bleiben außerhalb des Repositorys. Die Einschränkung der Datumssegment-Markierung bleibt bestehen.
+
 ## Testbuild 1.1.17: Eigene Pfeilfläche für die Schlüsseldatei
 
 Das tatsächliche Nutzerprotokoll bestätigt 1.1.16, OwnerDrawFixed, Flat und DropDownList auch nach Shown. Eine spätere Rückstellung dieser Eigenschaften ist darin nicht erkennbar; die sichtbare Abweichung ist weiterhin nicht vollständig erklärt. Der native Pfeil-/Separatorbereich des Schlüsseldateifelds wird deshalb jetzt durch ein eigenes dunkles Kind-Control abgedeckt, statt ausschließlich nach nativen Zeichenmeldungen übermalt zu werden. Die Änderung ist auf m_cmbKeyFile mit aktivem modernem Feld-Decorator beschränkt.
 
-Die Schaltfläche öffnet die originale ComboBox-Liste über DroppedDown; Tastaturbedienung und gespeicherter Dateipfad bleiben bei KeePass. Der Helfer folgt Größen- und Handle-Änderungen und wird mit dem Decorator entfernt. Der Dropdown-Test prüft die Existenz des Helfers, Öffnen der Originalliste, dunkle Trennkante und unveränderte Auswahl. Ein echter isolierter KeePass-Hauptschlüsseldialog mit langem fiktivem Pfad wurde erneut aufgenommen und geprüft. Keine private Aufnahme und kein privates Nutzerprotokoll wird veröffentlicht. Der Praxistest am betroffenen Rechner bleibt erforderlich; kein neues stabiles Release vor Bestätigung.
+Die Schaltfläche öffnet die originale ComboBox-Liste über DroppedDown; Tastaturbedienung und gespeicherter Dateipfad bleiben bei KeePass. Der Helfer folgt Größen- und Handle-Änderungen und wird mit dem Decorator entfernt. Der Dropdown-Test prüft die Existenz des Helfers, Öffnen der Originalliste, dunkle Trennkante und unveränderte Auswahl. Ein echter isolierter KeePass-Hauptschlüsseldialog mit langem fiktivem Pfad wurde erneut aufgenommen und geprüft. Keine private Aufnahme und kein privates Nutzerprotokoll wird veröffentlicht. Der anschließende Praxistest am betroffenen Rechner wurde positiv bestätigt; siehe Release 1.1.17 oben.
 
 ## Laufende Diagnose nach 1.1.16
 

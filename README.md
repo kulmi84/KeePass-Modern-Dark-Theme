@@ -2,9 +2,9 @@
 
 Ein KeeTheme-Fork für KeePass 2 mit dunkler Oberfläche, einheitlichen Standardicons und einer aufgeräumten Symbolleiste.
 
-![Modern Dark mit fiktiven Demo-Daten](docs/ModernDark-demo.png)
+![Modern Dark mit fiktiven Demo-Daten](docs/ModernDark-main-demo-v1.1.17.png)
 
-Bearbeitete Originalansicht mit ausschließlich fiktiven Ordnernamen, Einträgen und Zugangsdaten.
+Mit Bildbearbeitung erstellte Dokumentationsansichten mit ausschließlich fiktiven Ordnernamen, Einträgen und Zugangsdaten. Einzelne Darstellungsdetails können von der laufenden Anwendung abweichen.
 
 ![Moderne Standardicons und benutzerdefinierte Icons](docs/ModernDark-icons-demo.png)
 
@@ -30,7 +30,7 @@ Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und
 
 ## Installation und Einstellungen
 
-[**Version 1.1.13 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.13) – das ZIP enthält die fertige KeeTheme.dll.
+[**Version 1.1.17 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.17) – das ZIP enthält die fertige KeeTheme.dll.
 
 [Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
@@ -43,6 +43,20 @@ Die dunklen Rahmen und das neue Banner wurden im laufenden KeePass vom Nutzer be
 ![Dunkler Kalender mit fiktivem Testdatum](docs/ModernDark-calendar-demo.png)
 
 Aufnahme eines echten Kalender-Popups mit fiktivem Testdatum. Bekannte Einschränkung: Die einheitliche dunkle Datumsdarstellung überdeckt beim Bearbeiten die native Markierung einzelner Datumssegmente.
+
+## Weitere Ansichten
+
+Hauptschlüssel mit fiktiver Schlüsseldatei:
+
+<img src="docs/ModernDark-unlock-demo-v1.1.17.png" alt="Hauptschlüssel mit Demo-Daten" width="424">
+
+Eintrag bearbeiten mit geöffnetem Kalender:
+
+<img src="docs/ModernDark-entry-demo-v1.1.17.png" alt="Demo-Eintrag und dunkler Kalender" width="506">
+
+Menü mit fiktiven Einträgen:
+
+![Dunkles Eintragsmenü mit Demo-Daten](docs/ModernDark-menu-demo-v1.1.17.png)
 
 ## Ursprung
 
