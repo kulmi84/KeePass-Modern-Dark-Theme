@@ -18,6 +18,7 @@ public static class KeyFileProbe {
 '@
 $form=New-Object Windows.Forms.Form
 $combo=New-Object Windows.Forms.ComboBox
+$combo.Name="m_cmbKeyFile";
 $combo.DropDownStyle='DropDownList';$combo.FlatStyle='Flat';$combo.Width=240
 $combo.BackColor=[Drawing.Color]::FromArgb(37,37,38);$combo.ForeColor=[Drawing.Color]::FromArgb(241,241,241)
 $combo.Items.Add('C:\Demo\Example Database Keys\Demo Family Vault\Example.keyx')|Out-Null;$combo.SelectedIndex=0
@@ -39,6 +40,13 @@ try {
    if([KeyFileProbe]::GetPixel($dc,$info.Button.Left-1,$y) -ne 0x262525){throw "Light key-file separator after message $msg at y=$y"}
   }} finally {[KeyFileProbe]::ReleaseDC($combo.Handle,$dc)|Out-Null}
  }
+ $arrow=$combo.Controls.Find('KeeThemeKeyFileArrow',$false)
+ if($arrow.Count -ne 1){throw 'Managed key-file arrow missing'}
+ $click=$arrow[0].GetType().GetMethod('OnMouseDown',[Reflection.BindingFlags]'Instance,NonPublic')
+ $mouse=New-Object Windows.Forms.MouseEventArgs([Windows.Forms.MouseButtons]::Left,1,5,5,0)
+ $click.Invoke($arrow[0],@($mouse.PSObject.BaseObject))|Out-Null
+ if(!$combo.DroppedDown){throw 'Managed arrow did not open original list'}
+ $combo.DroppedDown=$false
  if($combo.SelectedIndex -ne 0){throw 'Rendering changed selected key file'}
  Write-Output 'PASS matching DropDownList/Flat configuration: separator stays dark; selection unchanged'
 }finally{$guard.Dispose();$form.Dispose()}

@@ -84,6 +84,7 @@ namespace KeeTheme.Decorators
             private CalendarBorderWindow _calendarBorder;
             private CalendarBorderWindow _calendarHeader;
             private ComboEditEdgeWindow _comboEditEdge;
+            private ComboArrowOverlay _comboArrow;
             [DllImport("user32.dll")] private static extern IntPtr GetParent(IntPtr hwnd);
             [DllImport("user32.dll", EntryPoint="GetWindowLongW")] private static extern int GetWindowLong(IntPtr hwnd,int index);
             [DllImport("gdi32.dll")] private static extern IntPtr CreateSolidBrush(int color);
@@ -92,15 +93,15 @@ namespace KeeTheme.Decorators
             [DllImport("gdi32.dll")] private static extern int SetTextColor(IntPtr dc, int color);
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
-            [StructLayout(LayoutKind.Sequential)] private struct ComboInfo
+            [StructLayout(LayoutKind.Sequential)] internal struct ComboInfo
             {
                 public int Size;
                 public RectangleNative Item, Button;
                 public int State;
                 public IntPtr Combo, Edit, List;
             }
-            [StructLayout(LayoutKind.Sequential)] private struct RectangleNative { public int Left, Top, Right, Bottom; }
-            [DllImport("user32.dll")] private static extern bool GetComboBoxInfo(IntPtr hwnd, ref ComboInfo info);
+            [StructLayout(LayoutKind.Sequential)] internal struct RectangleNative { public int Left, Top, Right, Bottom; }
+            [DllImport("user32.dll")] internal static extern bool GetComboBoxInfo(IntPtr hwnd, ref ComboInfo info);
             internal SearchBorderWindow(Control combo) : this(combo, false) { }
             internal SearchBorderWindow(Control combo, bool field)
             {
@@ -115,6 +116,8 @@ namespace KeeTheme.Decorators
                 IntPtr handle = combo.Handle;
                 if (Handle == IntPtr.Zero) AssignHandle(handle);
                 AttachComboEditEdge();
+                if (field && combo is ComboBox && combo.Name == "m_cmbKeyFile")
+                    _comboArrow = new ComboArrowOverlay((ComboBox)combo);
             }
             private void AttachComboEditEdge()
             {
@@ -207,8 +210,57 @@ namespace KeeTheme.Decorators
                 if (picker != null) { picker.DropDown -= OnCalendarOpened; picker.CloseUp -= OnCalendarClosed; }
                 OnCalendarClosed(null,EventArgs.Empty);
                 if(_comboEditEdge!=null){_comboEditEdge.Dispose();_comboEditEdge=null;}
+                if(_comboArrow!=null){_comboArrow.Dispose();_comboArrow=null;}
                 ReleaseHandle();
                 if (!_combo.IsDisposed) _combo.Invalidate(true);
+            }
+        }
+
+        private sealed class ComboArrowOverlay : Control
+        {
+            private readonly ComboBox _combo;
+            internal ComboArrowOverlay(ComboBox combo)
+            {
+                _combo=combo;
+                Name="KeeThemeKeyFileArrow";
+                TabStop=false;
+                AccessibleRole=AccessibleRole.PushButton;
+                AccessibleName="Open key file list";
+                SetStyle(ControlStyles.UserPaint|ControlStyles.AllPaintingInWmPaint|ControlStyles.OptimizedDoubleBuffer,true);
+                combo.Controls.Add(this);
+                combo.SizeChanged+=Reposition;
+                combo.HandleCreated+=Reposition;
+                Reposition(null,EventArgs.Empty);
+            }
+            private void Reposition(object sender,EventArgs e)
+            {
+                var info=new SearchBorderWindow.ComboInfo();
+                info.Size=Marshal.SizeOf(typeof(SearchBorderWindow.ComboInfo));
+                int left=Math.Max(0,_combo.ClientSize.Width-SystemInformation.VerticalScrollBarWidth-5);
+                // Cover the separator as well as the native arrow surface.
+                if(SearchBorderWindow.GetComboBoxInfo(_combo.Handle,ref info))left=Math.Max(0,info.Button.Left-4);
+                Bounds=new Rectangle(left,2,Math.Max(0,_combo.ClientSize.Width-left-2),Math.Max(0,_combo.ClientSize.Height-4));
+                BringToFront();
+            }
+            protected override void OnPaintBackground(PaintEventArgs e)
+            {
+                e.Graphics.Clear(Color.FromArgb(37,37,38));
+            }
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                int x=Width/2,y=Height/2;
+                using(var brush=new SolidBrush(_combo.Enabled ? Color.FromArgb(190,190,190) : Color.FromArgb(110,110,110)))
+                    e.Graphics.FillPolygon(brush,new Point[]{new Point(x-3,y-1),new Point(x+3,y-1),new Point(x,y+2)});
+            }
+            protected override void OnMouseDown(MouseEventArgs e)
+            {
+                base.OnMouseDown(e);
+                if(e.Button==MouseButtons.Left && _combo.Enabled){_combo.Focus();_combo.DroppedDown=!_combo.DroppedDown;}
+            }
+            protected override void Dispose(bool disposing)
+            {
+                if(disposing){_combo.SizeChanged-=Reposition;_combo.HandleCreated-=Reposition;}
+                base.Dispose(disposing);
             }
         }
 

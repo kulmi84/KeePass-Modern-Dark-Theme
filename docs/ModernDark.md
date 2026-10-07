@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.17: Eigene Pfeilfläche für die Schlüsseldatei
+
+Das tatsächliche Nutzerprotokoll bestätigt 1.1.16, OwnerDrawFixed, Flat und DropDownList auch nach Shown. Eine spätere Rückstellung dieser Eigenschaften ist darin nicht erkennbar; die sichtbare Abweichung ist weiterhin nicht vollständig erklärt. Der native Pfeil-/Separatorbereich des Schlüsseldateifelds wird deshalb jetzt durch ein eigenes dunkles Kind-Control abgedeckt, statt ausschließlich nach nativen Zeichenmeldungen übermalt zu werden. Die Änderung ist auf m_cmbKeyFile mit aktivem modernem Feld-Decorator beschränkt.
+
+Die Schaltfläche öffnet die originale ComboBox-Liste über DroppedDown; Tastaturbedienung und gespeicherter Dateipfad bleiben bei KeePass. Der Helfer folgt Größen- und Handle-Änderungen und wird mit dem Decorator entfernt. Der Dropdown-Test prüft die Existenz des Helfers, Öffnen der Originalliste, dunkle Trennkante und unveränderte Auswahl. Ein echter isolierter KeePass-Hauptschlüsseldialog mit langem fiktivem Pfad wurde erneut aufgenommen und geprüft. Keine private Aufnahme und kein privates Nutzerprotokoll wird veröffentlicht. Der Praxistest am betroffenen Rechner bleibt erforderlich; kein neues stabiles Release vor Bestätigung.
+
 ## Laufende Diagnose nach 1.1.16
 
 Der Nutzer bestätigt die geladene Plugin-Version 1.1.16; die helle Linie bleibt dennoch bestehen. Die Vorschau im isolierten echten KeePass-Hauptschlüsseldialog zeigt bereits Ellipse und Abstand zum Pfeil. Diese Abweichung ist noch nicht erklärt. Eine kurze Windows-Assembly-Rundown-Abfrage war wegen fehlender Administratorrechte nicht möglich; es wurde kein Trace gestartet.
