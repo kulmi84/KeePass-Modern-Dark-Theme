@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Laufende Diagnose nach 1.1.16
+
+Der Nutzer bestätigt die geladene Plugin-Version 1.1.16; die helle Linie bleibt dennoch bestehen. Die Vorschau im isolierten echten KeePass-Hauptschlüsseldialog zeigt bereits Ellipse und Abstand zum Pfeil. Diese Abweichung ist noch nicht erklärt. Eine kurze Windows-Assembly-Rundown-Abfrage war wegen fehlender Administratorrechte nicht möglich; es wurde kein Trace gestartet.
+
+Das temporäre Diagnose-Zusatzplugin 1.0.3 erfasst jetzt zusätzlich DrawMode, FlatStyle und DropDownStyle von ComboBoxen sowie deren Zustand nach Shown. Es liest weiterhin weder Text noch Steuerelementnamen, Dateipfade, Einträge oder Passwörter. Die neue Datei heißt KeeTheme-ComboTrace.log; das frühere PaintTrace-Protokoll bleibt unangetastet. Die Analyse des tatsächlichen Nutzerzustands steht noch aus. Kein neuer funktionaler Build und kein neues stabiles Release wird daraus bereits als behoben dargestellt.
+
 ## Testbuild 1.1.16: Lange Pfade mit Abstand und Ellipse zeichnen
 
 Die installierte DLL entspricht nach Versions-/Hashprüfung 1.1.15. Der Nutzer bestätigt, dass die Linie dauerhaft sichtbar bleibt. Mit einem langen fiktiven Pfad zeigt auch das Testfeld abgeschnittene Zeichen unmittelbar vor dem Pfeil. Standard-DropDownLists werden unter Modern Dark nun mit eigener Item-Zeichnung dargestellt: dunkler Hintergrund, Innenabstand und EndEllipsis statt abgeschnittener Zeichen; kein nativer Fokusrahmen innerhalb des Textbereichs. Der äußere Theme-Fokusrahmen bleibt bestehen. Ausgewählter Index und vollständiger zugrundeliegender Pfad werden nicht geändert. Bereits fremd gezeichnete ComboBoxen werden nicht übernommen; Theme-Abschaltung stellt den vorherigen DrawMode wieder her.

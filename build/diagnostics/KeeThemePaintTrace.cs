@@ -12,8 +12,8 @@ using KeePass.UI;
 [assembly: AssemblyTitle("KeeTheme Paint Trace (temporary diagnostics)")]
 [assembly: AssemblyProduct("KeePass Plugin")]
 [assembly: AssemblyDescription("Temporary metadata-only paint diagnostics for KeeTheme")]
-[assembly: AssemblyVersion("1.0.2.0")]
-[assembly: AssemblyFileVersion("1.0.2.0")]
+[assembly: AssemblyVersion("1.0.3.0")]
+[assembly: AssemblyFileVersion("1.0.3.0")]
 namespace KeeThemePaintTrace
 {
     public sealed class KeeThemePaintTraceExt : Plugin
@@ -31,7 +31,7 @@ namespace KeeThemePaintTrace
         {
             if (host == null) return false;
             string workspaceOutput = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ChatGPT\\KeePass Dark Theme\\outputs");
-            path = Path.Combine(Directory.Exists(workspaceOutput) ? workspaceOutput : Path.GetTempPath(), "KeeTheme-PaintTrace.log");
+            path = Path.Combine(Directory.Exists(workspaceOutput) ? workspaceOutput : Path.GetTempPath(), "KeeTheme-ComboTrace.log");
             main = host.MainWindow;
             Record("Diagnostic session. No control text, entry contents, database names, passwords or screenshots recorded.");
             Save(); // Leave startup evidence even if subsequent hook setup fails.
@@ -73,15 +73,22 @@ namespace KeeThemePaintTrace
         {
             Form form = (Form)sender;
             Record("Shown " + State(form));
-            form.BeginInvoke(new MethodInvoker(delegate { Record("AfterShownQueue " + State(form)); Save(); }));
+            form.BeginInvoke(new MethodInvoker(delegate { Record("AfterShownQueue " + State(form)); RecordComboStates(form); Save(); }));
+        }
+        private void RecordComboStates(Control control)
+        {
+            if (control is ComboBox) Record("ComboAfterShown " + State(control));
+            foreach (Control child in control.Controls) RecordComboStates(child);
         }
         private void OnClosed(object sender, FormClosedEventArgs e) { Record("Closed " + ((Form)sender).GetType().Name); Save(); }
         internal static string State(Control control)
         {
             Form form = control.FindForm();
+            ComboBox combo = control as ComboBox;
             return control.GetType().Name + " visible=" + control.Visible + " enabled=" + control.Enabled +
                 " handle=" + control.IsHandleCreated + " opacity=" + (form == null ? "none" : form.Opacity.ToString(System.Globalization.CultureInfo.InvariantCulture)) +
                 " background=" + control.BackColor.ToArgb().ToString("X8") +
+                (combo == null ? "" : " drawMode=" + combo.DrawMode + " flatStyle=" + combo.FlatStyle + " dropDownStyle=" + combo.DropDownStyle) +
                 (control.IsHandleCreated ? " nativeVisible=" + IsWindowVisible(control.Handle) + " exStyle=" + GetWindowLong(control.Handle, -20).ToString("X8") : "");
         }
         [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr handle);
