@@ -83,6 +83,7 @@ namespace KeeTheme.Decorators
             private readonly IntPtr _backgroundBrush = CreateSolidBrush(0x00262525);
             private CalendarBorderWindow _calendarBorder;
             private CalendarBorderWindow _calendarHeader;
+            private ComboEditEdgeWindow _comboEditEdge;
             [DllImport("user32.dll")] private static extern IntPtr GetParent(IntPtr hwnd);
             [DllImport("user32.dll", EntryPoint="GetWindowLongW")] private static extern int GetWindowLong(IntPtr hwnd,int index);
             [DllImport("gdi32.dll")] private static extern IntPtr CreateSolidBrush(int color);
@@ -113,9 +114,21 @@ namespace KeeTheme.Decorators
                 if (picker != null) { picker.DropDown += OnCalendarOpened; picker.CloseUp += OnCalendarClosed; }
                 IntPtr handle = combo.Handle;
                 if (Handle == IntPtr.Zero) AssignHandle(handle);
+                AttachComboEditEdge();
             }
-            private void OnCreated(object sender, EventArgs e) { AssignHandle(_combo.Handle); }
-            private void OnDestroyed(object sender, EventArgs e) { ReleaseHandle(); }
+            private void AttachComboEditEdge()
+            {
+                if (!(_combo is ComboBox)) return;
+                var info = new ComboInfo(); info.Size=Marshal.SizeOf(typeof(ComboInfo));
+                if (GetComboBoxInfo(_combo.Handle,ref info) && info.Edit != IntPtr.Zero &&
+                    (_comboEditEdge == null || _comboEditEdge.Handle != info.Edit))
+                {
+                    if (_comboEditEdge != null) _comboEditEdge.Dispose();
+                    _comboEditEdge = new ComboEditEdgeWindow(info.Edit);
+                }
+            }
+            private void OnCreated(object sender, EventArgs e) { AssignHandle(_combo.Handle); AttachComboEditEdge(); }
+            private void OnDestroyed(object sender, EventArgs e) { if(_comboEditEdge!=null){_comboEditEdge.Dispose();_comboEditEdge=null;} ReleaseHandle(); }
             private void OnFocus(object sender, EventArgs e) { _combo.Invalidate(); }
             private void OnCalendarOpened(object sender, EventArgs e)
             {
@@ -170,7 +183,12 @@ namespace KeeTheme.Decorators
                         {
                             var info = new ComboInfo(); info.Size = Marshal.SizeOf(typeof(ComboInfo));
                             if (GetComboBoxInfo(m.HWnd, ref info))
+                            {
+                                // The edit and arrow may have a native raised edge between them.
+                                using(var brush=new SolidBrush(Color.FromArgb(37,37,38)))
+                                    graphics.FillRectangle(brush,info.Item.Right-2,info.Item.Top,Math.Max(2,info.Button.Left-info.Item.Right+2),info.Item.Bottom-info.Item.Top);
                                 DrawComboButton(graphics, Rectangle.FromLTRB(info.Button.Left, info.Button.Top, info.Button.Right, info.Button.Bottom));
+                            }
                         }
                         if (_field) DrawFieldBorder(graphics, _combo.Size, _combo.ContainsFocus);
                         else DrawSearchBorder(graphics, _combo.Size);
@@ -187,9 +205,30 @@ namespace KeeTheme.Decorators
                 var picker = _combo as DateTimePicker;
                 if (picker != null) { picker.DropDown -= OnCalendarOpened; picker.CloseUp -= OnCalendarClosed; }
                 OnCalendarClosed(null,EventArgs.Empty);
+                if(_comboEditEdge!=null){_comboEditEdge.Dispose();_comboEditEdge=null;}
                 ReleaseHandle();
                 if (!_combo.IsDisposed) _combo.Invalidate(true);
             }
+        }
+
+        private sealed class ComboEditEdgeWindow : NativeWindow, IDisposable
+        {
+            [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left,Top,Right,Bottom; }
+            [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd,out Rect rect);
+            [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
+            [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd,IntPtr dc);
+            internal ComboEditEdgeWindow(IntPtr handle){AssignHandle(handle);}
+            protected override void WndProc(ref Message m)
+            {
+                base.WndProc(ref m);
+                if(m.Msg!=0xF && m.Msg!=0x85 && m.Msg!=0x7 && m.Msg!=0x8 && m.Msg!=0x201 && m.Msg!=0x202 && m.Msg!=0x100 && m.Msg!=0x101)return;
+                Rect rect; if(!GetWindowRect(m.HWnd,out rect))return;
+                IntPtr dc=GetWindowDC(m.HWnd);if(dc==IntPtr.Zero)return;
+                try {using(var graphics=Graphics.FromHdc(dc))using(var brush=new SolidBrush(Color.FromArgb(37,37,38)))
+                    graphics.FillRectangle(brush,Math.Max(0,rect.Right-rect.Left-2),0,2,rect.Bottom-rect.Top);
+                }finally{ReleaseDC(m.HWnd,dc);}
+            }
+            public void Dispose(){ReleaseHandle();}
         }
 
         private sealed class CalendarBorderWindow : NativeWindow, IDisposable

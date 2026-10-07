@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.14: Innerer Textfeldrand der Schlüsseldatei-ComboBox
+
+Der Nutzer sieht in 1.1.13 weiterhin eine helle senkrechte Linie unmittelbar vor dem Dropdown-Pfeil. Die bisherige Prüfung deckte die Pfeilfläche ab, nicht den rechten Rand des eigenständigen nativen Edit-Kindfensters. Der neue Hook zeichnet auch dessen rechte Kante nach Fokus-, Maus- und Zeichenmeldungen dunkel. Zusätzlich wird der Zwischenraum zwischen Edit und Pfeil dunkel überzeichnet. Der Hook wird bei Handle-Zerstörung oder Theme-Abschaltung gelöst.
+
+Der native Feldtest prüft nun zusätzlich genau die rechte Kante des Edit-Kindfensters nach dessen eigenen Meldungen. Diese Prüfung besteht mit 1.1.14. Die tatsächliche Schlüsseldatei-Ansicht am Nutzerrechner muss noch bestätigt werden; der Build bleibt zunächst ein Teststand.
+
 ## Version 1.1.13: Dropdown-Schaltflächen und Veröffentlichung
 
 Die native ComboBox zeichnet ihren Pfeil auch bei Fokus-, Maus- und Tastaturmeldungen neu, ohne zwingend WM_PAINT auszulösen. Diese Nachzeichnungen werden jetzt ebenfalls mit dunkler Schaltfläche und grauer Trennlinie abgeschlossen, insbesondere bei der Schlüsseldatei im Hauptschlüsseldialog. Der native Feldtest prüft die Buttonfarbe nach diesen Meldungen. Theme-/Icon-Prüfungen und die echte KeePass-Integration prüfen den fertigen Build.

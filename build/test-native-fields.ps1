@@ -6,6 +6,10 @@ $f=[Reflection.BindingFlags]'Public,NonPublic,Instance,Static'
 Add-Type @"
 using System; using System.Runtime.InteropServices;
 public static class PaintProbe {
+ [StructLayout(LayoutKind.Sequential)] public struct Rect { public int Left,Top,Right,Bottom; }
+ [StructLayout(LayoutKind.Sequential)] public struct Info { public int Size; public Rect Item,Button; public int State; public IntPtr Combo,Edit,List; }
+ [DllImport("user32.dll")] public static extern bool GetComboBoxInfo(IntPtr h,ref Info i);
+ [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr h,out Rect r);
  [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr h,int m,IntPtr w,IntPtr l);
  [DllImport("gdi32.dll")] public static extern IntPtr CreateCompatibleDC(IntPtr dc);
  [DllImport("gdi32.dll")] public static extern int GetBkColor(IntPtr dc);
@@ -39,6 +43,15 @@ try {
   $dc=[PaintProbe]::GetWindowDC($combo.Handle)
   try {if([PaintProbe]::GetPixel($dc,$combo.Width-7,4) -ne 0x262525){throw "Combo button became light after message $msg"}}
   finally {[PaintProbe]::ReleaseDC($combo.Handle,$dc)|Out-Null}
+ }
+ $info=New-Object PaintProbe+Info;$info.Size=[Runtime.InteropServices.Marshal]::SizeOf($info)
+ [PaintProbe]::GetComboBoxInfo($combo.Handle,[ref]$info)|Out-Null
+ $rect=New-Object PaintProbe+Rect;[PaintProbe]::GetWindowRect($info.Edit,[ref]$rect)|Out-Null
+ foreach($msg in @(0xF,0x85,0x7,0x8,0x201,0x202)) {
+  [PaintProbe]::SendMessage($info.Edit,$msg,[IntPtr]::Zero,[IntPtr]::Zero)|Out-Null
+  $dc=[PaintProbe]::GetWindowDC($info.Edit)
+  try {if([PaintProbe]::GetPixel($dc,$rect.Right-$rect.Left-1,2) -ne 0x262525){throw "Inner combo edit edge light after $msg"}}
+  finally {[PaintProbe]::ReleaseDC($info.Edit,$dc)|Out-Null}
  }
 } finally {$decorator.Dispose()}
 $edit=New-Object Windows.Forms.TextBox;$edit.Location=New-Object Drawing.Point(0,40);$form.Controls.Add($edit)
