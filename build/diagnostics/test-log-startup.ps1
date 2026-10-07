@@ -1,5 +1,8 @@
 param([string]$PluginPath)
 $ErrorActionPreference='Stop'
+$fileInfo=[Diagnostics.FileVersionInfo]::GetVersionInfo($PluginPath)
+if($fileInfo.ProductName -ne 'KeePass Plugin'){throw 'KeePass loader would ignore DLL: required product metadata missing'}
+Write-Output 'PASS KeePass plugin discovery metadata'
 Add-Type -AssemblyName System.Windows.Forms
 [Reflection.Assembly]::LoadFrom('C:\Program Files\KeePass Password Safe 2\KeePass.exe') | Out-Null
 $properties=[KeePass.Plugins.IPluginHost].GetProperties()

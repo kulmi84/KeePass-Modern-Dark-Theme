@@ -10,7 +10,10 @@ using KeePass.Plugins;
 using KeePass.UI;
 
 [assembly: AssemblyTitle("KeeTheme Paint Trace (temporary diagnostics)")]
-[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyProduct("KeePass Plugin")]
+[assembly: AssemblyDescription("Temporary metadata-only paint diagnostics for KeeTheme")]
+[assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
 namespace KeeThemePaintTrace
 {
     public sealed class KeeThemePaintTraceExt : Plugin

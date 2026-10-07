@@ -4,6 +4,8 @@ Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
 ## Testbuild 1.1.7: Erstes vollständiges Fensterbild vor der Einblendung
 
+Diagnose-Zusatzplugin 1.0.2: Den Fassungen 1.0.0/1.0.1 fehlte `AssemblyProduct("KeePass Plugin")`. KeePass ignoriert solche DLLs vor der Initialisierung; deshalb fehlten Menüpunkt und Logdatei trotz korrekter Installation. Die Kennung ist ergänzt, und der Startup-Test prüft nun auch die Loader-Metadaten. Eine getrennte echte KeePass-2.61.1-Testkopie mit eigener Konfiguration und fiktiven Eintrags-, Gruppen- und Hauptschlüsseldialogen hat das Zusatzplugin geladen und das Zeichenprotokoll erstellt. Die Nutzerdateien und vorhandene Installation wurden dabei nicht verändert.
+
 Diagnose-Zusatzplugin 1.0.1: Das Protokoll wird jetzt vor dem Anhängen der Überwachung angelegt. Hook-Fehler werden anhand ihres Typs aufgezeichnet. Wenn `Dokumente/ChatGPT/KeePass Dark Theme/outputs` vorhanden ist, wird die Logdatei dort gespeichert; sonst im Temp-Ordner. Das Extras-Menü „KeeTheme-Zeichenprotokoll: Speicherort anzeigen“ zeigt den tatsächlich gewählten Pfad und eventuelle Schreibfehler. Der neue Startup-Test prüft die Erstellung mit einem Test-Pluginhost, ohne Datenbank oder sichtbares Fenster.
 
 **Ergebnis des Praxistests:** Die neuen Nutzeraufnahmen zeigen weiterhin weiße Steuerelemente beim Anzeigen der Dialoge. Der SHA-256-Vergleich bestätigt, dass die installierte DLL genau dem lokalen 1.1.7-Testbuild entspricht. 1.1.7 beseitigt den gemeldeten Fehler nicht. Der synthetische Test ist deshalb kein Reproduktions- oder Behebungstest für diesen KeePass-Fehler.
