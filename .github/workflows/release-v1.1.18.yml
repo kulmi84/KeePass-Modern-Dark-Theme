@@ -1,4 +1,5 @@
 name: Build and release KeeTheme Modern Dark 1.1.18
+# One-time release workflow
 
 on:
   push:
