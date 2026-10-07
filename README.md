@@ -1,4 +1,4 @@
-# KeeTheme Modern Dark
+# KeePass Modern Dark Theme
 
 Ein KeeTheme-Fork für KeePass 2 mit dunkler Oberfläche, einheitlichen Standardicons und einer aufgeräumten Symbolleiste.
 
@@ -30,7 +30,7 @@ Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und
 
 ## Installation und Einstellungen
 
-[**Version 1.1.19 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.19) – das ZIP enthält die fertige KeeTheme.dll.
+[**Version 1.1.19 herunterladen**](https://github.com/kulmi84/KeePass-Modern-Dark-Theme/releases/tag/v1.1.19) – das ZIP enthält die fertige KeeTheme.dll.
 
 [Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
@@ -60,6 +60,6 @@ Menü mit fiktiven Einträgen:
 
 ## Ursprung
 
-Dieser Fork basiert auf [xatupal/KeeTheme](https://github.com/xatupal/KeeTheme) von Krzysztof Łaputa und wird als **KeeTheme Modern Dark** von **Marcin Kulmaczewski (kulmi84)** gepflegt und weiterentwickelt.
+Dieser Fork basiert auf [xatupal/KeeTheme](https://github.com/xatupal/KeeTheme) von Krzysztof Łaputa und wird als **KeePass Modern Dark Theme** von **Marcin Kulmaczewski (kulmi84)** gepflegt und weiterentwickelt.
 
 KeeTheme-Lizenz: [MIT](LICENSE). Das originale KeePass-Logo stammt aus KeePass; Quellenhinweise stehen in der Dokumentation.

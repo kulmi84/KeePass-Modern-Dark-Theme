@@ -1,4 +1,4 @@
-# KeeTheme Modern Dark – Dokumentation
+# KeePass Modern Dark Theme – Dokumentation
 
 KeePass selbst wird nicht verändert.
 
