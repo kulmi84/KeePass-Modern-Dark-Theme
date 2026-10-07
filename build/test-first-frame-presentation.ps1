@@ -13,6 +13,7 @@ public class FirstFramePaintProbe : Control {
     public int WhitePresentations;
     public int Paints;
     public double FirstPaintOpacity = -1;
+    [DllImport("user32.dll")] static extern bool GetLayeredWindowAttributes(IntPtr h, out uint key, out byte alpha, out uint flags);
     [DllImport("gdi32.dll")] static extern bool GdiFlush();
     [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
     [DllImport("dwmapi.dll")] public static extern int DwmFlush();
@@ -28,7 +29,7 @@ public class FirstFramePaintProbe : Control {
     protected override void WndProc(ref Message message) {
         base.WndProc(ref message);
         if (message.Msg != 15) return;
-        if (Paints == 0) FirstPaintOpacity = FindForm().Opacity;
+        if (Paints == 0) { uint key, flags; byte alpha; FirstPaintOpacity = GetLayeredWindowAttributes(FindForm().Handle, out key, out alpha, out flags) ? alpha / 255.0 : 1; }
         ++Paints;
         using (Graphics graphics = Graphics.FromHwnd(Handle)) graphics.Clear(Color.White);
         GdiFlush(); DwmFlush();
@@ -65,6 +66,8 @@ try {
         $form.Controls.Add($child)
         $decorator=$null
         try {
+            # KeePass WindowAdded occurs after handle creation; match that lifecycle.
+            $null=$form.Handle
             if($guarded){$decorator=[Activator]::CreateInstance($type,$flags,$null,@($form.PSObject.BaseObject),$null)}
             $form.Show($owner)
             [Windows.Forms.Application]::DoEvents()

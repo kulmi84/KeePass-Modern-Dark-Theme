@@ -29,11 +29,11 @@ if(!$process.WaitForExit(30000)) {
 }
 $trace=[IO.File]::ReadAllText((Join-Path $testDir 'trace.txt'))
 if($trace -match 'ERROR' -or $trace -notmatch 'DONE'){throw "Integration failed; artifacts: $testDir"}
-if($trace -notmatch 'Main queued opacity=1'){throw 'Main window opacity was not restored'}
+if($trace -notmatch 'Main queued opacity=1 alpha=255'){throw 'Main window opacity was not restored'}
 foreach($name in @('PwEntryForm','GroupForm','KeyPromptForm')) {
-    if($trace -notmatch ('WindowAdded '+$name+' visible=True opacity=0')){throw "$name first-frame guard was skipped"}
-    if($trace -notmatch ('FirstPaint '+$name+'/[^\r\n]*opacity=0')){throw "$name initial paint was visible"}
-    if($trace -notmatch ('Shown '+$name+' opacity=1')){throw "$name opacity was not restored"}
+    if($trace -notmatch ('WindowAdded '+$name+' visible=True opacity=1 alpha=0 nativeVisible=False')){throw "$name first-frame guard was skipped"}
+    if($trace -notmatch ('FirstPaint '+$name+'/[^\r\n]*alpha=0')){throw "$name initial paint was visible"}
+    if($trace -notmatch ('Shown '+$name+' opacity=1 alpha=255')){throw "$name opacity was not restored"}
 }
-Write-Output "PASS actual KeePass: initial dialog painting at opacity 0; main and dialogs restored to 1. Trace: $testDir\trace.txt"
+Write-Output "PASS actual KeePass: initial dialog painting at native alpha 0; no premature native visibility; main and dialogs restored to alpha 255. Trace: $testDir\trace.txt"
 Write-Output 'LIMIT: uses synthetic data and offscreen dialogs; user-visible white flash still requires manual confirmation.'

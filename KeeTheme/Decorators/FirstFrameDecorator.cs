@@ -9,7 +9,7 @@ namespace KeeTheme.Decorators
     internal sealed class FirstFrameDecorator : IDisposable
     {
         private readonly Form _form;
-        private readonly double _opacity;
+        private int _originalStyle;
         private bool _armed;
 
         [DllImport("user32.dll")]
@@ -17,6 +17,13 @@ namespace KeeTheme.Decorators
 
         [DllImport("user32.dll", ExactSpelling = true)]
         private static extern bool IsWindowVisible(IntPtr window);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongW")]
+        private static extern int GetWindowLong(IntPtr window, int index);
+        [DllImport("user32.dll", EntryPoint = "SetWindowLongW")]
+        private static extern int SetWindowLong(IntPtr window, int index, int value);
+        [DllImport("user32.dll")]
+        private static extern bool SetLayeredWindowAttributes(IntPtr window, uint key, byte alpha, uint flags);
 
         internal static bool IsNativeVisible(Form form)
         {
@@ -28,11 +35,34 @@ namespace KeeTheme.Decorators
         internal FirstFrameDecorator(Form form)
         {
             _form = form;
-            _opacity = form.Opacity;
             if (IsNativeVisible(form)) return;
+            // Preserve third-party transparency; this guard only owns opaque windows.
+            if (form.Opacity != 1 || form.AllowTransparency) return;
+            if (!form.IsHandleCreated) { form.HandleCreated += OnHandleCreated; return; }
+            Arm();
+        }
+
+        private void OnHandleCreated(object sender, EventArgs e)
+        {
+            _form.HandleCreated -= OnHandleCreated;
+            if (!IsNativeVisible(_form)) Arm();
+        }
+
+        private void Arm()
+        {
+            _originalStyle = GetWindowLong(_form.Handle, -20);
+            if ((_originalStyle & 0x80000) != 0) return;
+            // Form.Opacity calls UpdateStyles while managed Visible is true during
+            // Load. That can show the HWND before its final monitor position.
+            // Native style/alpha changes must never call ShowWindow or SetWindowPos.
+            SetWindowLong(_form.Handle, -20, _originalStyle | 0x80000);
+            if (!SetLayeredWindowAttributes(_form.Handle, 0, 0, 2))
+            {
+                SetWindowLong(_form.Handle, -20, _originalStyle);
+                return;
+            }
             _armed = true;
-            form.Shown += OnShown;
-            form.Opacity = 0;
+            _form.Shown += OnShown;
         }
 
         private void OnShown(object sender, EventArgs e)
@@ -51,12 +81,19 @@ namespace KeeTheme.Decorators
         {
             if (!_armed) return;
             _armed = false;
-            if (!_form.IsDisposed && !_form.Disposing) _form.Opacity = _opacity;
+            if (!_form.IsDisposed && !_form.Disposing && _form.IsHandleCreated)
+            {
+                SetLayeredWindowAttributes(_form.Handle, 0, 255, 2);
+                // Restore only our bit; preserve changes made by KeePass in Load.
+                int style = GetWindowLong(_form.Handle, -20);
+                SetWindowLong(_form.Handle, -20, style & ~0x80000);
+            }
         }
 
         public void Dispose()
         {
             _form.Shown -= OnShown;
+            _form.HandleCreated -= OnHandleCreated;
             Restore();
         }
     }

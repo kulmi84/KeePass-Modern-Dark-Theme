@@ -2,6 +2,14 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.9: Kein vorzeitiges Anzeigen durch Form.Opacity
+
+Auch 1.1.8 beseitigt laut Nutzer die weißen Flächen nicht; ein Fenster blitzt zuvor auf dem anderen Bildschirm auf. Das aktuelle Protokoll bestätigt nun zwar Deckkraft 0, aber bereits native Sichtbarkeit beim Anhängen an die Dialoge. Im [WinForms-Referenzcode](https://referencesource.microsoft.com/System.Windows.Forms/winforms/Managed/System/WinForms/Form.cs.html) setzt Form.Opacity über AllowTransparency die Fensterstile neu. Während Load ist die verwaltete Visible-Eigenschaft schon true; die Aktualisierung kann deshalb vorzeitig native Sichtbarkeit herstellen.
+
+1.1.9 setzt die temporäre Transparenz direkt mit SetWindowLong/SetLayeredWindowAttributes. Es verwendet weder Form.Opacity noch ShowWindow oder SetWindowPos; KeePass behält seine Positionierungsreihenfolge. Nach dem ersten synchronen Zeichnen wird ausschließlich das temporäre Layered-Bit entfernt. Bereits sichtbare Fenster und bereits transparente Fenster anderer Plugins bleiben ausgenommen.
+
+Der erweiterte echte KeePass-Integrationstest prüft bei WindowAdded native Sichtbarkeit false und Alpha 0, beim ersten Zeichnen Alpha 0 und anschließend Alpha 255. Er besteht mit 1.1.9 und schlägt mit der bisherigen 1.1.8 fehl. Hauptfenster und alle drei Testdialoge beenden den Test regulär. Die Testdialoge sind weiterhin außerhalb des Bildschirms; dies ist kein visueller Beweis, dass sämtliche weißen Flächen am betroffenen Rechner verschwunden sind. Der Praxistest bleibt erforderlich. Keine Veröffentlichung als bestätigtes stabiles Release.
+
 ## Testbuild 1.1.8: Native Sichtbarkeit statt WinForms-Visible
 
 Das Nutzerprotokoll von 1.1.7 zeigt beim Anhängen an MainForm, KeyPromptForm und PwEntryForm bereits `Visible=True`, aber noch `nativeVisible=False` und `Opacity=1`. Beide bisherigen Visible-Prüfungen übersprangen damit den Schutz vor dem ersten sichtbaren Zeichenlauf. 1.1.8 prüft stattdessen `IsWindowVisible`, ohne einen Fensterhandle vorzeitig anzulegen. Bereits tatsächlich sichtbare Fenster bleiben ausgenommen.
