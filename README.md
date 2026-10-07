@@ -2,9 +2,9 @@
 
 Ein KeeTheme-Fork für KeePass 2 mit dunkler Oberfläche, einheitlichen Standardicons und einer aufgeräumten Symbolleiste.
 
-![Modern Dark mit Testeinträgen](docs/ModernDark-main-test.png)
+![Modern Dark mit fiktiven Demo-Einträgen](docs/ModernDark-main-demo-v2.png)
 
-Originalaufnahme mit Testeinträgen, vom Nutzer zur Veröffentlichung bereitgestellt. Die weiteren bearbeiteten Demo-Ansichten enthalten fiktive Daten; einzelne Darstellungsdetails können von der laufenden Anwendung abweichen.
+Bearbeitete Hauptansicht mit fiktiven Demo-Einträgen. Die Hauptschlüssel- und Eintragsansichten weiter unten sind vom Nutzer bereitgestellte Originalaufnahmen mit Testdaten. Einzelne Details der bearbeiteten Demo-Ansichten können von der laufenden Anwendung abweichen.
 
 ![Moderne Standardicons und benutzerdefinierte Icons](docs/ModernDark-icons-demo.png)
 
