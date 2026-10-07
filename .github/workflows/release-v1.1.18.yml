@@ -2,11 +2,7 @@ name: Build and release KeeTheme Modern Dark 1.1.18
 # One-time release workflow
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - .github/workflows/release-v1.1.18.yml
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -87,7 +83,8 @@ jobs:
           $notes = @'
           KeeTheme Modern Dark 1.1.18 veröffentlicht den fertig abgestimmten Modern-Dark-Stand.
 
-          - Stabiler Funktionsstand aus 1.1.17 unverändert übernommen.
+          - Bestätigte Korrektur des weiß aufblitzenden Suchfeldrahmens durch gepufferte Zeichnung.
+          - Bisherige Korrekturen aus 1.1.17 bleiben enthalten.
           - Plugin-Metadaten auf "KeeTheme Modern Dark" aktualisiert.
           - Marcin Kulmaczewski (kulmi84) als Maintainer des Forks eingetragen.
           - Krzysztof Łaputa bleibt als ursprünglicher Autor von KeeTheme genannt.
