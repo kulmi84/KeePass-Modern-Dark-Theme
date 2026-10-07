@@ -27,6 +27,7 @@ namespace KeeTheme
 		private bool _enabled;
         private Image _bannerArtwork;
         private readonly Dictionary<Control, IDisposable> _fieldBorders = new Dictionary<Control, IDisposable>();
+        private readonly Dictionary<ComboBox, DrawMode> _comboDrawModes = new Dictionary<ComboBox, DrawMode>();
         private readonly Dictionary<ToolStrip, CenteredSearchDecorator> _centeredSearch = new Dictionary<ToolStrip, CenteredSearchDecorator>();
         private readonly Dictionary<ToolStripItem, bool> _toolbarAvailable = new Dictionary<ToolStripItem, bool>();
         private readonly Dictionary<ToolStripItem, Size> _searchSize = new Dictionary<ToolStripItem, Size>();
@@ -441,9 +442,41 @@ namespace KeeTheme
 			if (comboBox.DropDownStyle == ComboBoxStyle.DropDownList)
 				comboBox.FlatStyle = UseModernIcons ? FlatStyle.Flat : FlatStyle.Popup;
 
+            comboBox.DrawItem -= HandleModernComboDrawItem;
+            DrawMode original;
+            if (UseModernIcons && comboBox.DropDownStyle == ComboBoxStyle.DropDownList &&
+                (comboBox.DrawMode == DrawMode.Normal || _comboDrawModes.ContainsKey(comboBox)))
+            {
+                if (!_comboDrawModes.ContainsKey(comboBox))
+                {
+                    _comboDrawModes.Add(comboBox,comboBox.DrawMode);
+                    comboBox.Disposed += delegate { _comboDrawModes.Remove(comboBox); };
+                }
+                comboBox.DrawMode = DrawMode.OwnerDrawFixed;
+                comboBox.DrawItem += HandleModernComboDrawItem;
+            }
+            else if (_comboDrawModes.TryGetValue(comboBox,out original))
+            {
+                comboBox.DrawMode=original;
+                _comboDrawModes.Remove(comboBox);
+            }
+
 			comboBox.BackColorChanged -= HandleComboBoxBackColorChanged;
 			comboBox.BackColorChanged += HandleComboBoxBackColorChanged;
 		}
+
+        private void HandleModernComboDrawItem(object sender,DrawItemEventArgs e)
+        {
+            var combo=(ComboBox)sender;
+            bool display=(e.State & DrawItemState.ComboBoxEdit)!=0;
+            bool selected=!display && (e.State & DrawItemState.Selected)!=0;
+            Color background=selected ? Color.FromArgb(56,101,138) : combo.BackColor;
+            using(var brush=new SolidBrush(background))e.Graphics.FillRectangle(brush,e.Bounds);
+            string text=e.Index>=0 && e.Index<combo.Items.Count ? combo.GetItemText(combo.Items[e.Index]) : combo.Text;
+            var bounds=e.Bounds; bounds.Inflate(-3,0);
+            TextRenderer.DrawText(e.Graphics,text,combo.Font,bounds,combo.Enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),
+                TextFormatFlags.Left|TextFormatFlags.VerticalCenter|TextFormatFlags.SingleLine|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);
+        }
 
 		private void HandleComboBoxBackColorChanged(object sender, EventArgs e)
 		{

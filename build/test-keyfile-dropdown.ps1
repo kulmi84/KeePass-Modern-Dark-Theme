@@ -20,7 +20,11 @@ $form=New-Object Windows.Forms.Form
 $combo=New-Object Windows.Forms.ComboBox
 $combo.DropDownStyle='DropDownList';$combo.FlatStyle='Flat';$combo.Width=240
 $combo.BackColor=[Drawing.Color]::FromArgb(37,37,38);$combo.ForeColor=[Drawing.Color]::FromArgb(241,241,241)
-$combo.Items.Add('C:\Demo\Example Database Key.keyx')|Out-Null;$combo.SelectedIndex=0
+$combo.Items.Add('C:\Demo\Example Database Keys\Demo Family Vault\Example.keyx')|Out-Null;$combo.SelectedIndex=0
+$theme=[Runtime.Serialization.FormatterServices]::GetUninitializedObject($assembly.GetType("KeeTheme.KeeTheme"))
+$drawMethod=$assembly.GetType("KeeTheme.KeeTheme").GetMethod("HandleModernComboDrawItem",[Reflection.BindingFlags]"Instance,NonPublic")
+$combo.DrawMode="OwnerDrawFixed"
+$combo.add_DrawItem({param($drawSender,$drawArgs) $drawMethod.Invoke($theme,@($drawSender,$drawArgs))|Out-Null})
 $form.Controls.Add($combo)
 $flags=[Reflection.BindingFlags]'Instance,Public,NonPublic'
 $guard=[Activator]::CreateInstance($assembly.GetType('KeeTheme.Decorators.CenteredSearchDecorator+SearchBorderWindow'),$flags,$null,@($combo.PSObject.BaseObject,$true),$null)

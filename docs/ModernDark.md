@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.16: Lange Pfade mit Abstand und Ellipse zeichnen
+
+Die installierte DLL entspricht nach Versions-/Hashprüfung 1.1.15. Der Nutzer bestätigt, dass die Linie dauerhaft sichtbar bleibt. Mit einem langen fiktiven Pfad zeigt auch das Testfeld abgeschnittene Zeichen unmittelbar vor dem Pfeil. Standard-DropDownLists werden unter Modern Dark nun mit eigener Item-Zeichnung dargestellt: dunkler Hintergrund, Innenabstand und EndEllipsis statt abgeschnittener Zeichen; kein nativer Fokusrahmen innerhalb des Textbereichs. Der äußere Theme-Fokusrahmen bleibt bestehen. Ausgewählter Index und vollständiger zugrundeliegender Pfad werden nicht geändert. Bereits fremd gezeichnete ComboBoxen werden nicht übernommen; Theme-Abschaltung stellt den vorherigen DrawMode wieder her.
+
+Der passende Dropdown-Test nutzt einen langen fiktiven Pfad und den tatsächlichen Item-Zeichner. Die lokale Bildschirmvorschau zeigt nun eine Ellipse und Abstand vor dem Pfeil. Theme-/Icon-Prüfungen bestehen. Die tatsächliche Hauptschlüsselansicht beim Nutzer bleibt zu bestätigen; kein neues öffentliches stabiles Release vor dieser Bestätigung.
+
 ## Testbuild 1.1.15: Schlüsseldatei-DropDownList korrekt berücksichtigen
 
 Auch 1.1.14 lässt die helle Kante laut Nutzer bestehen. Die KeePass-KeyPromptForm verwendet eine DropDownList, die KeeTheme bisher im Popup-Stil darstellte. Die bisherigen Feldtests verwendeten stattdessen eine editierbare DropDown-ComboBox. Modern Dark verwendet jetzt für DropDownList den Flat-Stil; andere Themes behalten Popup. Der Edit-Kindfenster-Hook ist bei DropDownList ausgeschlossen, weil dort kein eigenständiger editierbarer Textbereich vorhanden ist.
