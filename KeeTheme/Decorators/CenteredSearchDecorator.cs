@@ -82,6 +82,9 @@ namespace KeeTheme.Decorators
             }
             private readonly IntPtr _backgroundBrush = CreateSolidBrush(0x00262525);
             private CalendarBorderWindow _calendarBorder;
+            private CalendarBorderWindow _calendarHeader;
+            [DllImport("user32.dll")] private static extern IntPtr GetParent(IntPtr hwnd);
+            [DllImport("user32.dll", EntryPoint="GetWindowLongW")] private static extern int GetWindowLong(IntPtr hwnd,int index);
             [DllImport("gdi32.dll")] private static extern IntPtr CreateSolidBrush(int color);
             [DllImport("gdi32.dll")] private static extern bool DeleteObject(IntPtr obj);
             [DllImport("gdi32.dll")] private static extern int SetBkColor(IntPtr dc, int color);
@@ -118,11 +121,19 @@ namespace KeeTheme.Decorators
             {
                 OnCalendarClosed(sender,e);
                 IntPtr calendar = ListViewNativeWindow.SendMessage(_combo.Handle,0x1008,IntPtr.Zero,IntPtr.Zero);
-                if (calendar != IntPtr.Zero) _calendarBorder = new CalendarBorderWindow(calendar);
+                if (calendar != IntPtr.Zero)
+                {
+                    IntPtr popup = GetParent(calendar);
+                    // DateTimePicker hosts SysMonthCal32 in a separate popup window.
+                    if (popup == IntPtr.Zero || (GetWindowLong(popup,-16) & unchecked((int)0x80000000)) == 0) popup = calendar;
+                    _calendarBorder = new CalendarBorderWindow(popup);
+                    if (popup != calendar) _calendarHeader = new CalendarBorderWindow(calendar,true);
+                }
             }
             private void OnCalendarClosed(object sender, EventArgs e)
             {
                 if (_calendarBorder != null) { _calendarBorder.Dispose(); _calendarBorder = null; }
+                if (_calendarHeader != null) { _calendarHeader.Dispose(); _calendarHeader = null; }
             }
             protected override void WndProc(ref Message m)
             {
@@ -179,11 +190,19 @@ namespace KeeTheme.Decorators
 
         private sealed class CalendarBorderWindow : NativeWindow, IDisposable
         {
+            private readonly bool _weekdays;
             [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left,Top,Right,Bottom; }
+            [StructLayout(LayoutKind.Sequential)] private struct HitInfo {
+                public uint Size; public int X,Y; public uint Hit;
+                public ushort Year,Month,DayOfWeek,Day,Hour,Minute,Second,Milliseconds;
+            }
+            [DllImport("user32.dll",EntryPoint="SendMessageW")] private static extern IntPtr HitTest(IntPtr hwnd,int msg,IntPtr w,ref HitInfo info);
+            [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr hwnd,out Rect rect);
             [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd,out Rect rect);
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd,IntPtr dc);
-            internal CalendarBorderWindow(IntPtr handle) { AssignHandle(handle); }
+            internal CalendarBorderWindow(IntPtr handle) : this(handle,false) { }
+            internal CalendarBorderWindow(IntPtr handle,bool weekdays) { _weekdays=weekdays; AssignHandle(handle); }
             protected override void WndProc(ref Message m)
             {
                 base.WndProc(ref m);
@@ -195,6 +214,7 @@ namespace KeeTheme.Decorators
                 try {
                     using(var graphics=Graphics.FromHdc(dc)) {
                         int width=rect.Right-rect.Left,height=rect.Bottom-rect.Top;
+                        if (_weekdays) { DrawWeekdays(graphics,m.HWnd); return; }
                         // Cover the classic raised edge, then draw one gray line.
                         using(var pen=new Pen(Color.FromArgb(37,37,38),3))
                             graphics.DrawRectangle(pen,1,1,width-3,height-3);
@@ -202,6 +222,36 @@ namespace KeeTheme.Decorators
                             graphics.DrawRectangle(pen,0,0,width-1,height-1);
                     }
                 } finally { ReleaseDC(m.HWnd,dc); }
+            }
+            private static void DrawWeekdays(Graphics graphics,IntPtr hwnd)
+            {
+                Rect client;
+                if(!GetClientRect(hwnd,out client))return;
+                int top=-1,bottom=-1;
+                // Use native hit testing rather than guessing header height/DPI.
+                for(int y=0;y<client.Bottom;y++) {
+                    var hit=new HitInfo(); hit.Size=(uint)Marshal.SizeOf(typeof(HitInfo)); hit.X=client.Right/2; hit.Y=y;
+                    HitTest(hwnd,0x100E,IntPtr.Zero,ref hit);
+                    if(hit.Hit==0x20002) { if(top<0)top=y; bottom=y+1; }
+                    else if(top>=0)break;
+                }
+                if(top<0)return;
+                int first=ListViewNativeWindow.SendMessage(hwnd,0x1010,IntPtr.Zero,IntPtr.Zero).ToInt32() & 0xFFFF;
+                var names=System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames;
+                int left=0,index=0;
+                while(left<client.Right && index<7) {
+                    var hit=new HitInfo(); hit.Size=(uint)Marshal.SizeOf(typeof(HitInfo)); hit.X=left; hit.Y=top;
+                    HitTest(hwnd,0x100E,IntPtr.Zero,ref hit);
+                    if(hit.Hit!=0x20002){left++;continue;}
+                    int start=left;
+                    // Header cells share the hit code; their widths follow the date grid.
+                    int width=Math.Max(1,(client.Right-start)/ (7-index));
+                    var bounds=new Rectangle(start,top,width,bottom-top);
+                    using(var brush=new SolidBrush(Color.FromArgb(37,37,38)))graphics.FillRectangle(brush,bounds);
+                    TextRenderer.DrawText(graphics,names[(first+1+index)%7],SystemFonts.MenuFont,bounds,Color.FromArgb(190,190,190),
+                        TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.NoPadding);
+                    left=start+width;index++;
+                }
             }
             public void Dispose() { ReleaseHandle(); }
         }

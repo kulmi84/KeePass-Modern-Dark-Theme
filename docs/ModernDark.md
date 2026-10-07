@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.12: Tatsächlicher DropDown-Rahmen und lesbare Wochentage
+
+1.1.11 änderte den sichtbaren Rahmen beim Nutzer nicht. Die Untersuchung eines tatsächlich geöffneten DateTimePicker zeigt zwei Fenster: SysMonthCal32 liegt innerhalb eines separaten Popup-Fensters der Klasse DropDown. Der helle Außenrand gehört zum DropDown-Fenster. Jetzt wird dessen Rahmen überzeichnet; der Kalender selbst bekommt einen getrennten Paint-Hook für die Wochentage. MCM_HITTEST bestimmt die Zeilenhöhe, MCM_GETFIRSTDAYOFWEEK die Reihenfolge; die Beschriftungen stammen aus der aktuellen Kultur.
+
+`test-calendar-popup.ps1` öffnet den echten Datumskalender eines eigenen Testfensters mit fiktivem Datum, prüft die Farbe des äußeren Popup-Rands und speichert eine Bildschirmvorschau ausschließlich dieses Test-Popups. Die Vorschau für 1.1.12 wurde visuell geprüft: graue Außenlinie, dunkler Randbereich und lesbare Wochentage. Der frühere Test eines isolierten MonthCalendar war für den sichtbaren Popup-Rahmen nicht aussagekräftig. Kontrolle am betroffenen Nutzerrechner bleibt erforderlich; Einschränkung der Datumssegment-Markierung aus 1.1.11 bleibt erhalten.
+
 ## Testbuild 1.1.11: Datumsfeld bei Fokus dunkel, Kalenderrahmen grau
 
 Die bisherige dunkle Datumsdarstellung wurde bei ContainsFocus ausgelassen; deshalb erschien das native weiße Feld beim Anklicken. Die Nachzeichnung erfolgt jetzt auch bei Fokus und nach Maus-/Tastaturmeldungen. Sie zeigt das formatierte Datum einheitlich; die native Hervorhebung eines einzelnen Datumssegments wird dabei überdeckt. Die Datumseingabe bleibt beim nativen DateTimePicker, die Kalenderauswahl bleibt unverändert.
