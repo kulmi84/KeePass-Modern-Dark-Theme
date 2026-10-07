@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.15: Schlüsseldatei-DropDownList korrekt berücksichtigen
+
+Auch 1.1.14 lässt die helle Kante laut Nutzer bestehen. Die KeePass-KeyPromptForm verwendet eine DropDownList, die KeeTheme bisher im Popup-Stil darstellte. Die bisherigen Feldtests verwendeten stattdessen eine editierbare DropDown-ComboBox. Modern Dark verwendet jetzt für DropDownList den Flat-Stil; andere Themes behalten Popup. Der Edit-Kindfenster-Hook ist bei DropDownList ausgeschlossen, weil dort kein eigenständiger editierbarer Textbereich vorhanden ist.
+
+`test-keyfile-dropdown.ps1` bildet die DropDownList/Flat-Konfiguration mit langem fiktivem Dateipfad nach und prüft die gesamte Kante vor dem Pfeil nach Fokus-, Maus- und Zeichenmeldungen sowie die unveränderte Auswahl. Der Test besteht. Eine lokale Bildschirmvorschau dieser Konfiguration wurde geprüft. Die tatsächliche Ansicht beim Nutzer ist noch zu bestätigen; das öffentliche Release bleibt bis dahin bei 1.1.13.
+
 ## Testbuild 1.1.14: Innerer Textfeldrand der Schlüsseldatei-ComboBox
 
 Der Nutzer sieht in 1.1.13 weiterhin eine helle senkrechte Linie unmittelbar vor dem Dropdown-Pfeil. Die bisherige Prüfung deckte die Pfeilfläche ab, nicht den rechten Rand des eigenständigen nativen Edit-Kindfensters. Der neue Hook zeichnet auch dessen rechte Kante nach Fokus-, Maus- und Zeichenmeldungen dunkel. Zusätzlich wird der Zwischenraum zwischen Edit und Pfeil dunkel überzeichnet. Der Hook wird bei Handle-Zerstörung oder Theme-Abschaltung gelöst.

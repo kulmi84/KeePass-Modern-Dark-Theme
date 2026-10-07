@@ -439,7 +439,7 @@ namespace KeeTheme
 		private void Apply(ComboBox comboBox)
 		{
 			if (comboBox.DropDownStyle == ComboBoxStyle.DropDownList)
-				comboBox.FlatStyle = FlatStyle.Popup;
+				comboBox.FlatStyle = UseModernIcons ? FlatStyle.Flat : FlatStyle.Popup;
 
 			comboBox.BackColorChanged -= HandleComboBoxBackColorChanged;
 			comboBox.BackColorChanged += HandleComboBoxBackColorChanged;

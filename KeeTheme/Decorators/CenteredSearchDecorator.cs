@@ -118,7 +118,8 @@ namespace KeeTheme.Decorators
             }
             private void AttachComboEditEdge()
             {
-                if (!(_combo is ComboBox)) return;
+                var combo=_combo as ComboBox;
+                if (combo == null || combo.DropDownStyle == ComboBoxStyle.DropDownList) return;
                 var info = new ComboInfo(); info.Size=Marshal.SizeOf(typeof(ComboInfo));
                 if (GetComboBoxInfo(_combo.Handle,ref info) && info.Edit != IntPtr.Zero &&
                     (_comboEditEdge == null || _comboEditEdge.Handle != info.Edit))
