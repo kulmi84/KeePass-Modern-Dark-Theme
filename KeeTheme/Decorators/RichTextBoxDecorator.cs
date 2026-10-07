@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -219,6 +219,7 @@ namespace KeeTheme.Decorators
 		{
 			_theme = theme;
 			_enabled = enabled;
+            if (_richTextBoxNativeWindow != null) _richTextBoxNativeWindow.ModernScrollBars = enabled && theme.MenuItem.ModernIcons;
 			if (!enabled)
 				ApplyFontColor(_richTextBox);
 
