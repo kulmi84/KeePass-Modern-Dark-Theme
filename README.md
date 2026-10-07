@@ -46,13 +46,13 @@ Aufnahme eines echten Kalender-Popups mit fiktivem Testdatum. Bekannte Einschrä
 
 ## Weitere Ansichten
 
-Hauptschlüssel mit fiktiver Schlüsseldatei:
+Hauptschlüssel der Testdatenbank:
 
-<img src="docs/ModernDark-unlock-demo-v1.1.17.png" alt="Hauptschlüssel mit Demo-Daten" width="424">
+<img src="docs/ModernDark-unlock-test.png" alt="Hauptschlüssel der Testdatenbank" width="424">
 
 Eintrag bearbeiten mit geöffnetem Kalender:
 
-<img src="docs/ModernDark-entry-demo-v1.1.17.png" alt="Demo-Eintrag und dunkler Kalender" width="506">
+![Testeintrag und dunkler Kalender](docs/ModernDark-entry-test.png)
 
 Menü mit fiktiven Einträgen:
 
