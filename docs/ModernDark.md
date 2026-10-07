@@ -4,6 +4,10 @@ Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
 ## Testbuild 1.1.7: Erstes vollständiges Fensterbild vor der Einblendung
 
+**Ergebnis des Praxistests:** Die neuen Nutzeraufnahmen zeigen weiterhin weiße Steuerelemente beim Anzeigen der Dialoge. Der SHA-256-Vergleich bestätigt, dass die installierte DLL genau dem lokalen 1.1.7-Testbuild entspricht. 1.1.7 beseitigt den gemeldeten Fehler nicht. Der synthetische Test ist deshalb kein Reproduktions- oder Behebungstest für diesen KeePass-Fehler.
+
+Für die weitere Diagnose liegt unter `build/diagnostics/KeeThemePaintTrace.cs` ein separates, temporäres Zusatzplugin. Es protokolliert frühe native Zeichenmeldungen, Sichtbarkeit, Deckkraft und Farben. Es liest keine Steuerelementtexte, Namen, Datenbankinhalte oder Passwörter und erstellt keine Screenshots. `test-log-privacy.ps1` überprüft, dass auch mit fiktiven geheimen Texten und Kontrollnamen ausschließlich technische Metadaten ausgegeben werden und keine Handles vorzeitig erzeugt werden. Das Protokoll wird lokal unter `Path.GetTempPath()/KeeTheme-PaintTrace.log` gespeichert. Nach der Diagnose kann das Zusatzplugin bei geschlossenem KeePass wieder entfernt werden. Ein neuer funktionaler Fix wird erst nach weiterer Diagnose bewertet.
+
 Der Nutzer bestätigt: 1.1.6 verändert den Start, beseitigt aber die weiße Fläche weder beim Start noch beim Öffnen von Dialogen. Der Rahmen-Fix allein löst das Problem also nicht.
 
 1.1.7 hält neu geöffnete KeePass-Haupt-, Eintrags-, Gruppen-, Hauptschlüssel- und Datenbankeinstellungsfenster während ihres ersten synchronen Zeichenlaufs transparent. Erst wenn alle Kindfenster und Theme-Nachzeichnungen zurückgekehrt sind, wird die ursprüngliche Fensterdeckkraft wiederhergestellt. Bereits sichtbare Fenster werden nicht ausgeblendet. Es gibt keine Wartezeiten, Timer oder Fade-Animationen im Plugin. Theme-Abschaltung beim Start, Mono und fremde Plugin-Fenster sind ausgenommen.
