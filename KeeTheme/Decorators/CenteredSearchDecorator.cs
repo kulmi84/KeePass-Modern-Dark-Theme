@@ -81,6 +81,7 @@ namespace KeeTheme.Decorators
                 }
             }
             private readonly IntPtr _backgroundBrush = CreateSolidBrush(0x00262525);
+            private CalendarBorderWindow _calendarBorder;
             [DllImport("gdi32.dll")] private static extern IntPtr CreateSolidBrush(int color);
             [DllImport("gdi32.dll")] private static extern bool DeleteObject(IntPtr obj);
             [DllImport("gdi32.dll")] private static extern int SetBkColor(IntPtr dc, int color);
@@ -105,12 +106,24 @@ namespace KeeTheme.Decorators
                 combo.HandleDestroyed += OnDestroyed;
                 combo.GotFocus += OnFocus;
                 combo.LostFocus += OnFocus;
+                var picker = combo as DateTimePicker;
+                if (picker != null) { picker.DropDown += OnCalendarOpened; picker.CloseUp += OnCalendarClosed; }
                 IntPtr handle = combo.Handle;
                 if (Handle == IntPtr.Zero) AssignHandle(handle);
             }
             private void OnCreated(object sender, EventArgs e) { AssignHandle(_combo.Handle); }
             private void OnDestroyed(object sender, EventArgs e) { ReleaseHandle(); }
             private void OnFocus(object sender, EventArgs e) { _combo.Invalidate(); }
+            private void OnCalendarOpened(object sender, EventArgs e)
+            {
+                OnCalendarClosed(sender,e);
+                IntPtr calendar = ListViewNativeWindow.SendMessage(_combo.Handle,0x1008,IntPtr.Zero,IntPtr.Zero);
+                if (calendar != IntPtr.Zero) _calendarBorder = new CalendarBorderWindow(calendar);
+            }
+            private void OnCalendarClosed(object sender, EventArgs e)
+            {
+                if (_calendarBorder != null) { _calendarBorder.Dispose(); _calendarBorder = null; }
+            }
             protected override void WndProc(ref Message m)
             {
                 // The disabled edit child of a ComboBox asks its parent for colors.
@@ -127,7 +140,8 @@ namespace KeeTheme.Decorators
                 if (_field && _combo is TextBoxBase && !HasNativeScrollBars && m.Msg == 0x0085)
                     m.Result = IntPtr.Zero;
                 else base.WndProc(ref m);
-                if (m.Msg != 0x000F && m.Msg != 0x0085) return;
+                bool dateInteraction = _combo is DateTimePicker && (m.Msg == 0x0007 || m.Msg == 0x0008 || m.Msg == 0x0100 || m.Msg == 0x0101 || m.Msg == 0x0201 || m.Msg == 0x0202);
+                if (m.Msg != 0x000F && m.Msg != 0x0085 && !dateInteraction) return;
                 IntPtr dc = GetWindowDC(m.HWnd);
                 if (dc == IntPtr.Zero) return;
                 try
@@ -135,7 +149,7 @@ namespace KeeTheme.Decorators
                     using (var graphics = Graphics.FromHdc(dc))
                     {
                         var date = _combo as DateTimePicker;
-                        if (date != null && !date.ContainsFocus)
+                        if (date != null)
                             DrawDateField(graphics, date.ClientRectangle, date.Text, date.Font, date.Enabled);
                         if (_combo is ComboBox)
                         {
@@ -155,9 +169,41 @@ namespace KeeTheme.Decorators
                 _combo.HandleDestroyed -= OnDestroyed;
                 _combo.GotFocus -= OnFocus;
                 _combo.LostFocus -= OnFocus;
+                var picker = _combo as DateTimePicker;
+                if (picker != null) { picker.DropDown -= OnCalendarOpened; picker.CloseUp -= OnCalendarClosed; }
+                OnCalendarClosed(null,EventArgs.Empty);
                 ReleaseHandle();
                 if (!_combo.IsDisposed) _combo.Invalidate(true);
             }
+        }
+
+        private sealed class CalendarBorderWindow : NativeWindow, IDisposable
+        {
+            [StructLayout(LayoutKind.Sequential)] private struct Rect { public int Left,Top,Right,Bottom; }
+            [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd,out Rect rect);
+            [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
+            [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd,IntPtr dc);
+            internal CalendarBorderWindow(IntPtr handle) { AssignHandle(handle); }
+            protected override void WndProc(ref Message m)
+            {
+                base.WndProc(ref m);
+                if (m.Msg != 0x000F && m.Msg != 0x0085) return;
+                Rect rect;
+                if (!GetWindowRect(m.HWnd,out rect)) return;
+                IntPtr dc=GetWindowDC(m.HWnd);
+                if(dc==IntPtr.Zero)return;
+                try {
+                    using(var graphics=Graphics.FromHdc(dc)) {
+                        int width=rect.Right-rect.Left,height=rect.Bottom-rect.Top;
+                        // Cover the classic raised edge, then draw one gray line.
+                        using(var pen=new Pen(Color.FromArgb(37,37,38),3))
+                            graphics.DrawRectangle(pen,1,1,width-3,height-3);
+                        using(var pen=new Pen(Color.FromArgb(65,65,65)))
+                            graphics.DrawRectangle(pen,0,0,width-1,height-1);
+                    }
+                } finally { ReleaseDC(m.HWnd,dc); }
+            }
+            public void Dispose() { ReleaseHandle(); }
         }
 
         internal static void DrawSearchBorder(Graphics graphics, Size size)

@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.11: Datumsfeld bei Fokus dunkel, Kalenderrahmen grau
+
+Die bisherige dunkle Datumsdarstellung wurde bei ContainsFocus ausgelassen; deshalb erschien das native weiße Feld beim Anklicken. Die Nachzeichnung erfolgt jetzt auch bei Fokus und nach Maus-/Tastaturmeldungen. Sie zeigt das formatierte Datum einheitlich; die native Hervorhebung eines einzelnen Datumssegments wird dabei überdeckt. Die Datumseingabe bleibt beim nativen DateTimePicker, die Kalenderauswahl bleibt unverändert.
+
+Ein nur während des geöffneten Kalenders angehängtes NativeWindow überzeichnet dessen hellen klassischen Rand mit dunklem Hintergrund und einer einzelnen grauen Außenlinie (#414141). CloseUp und Dispose lösen den Hook wieder. Es werden keine Fensterpositionen oder Fensterstile geändert. `test-calendar-focus.ps1` prüft fokussierte Nachzeichnungen und den grauen Rand; der Kalenderfarbtest besteht ebenfalls. Visuelle Kontrolle auf dem Nutzerrechner bleibt erforderlich.
+
 ## Testbuild 1.1.10: Dunkler Kalender und geglättetes Häkchen
 
 Beim Öffnen des Kalender-Popups wird nur auf diesem vorübergehenden nativen Kalender das Windows-Visual-Style abgeschaltet. Mit aktivem Visual Style ignoriert der Kalender die meisten Farbvorgaben ([Microsoft](https://learn.microsoft.com/en-us/windows/win32/controls/dtm-setmccolor)). MCM_SETCOLOR setzt anschließend Panel-Hintergrund #252526, Kopf #2D2D30, Text #F1F1F1 und benachbarte Monatsdaten #BEBEBE. Kalendernavigation und Auswahl bleiben native Windows-Funktionen. Der native Test prüft deaktiviertes Visual Style, alle sechs Farbfelder und die unveränderte Datumsauswahl.
