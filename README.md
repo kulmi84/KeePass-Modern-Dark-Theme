@@ -60,4 +60,6 @@ Menü mit fiktiven Einträgen:
 
 ## Ursprung
 
-Dieser Fork basiert auf [xatupal/KeeTheme](https://github.com/xatupal/KeeTheme). KeeTheme-Lizenz: [MIT](LICENSE). Das originale KeePass-Logo stammt aus KeePass; Quellenhinweise stehen in der Dokumentation.
+Dieser Fork basiert auf [xatupal/KeeTheme](https://github.com/xatupal/KeeTheme) von Krzysztof Łaputa und wird als **KeeTheme Modern Dark** von **Marcin Kulmaczewski (kulmi84)** gepflegt und weiterentwickelt.
+
+KeeTheme-Lizenz: [MIT](LICENSE). Das originale KeePass-Logo stammt aus KeePass; Quellenhinweise stehen in der Dokumentation.
