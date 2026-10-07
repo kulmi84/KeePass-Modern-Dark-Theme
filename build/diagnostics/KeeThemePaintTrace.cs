@@ -10,7 +10,7 @@ using KeePass.Plugins;
 using KeePass.UI;
 
 [assembly: AssemblyTitle("KeeTheme Paint Trace (temporary diagnostics)")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
 namespace KeeThemePaintTrace
 {
     public sealed class KeeThemePaintTraceExt : Plugin
@@ -22,22 +22,30 @@ namespace KeeThemePaintTrace
         private readonly object sync = new object();
         private Form main;
         private string path;
+        private string saveFailure;
 
         public override bool Initialize(IPluginHost host)
         {
             if (host == null) return false;
-            path = Path.Combine(Path.GetTempPath(), "KeeTheme-PaintTrace.log");
+            string workspaceOutput = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ChatGPT\\KeePass Dark Theme\\outputs");
+            path = Path.Combine(Directory.Exists(workspaceOutput) ? workspaceOutput : Path.GetTempPath(), "KeeTheme-PaintTrace.log");
             main = host.MainWindow;
             Record("Diagnostic session. No control text, entry contents, database names, passwords or screenshots recorded.");
+            Save(); // Leave startup evidence even if subsequent hook setup fails.
             foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
                 if (assembly.GetName().Name == "KeeTheme") Record("Theme assembly: " + assembly.GetName().Version);
-            Attach(main);
+            try { Attach(main); }
+            catch (Exception error) { Record("Attach error type=" + error.GetType().FullName + " HRESULT=" + Marshal.GetHRForException(error).ToString("X8")); }
             GlobalWindowManager.WindowAdded += WindowAdded;
             Save();
             return true;
         }
 
-        private void WindowAdded(object sender, GwmWindowEventArgs e) { Attach(e.Form); }
+        private void WindowAdded(object sender, GwmWindowEventArgs e)
+        {
+            try { Attach(e.Form); }
+            catch (Exception error) { Record("Window hook error type=" + error.GetType().FullName); Save(); }
+        }
         private void Attach(Control control)
         {
             lock (sync) { if (!attached.Add(control)) return; }
@@ -52,7 +60,11 @@ namespace KeeThemePaintTrace
             control.HandleCreated += OnHandleCreated;
             foreach (Control child in control.Controls) Attach(child);
         }
-        private void AttachHandle(Control control) { lock (sync) { windows.Add(new PaintWindow(control, Record)); } }
+        private void AttachHandle(Control control)
+        {
+            try { lock (sync) { windows.Add(new PaintWindow(control, Record)); } }
+            catch (Exception error) { Record("Handle hook error type=" + error.GetType().FullName); }
+        }
         private void OnHandleCreated(object sender, EventArgs e) { AttachHandle((Control)sender); }
         private void OnShown(object sender, EventArgs e)
         {
@@ -79,9 +91,16 @@ namespace KeeThemePaintTrace
         {
             string[] snapshot;
             lock (sync) { snapshot = records.ToArray(); }
-            try { File.WriteAllLines(path, snapshot, Encoding.UTF8); }
-            catch (IOException) { }
-            catch (UnauthorizedAccessException) { }
+            try { File.WriteAllLines(path, snapshot, Encoding.UTF8); saveFailure = null; }
+            catch (IOException error) { saveFailure = error.GetType().FullName; }
+            catch (UnauthorizedAccessException error) { saveFailure = error.GetType().FullName; }
+        }
+        public override ToolStripMenuItem GetMenuItem(PluginMenuType type)
+        {
+            if (type != PluginMenuType.Main) return null;
+            ToolStripMenuItem item = new ToolStripMenuItem("KeeTheme-Zeichenprotokoll: Speicherort anzeigen");
+            item.Click += delegate { Save(); MessageBox.Show("Protokoll: " + path + (saveFailure == null ? "" : "\r\nSchreibfehler: " + saveFailure), "KeeTheme-Diagnose"); };
+            return item;
         }
         public override void Terminate()
         {
