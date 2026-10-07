@@ -61,13 +61,9 @@ namespace KeeTheme
 		{
 			if (form.IsHandleCreated)
 			{
-				if (UseImmersiveDarkMode(form.Handle, enabled))
-				{
-					// Hack: I have found no other way to redraw title bar
-					var borderStyle = form.FormBorderStyle;
-					form.FormBorderStyle = FormBorderStyle.None;
-					form.FormBorderStyle = borderStyle;
-				}
+				// DWM updates the title bar directly. Temporarily removing the frame
+				// resizes the client area twice and exposes intermediate child paints.
+				UseImmersiveDarkMode(form.Handle, enabled);
 			}
 			else
 			{

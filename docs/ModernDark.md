@@ -2,6 +2,14 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.6: Fensterrahmen beim Theming stabil halten
+
+Der bisherige Titelleisten-Workaround setzte FormBorderStyle kurz auf None und anschließend zurück. Das änderte beim Öffnen und erneuten Theming die Fensterstruktur und die Größe des Inhalts. Die neue Fassung setzt ausschließlich das DWM-Attribut für die dunkle Titelleiste, wie in der [Microsoft-Dokumentation](https://learn.microsoft.com/de-de/windows/apps/desktop/modernize/ui/apply-windows-themes) beschrieben.
+
+Die Lifecycle-Prüfung `build/test-titlebar-lifecycle.ps1` verwendet ein echtes WinForms-Fenster mit synthetischen Daten. Bei vier Titelleisten-Aktualisierungen erzeugt 1.1.5 zwölf native Stiländerungen und 24 Änderungen der Clientgröße; der Testbuild erzeugt jeweils null. Die dunkle Titelleiste bleibt aktiviert, Fensterhandle und Geometrie bleiben erhalten. Theme-, native Feld-, Gruppendialog- und Kontextmenüprüfungen bestehen ebenfalls.
+
+Dies belegt die Entfernung dieses Auslösers, noch nicht die vollständige Beseitigung aller weißen Startframes. Der praktische Vergleich beim KeePass-Anwendungsstart und Öffnen von Eintrags-/Gruppendialogen steht aus. Die Nutzeraufnahmen bleiben lokal und werden nicht veröffentlicht. Vor Bestätigung ist 1.1.6 ein Testbuild, kein als fehlerfrei bestätigtes Release.
+
 ## Installation und Rückweg
 
 KeePass schließen. Bisherige KeeTheme.dll/KeeTheme.plgx sichern und aus Plugins entfernen, damit nur eine Version geladen wird. Die neue KeeTheme.dll nach Plugins kopieren. KeePass starten, unter Extras > Optionen > KeeTheme das Theme Modern Dark auswählen und aktivieren (standardmäßig Strg+T). Bestehende Theme-Einstellungen werden respektiert; Modern Dark ist nur für neue Konfigurationen der Standard. Zum Rückweg KeePass schließen und die gesicherte Plugin-Version zurückkopieren.
