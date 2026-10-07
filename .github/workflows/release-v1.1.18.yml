@@ -22,7 +22,7 @@ jobs:
         shell: powershell
         run: |
           $ErrorActionPreference = 'Stop'
-          $url = 'https://sourceforge.net/projects/keepass/files/KeePass%202.x/2.61.1/KeePass-2.61.1.zip/download'
+          $url = 'https://downloads.sourceforge.net/project/keepass/KeePass%202.x/2.61.1/KeePass-2.61.1.zip'
           Invoke-WebRequest -Uri $url -OutFile keepass.zip -UseBasicParsing
           $expected = '3952354DB9B117E906F7CD4F9F5591065B95186472370DA47F46F3E246FEA864'
           $actual = (Get-FileHash keepass.zip -Algorithm SHA256).Hash
