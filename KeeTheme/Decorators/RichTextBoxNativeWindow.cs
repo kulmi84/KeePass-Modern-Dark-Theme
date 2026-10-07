@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -46,72 +46,6 @@ namespace KeeTheme.Decorators
         private readonly RichTextBox _richTextBox;
         private bool _enabled;
         
-        internal bool ModernScrollBars { get; set; }
-        [StructLayout(LayoutKind.Sequential)] private struct RECT { public int Left, Top, Right, Bottom; }
-        [StructLayout(LayoutKind.Sequential)] private struct SCROLLINFO { public int Size, Mask, Min, Max, Page, Pos, Track; }
-        [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr h, out RECT r);
-        [DllImport("user32.dll")] private static extern bool GetClientRect(IntPtr h, out RECT r);
-        [DllImport("user32.dll")] private static extern int GetWindowLong(IntPtr h, int index);
-        [DllImport("user32.dll")] private static extern bool GetScrollInfo(IntPtr h, int bar, ref SCROLLINFO info);
-        [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr h);
-        [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr h, IntPtr dc);
-        private void PaintScrollBars()
-        {
-            if (!ModernScrollBars || Handle == IntPtr.Zero) return;
-            RECT window, client;
-            if (!GetWindowRect(Handle,out window) || !GetClientRect(Handle,out client)) return;
-            int style = GetWindowLong(Handle,-16);
-            IntPtr dc=GetWindowDC(Handle); if(dc == IntPtr.Zero) return;
-            try
-            {
-                using(var g=Graphics.FromHdc(dc))
-                {
-                    // Borderless rich edit: the native scrollbar occupies the non-client
-                    // strip beyond ClientSize. Keep native input, range and accessibility.
-                    if((style & 0x00200000) != 0)
-                    {
-                        var info=new SCROLLINFO();info.Size=Marshal.SizeOf(typeof(SCROLLINFO));info.Mask=0x17;
-                        if(GetScrollInfo(Handle,1,ref info))
-                            DrawScrollBar(g,new Rectangle(client.Right,0,window.Right-window.Left-client.Right,client.Bottom),true,info.Min,info.Max,info.Page,info.Pos);
-                    }
-                    if((style & 0x00100000) != 0)
-                    {
-                        var info=new SCROLLINFO();info.Size=Marshal.SizeOf(typeof(SCROLLINFO));info.Mask=0x17;
-                        if(GetScrollInfo(Handle,0,ref info))
-                            DrawScrollBar(g,new Rectangle(0,client.Bottom,client.Right,window.Bottom-window.Top-client.Bottom),false,info.Min,info.Max,info.Page,info.Pos);
-                    }
-                }
-            }
-            finally {ReleaseDC(Handle,dc);}
-        }
-        internal static void DrawScrollBar(Graphics g,Rectangle r,bool vertical,int min,int max,int page,int pos)
-        {
-            if(r.Width<=0 || r.Height<=0) return;
-            using(var b=new SolidBrush(Color.FromArgb(37,37,38)))g.FillRectangle(b,r);
-            int length=vertical?r.Height:r.Width, width=vertical?r.Width:r.Height;
-            int arrow=Math.Min(width,length/2),track=Math.Max(0,length-arrow*2);
-            long range=Math.Max(1,(long)max-min+1);
-            int thumb=Math.Min(track,Math.Max(width,(int)(track*Math.Min(range,Math.Max(0,page))/range)));
-            long travel=Math.Max(1,range-Math.Max(1,page));
-            int offset=arrow+(int)((track-thumb)*Math.Max(0,Math.Min(travel,(long)pos-min))/travel);
-            if(range>page && track>0)
-                using(var b=new SolidBrush(Color.FromArgb(100,100,100)))
-                    g.FillRectangle(b,vertical?new Rectangle(r.X+4,r.Y+offset,Math.Max(2,width-8),thumb):new Rectangle(r.X+offset,r.Y+4,thumb,Math.Max(2,width-8)));
-            using(var p=new Pen(Color.FromArgb(190,190,190),1.4f))
-            {
-                int cx=r.X+r.Width/2,cy=r.Y+r.Height/2;
-                if(vertical)
-                {
-                    int y=r.Y+arrow/2;g.DrawLines(p,new Point[]{new Point(cx-3,y+1),new Point(cx,y-2),new Point(cx+3,y+1)});
-                    y=r.Bottom-arrow/2;g.DrawLines(p,new Point[]{new Point(cx-3,y-1),new Point(cx,y+2),new Point(cx+3,y-1)});
-                }
-                else
-                {
-                    int x=r.X+arrow/2;g.DrawLines(p,new Point[]{new Point(x+1,cy-3),new Point(x-2,cy),new Point(x+1,cy+3)});
-                    x=r.Right-arrow/2;g.DrawLines(p,new Point[]{new Point(x-1,cy-3),new Point(x+2,cy),new Point(x-1,cy+3)});
-                }
-            }
-        }
         internal event PaintEventHandler Paint;
         internal event EventHandler LinkCreated; 
 
@@ -163,8 +97,6 @@ namespace KeeTheme.Decorators
                 base.WndProc(ref m);
             }
 
-            if (m.Msg == WM_PAINT || m.Msg == 0x0085 || m.Msg == 0x0114 || m.Msg == 0x0115 || m.Msg == 0x0005)
-                PaintScrollBars();
             if (m.Msg == EM_SETCHARFORMAT)
             {
                 var cf = (CHARFORMAT2) Marshal.PtrToStructure(m.LParam, typeof(CHARFORMAT2));

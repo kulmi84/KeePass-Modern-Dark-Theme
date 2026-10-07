@@ -70,28 +70,14 @@ namespace KeeTheme.Decorators
         {
             private readonly Control _combo;
             private readonly bool _field;
-            [StructLayout(LayoutKind.Sequential)] private struct SCROLLINFO { public int Size,Mask,Min,Max,Page,Pos,Track; }
-            [DllImport("user32.dll")] private static extern bool GetScrollInfo(IntPtr hwnd,int bar,ref SCROLLINFO info);
-            private bool HasTextScrollBars
+            // WM_NCPAINT owns both the frame and scrollbars. Suppressing it on
+            // multiline editors leaves stale pixels until focus changes.
+            private bool HasNativeScrollBars
             {
-                get { var text=_combo as TextBox;return text!=null && text.Multiline && text.ScrollBars!=ScrollBars.None; }
-            }
-            private void DrawTextScrollBars(Graphics g)
-            {
-                var text=_combo as TextBox;
-                if(text==null || !text.Multiline) return;
-                int inset=text.BorderStyle==BorderStyle.None?0:2;
-                if(text.ScrollBars==ScrollBars.Vertical || text.ScrollBars==ScrollBars.Both)
+                get
                 {
-                    var info=new SCROLLINFO();info.Size=Marshal.SizeOf(typeof(SCROLLINFO));info.Mask=0x17;
-                    if(GetScrollInfo(Handle,1,ref info))
-                        RichTextBoxNativeWindow.DrawScrollBar(g,new Rectangle(text.Width-inset-SystemInformation.VerticalScrollBarWidth,inset,SystemInformation.VerticalScrollBarWidth,text.Height-inset*2-(text.ScrollBars==ScrollBars.Both?SystemInformation.HorizontalScrollBarHeight:0)),true,info.Min,info.Max,info.Page,info.Pos);
-                }
-                if((text.ScrollBars==ScrollBars.Horizontal || text.ScrollBars==ScrollBars.Both) && !text.WordWrap)
-                {
-                    var info=new SCROLLINFO();info.Size=Marshal.SizeOf(typeof(SCROLLINFO));info.Mask=0x17;
-                    if(GetScrollInfo(Handle,0,ref info))
-                        RichTextBoxNativeWindow.DrawScrollBar(g,new Rectangle(inset,text.Height-inset-SystemInformation.HorizontalScrollBarHeight,text.Width-inset*2-(text.ScrollBars==ScrollBars.Both?SystemInformation.VerticalScrollBarWidth:0),SystemInformation.HorizontalScrollBarHeight),false,info.Min,info.Max,info.Page,info.Pos);
+                    var text = _combo as TextBox;
+                    return text != null && text.Multiline && text.ScrollBars != ScrollBars.None;
                 }
             }
             private readonly IntPtr _backgroundBrush = CreateSolidBrush(0x00262525);
@@ -138,10 +124,10 @@ namespace KeeTheme.Decorators
                 }
                 // Do not let the native edit border flash white before our border.
                 // Caret and mouse messages can request non-client paint independently.
-                if (_field && _combo is TextBoxBase && !HasTextScrollBars && m.Msg == 0x0085)
+                if (_field && _combo is TextBoxBase && !HasNativeScrollBars && m.Msg == 0x0085)
                     m.Result = IntPtr.Zero;
                 else base.WndProc(ref m);
-                if (m.Msg != 0x000F && m.Msg != 0x0085 && m.Msg != 0x0114 && m.Msg != 0x0115) return;
+                if (m.Msg != 0x000F && m.Msg != 0x0085) return;
                 IntPtr dc = GetWindowDC(m.HWnd);
                 if (dc == IntPtr.Zero) return;
                 try
@@ -157,7 +143,6 @@ namespace KeeTheme.Decorators
                             if (GetComboBoxInfo(m.HWnd, ref info))
                                 DrawComboButton(graphics, Rectangle.FromLTRB(info.Button.Left, info.Button.Top, info.Button.Right, info.Button.Bottom));
                         }
-                        if (_field && HasTextScrollBars) DrawTextScrollBars(graphics);
                         if (_field) DrawFieldBorder(graphics, _combo.Size, _combo.ContainsFocus);
                         else DrawSearchBorder(graphics, _combo.Size);
                     }
