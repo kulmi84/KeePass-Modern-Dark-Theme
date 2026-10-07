@@ -93,6 +93,14 @@ namespace KeeTheme.Decorators
             [DllImport("gdi32.dll")] private static extern int SetTextColor(IntPtr dc, int color);
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr dc);
+            [StructLayout(LayoutKind.Sequential)] private struct PaintInfo
+            {
+                public IntPtr Dc; public int Erase; public RectangleNative Rect;
+                public int Restore, IncUpdate;
+                [MarshalAs(UnmanagedType.ByValArray, SizeConst=32)] public byte[] Reserved;
+            }
+            [DllImport("user32.dll")] private static extern IntPtr BeginPaint(IntPtr hwnd, out PaintInfo paint);
+            [DllImport("user32.dll")] private static extern bool EndPaint(IntPtr hwnd, ref PaintInfo paint);
             [StructLayout(LayoutKind.Sequential)] internal struct ComboInfo
             {
                 public int Size;
@@ -154,6 +162,16 @@ namespace KeeTheme.Decorators
             }
             protected override void WndProc(ref Message m)
             {
+                // The toolbar's flat adapter paints a light hover/focus frame.
+                // Compose native chrome and our dark chrome off screen instead of
+                // exposing that intermediate frame and covering it afterwards.
+                if (!_field && _combo is ComboBox && m.Msg == 0x000F)
+                {
+                    PaintSearch(ref m);
+                    return;
+                }
+                if (!_field && _combo is ComboBox && (m.Msg == 0x0085 || m.Msg == 0x0014))
+                { m.Result = new IntPtr(1); return; }
                 // The disabled edit child of a ComboBox asks its parent for colors.
                 // Returning a dark brush also covers the modal login/locked state.
                 if (_combo is ComboBox && (m.Msg == 0x0133 || m.Msg == 0x0138))
@@ -199,6 +217,36 @@ namespace KeeTheme.Decorators
                     }
                 }
                 finally { ReleaseDC(m.HWnd, dc); }
+            }
+            private void PaintSearch(ref Message message)
+            {
+                PaintInfo paint;
+                IntPtr dc=BeginPaint(message.HWnd,out paint);
+                try
+                {
+                    if(dc==IntPtr.Zero || _combo.Width<2 || _combo.Height<2)return;
+                    using(var bitmap=new Bitmap(_combo.Width,_combo.Height))
+                    using(var graphics=Graphics.FromImage(bitmap))
+                    {
+                        graphics.Clear(Color.FromArgb(37,37,38));
+                        IntPtr buffer=graphics.GetHdc();
+                        try
+                        {
+                            Message native=Message.Create(message.HWnd,0x0318,buffer,new IntPtr(4));
+                            base.WndProc(ref native); // WM_PRINTCLIENT / PRF_CLIENT
+                        }
+                        finally { graphics.ReleaseHdc(buffer); }
+                        using(var pen=new Pen(Color.FromArgb(37,37,38),4))
+                            graphics.DrawRectangle(pen,0,0,bitmap.Width-1,bitmap.Height-1);
+                        var info=new ComboInfo();info.Size=Marshal.SizeOf(typeof(ComboInfo));
+                        if(GetComboBoxInfo(message.HWnd,ref info))
+                            DrawComboButton(graphics,Rectangle.FromLTRB(info.Button.Left,info.Button.Top,info.Button.Right,info.Button.Bottom));
+                        DrawSearchBorder(graphics,_combo.Size);
+                        using(var target=Graphics.FromHdc(dc))target.DrawImageUnscaled(bitmap,0,0);
+                    }
+                }
+                finally { EndPaint(message.HWnd,ref paint); }
+                message.Result=IntPtr.Zero;
             }
             public void Dispose()
             {
