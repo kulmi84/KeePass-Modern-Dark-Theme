@@ -255,12 +255,20 @@ namespace KeeTheme
             var picker = (DateTimePicker)sender;
             IntPtr calendar = ListViewNativeWindow.SendMessage(picker.Handle,0x1008,IntPtr.Zero,IntPtr.Zero);
             if (calendar == IntPtr.Zero) return;
-            TrySetWindowTheme(calendar,true);
-            // DTM_SETMCCOLOR: supported fallback when the Windows calendar honors colors.
+            ApplyModernCalendarColors(calendar);
+        }
+
+        internal static void ApplyModernCalendarColors(IntPtr calendar)
+        {
+            if (calendar == IntPtr.Zero || MonoWorkarounds.IsRequired()) return;
+            // Month calendars ignore most MCSC colors while visual styles are active.
+            // Disable them on this transient popup only, not on the date picker.
+            SetWindowTheme(calendar, "", "");
             int[] colors = { ColorTranslator.ToWin32(Color.FromArgb(37,37,38)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
-                ColorTranslator.ToWin32(Color.FromArgb(56,101,138)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
+                ColorTranslator.ToWin32(Color.FromArgb(45,45,48)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
                 ColorTranslator.ToWin32(Color.FromArgb(37,37,38)), ColorTranslator.ToWin32(Color.FromArgb(190,190,190)) };
-            for (int i=0;i<colors.Length;i++) ListViewNativeWindow.SendMessage(picker.Handle,0x1006,new IntPtr(i),new IntPtr(colors[i]));
+            // MCM_SETCOLOR updates the actual popup created for this opening.
+            for (int i=0;i<colors.Length;i++) ListViewNativeWindow.SendMessage(calendar,0x100A,new IntPtr(i),new IntPtr(colors[i]));
         }
 
 		private void OverrideScrollBarsSetExplorerTheme(Control control)
@@ -388,8 +396,18 @@ namespace KeeTheme
             if (box.CheckState == CheckState.Indeterminate)
                 using (var brush = new SolidBrush(Color.FromArgb(190,190,190))) e.Graphics.FillRectangle(brush,r.X+3,r.Y+r.Height/2-1,r.Width-6,2);
             else if (box.Checked)
+              {
+                  var state = e.Graphics.Save();
+                  e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 using (var pen = new Pen(box.Enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),1.7f))
-                    e.Graphics.DrawLines(pen,new Point[]{new Point(r.X+3,r.Y+r.Height/2),new Point(r.X+r.Width/2-1,r.Bottom-4),new Point(r.Right-3,r.Y+3)});
+                  {
+                      pen.StartCap = pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                      pen.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+                      e.Graphics.DrawLines(pen,new PointF[]{new PointF(r.X+r.Width*0.24f,r.Y+r.Height*0.51f),
+                          new PointF(r.X+r.Width*0.43f,r.Y+r.Height*0.70f),new PointF(r.X+r.Width*0.77f,r.Y+r.Height*0.27f)});
+                  }
+                  e.Graphics.Restore(state);
+              }
         }
 
 		private void HandleCheckBoxEnabledChanged(object sender, EventArgs e)

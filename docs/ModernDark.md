@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.10: Dunkler Kalender und geglättetes Häkchen
+
+Beim Öffnen des Kalender-Popups wird nur auf diesem vorübergehenden nativen Kalender das Windows-Visual-Style abgeschaltet. Mit aktivem Visual Style ignoriert der Kalender die meisten Farbvorgaben ([Microsoft](https://learn.microsoft.com/en-us/windows/win32/controls/dtm-setmccolor)). MCM_SETCOLOR setzt anschließend Panel-Hintergrund #252526, Kopf #2D2D30, Text #F1F1F1 und benachbarte Monatsdaten #BEBEBE. Kalendernavigation und Auswahl bleiben native Windows-Funktionen. Der native Test prüft deaktiviertes Visual Style, alle sechs Farbfelder und die unveränderte Datumsauswahl.
+
+Das Checkbox-Häkchen wird als geglätteter Vektor mit abgerundeten Linien gezeichnet. Die Glättung ist auf das Häkchen beschränkt; Rahmen und Text behalten ihre Darstellung. Der Erstbildschutz aus 1.1.9 bleibt erhalten. Der Nutzer meldet für 1.1.9 einen guten ersten Eindruck; der weitere Praxistest läuft noch.
+
 ## Testbuild 1.1.9: Kein vorzeitiges Anzeigen durch Form.Opacity
 
 Auch 1.1.8 beseitigt laut Nutzer die weißen Flächen nicht; ein Fenster blitzt zuvor auf dem anderen Bildschirm auf. Das aktuelle Protokoll bestätigt nun zwar Deckkraft 0, aber bereits native Sichtbarkeit beim Anhängen an die Dialoge. Im [WinForms-Referenzcode](https://referencesource.microsoft.com/System.Windows.Forms/winforms/Managed/System/WinForms/Form.cs.html) setzt Form.Opacity über AllowTransparency die Fensterstile neu. Während Load ist die verwaltete Visible-Eigenschaft schon true; die Aktualisierung kann deshalb vorzeitig native Sichtbarkeit herstellen.
