@@ -1,0 +1,99 @@
+name: Build and release KeeTheme Modern Dark 1.1.18
+# One-time release workflow
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/release-v1.1.18.yml
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install KeePass 2.61.1
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install keepass --version=2.61.1 -y --no-progress
+          if ($LASTEXITCODE -ne 0) { throw "Chocolatey KeePass install failed with exit $LASTEXITCODE" }
+          $kp = 'C:\Program Files\KeePass Password Safe 2\KeePass.exe'
+          if (!(Test-Path $kp)) { throw "KeePass.exe not found at $kp" }
+          $kpVer = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($kp).ProductVersion
+          if ($kpVer -notlike '2.61.1*') { throw "Unexpected KeePass version: $kpVer" }
+          "KEEPASS_EXE=$kp" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+      - name: Enable .NET Framework 3.5 compiler
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $csc = "$env:WINDIR\Microsoft.NET\Framework\v3.5\csc.exe"
+          if (!(Test-Path $csc)) {
+            dism.exe /Online /Enable-Feature /FeatureName:NetFx3 /All /NoRestart
+            if ($LASTEXITCODE -ne 0) { throw "Could not enable .NET Framework 3.5 (DISM exit $LASTEXITCODE)" }
+          }
+          if (!(Test-Path $csc)) { throw '.NET Framework 3.5 C# compiler not found' }
+
+      - name: Build release DLL
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -ItemType Directory -Force release | Out-Null
+          & .\build\build-local.ps1 -KeePassPath "$env:KEEPASS_EXE" -OutputPath "$PWD\release\KeeTheme.dll"
+          if (!(Test-Path 'release\KeeTheme.dll')) { throw 'KeeTheme.dll was not created' }
+
+      - name: Verify plugin metadata
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $dll = (Resolve-Path 'release\KeeTheme.dll').Path
+          $ver = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($dll)
+          if ($ver.FileVersion -ne '1.1.18.0') { throw "Unexpected file version: $($ver.FileVersion)" }
+          if ($ver.ProductName -ne 'KeePass Plugin') { throw "Unexpected product name: $($ver.ProductName)" }
+          if ($ver.CompanyName -ne 'Marcin Kulmaczewski (kulmi84)') { throw "Unexpected company: $($ver.CompanyName)" }
+          Write-Host "Verified: $($ver.FileDescription) / $($ver.FileVersion) / $($ver.CompanyName)"
+
+      - name: Package release
+        shell: powershell
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $zip = 'release\KeeTheme-ModernDark-v1.1.18.zip'
+          Compress-Archive -Path 'release\KeeTheme.dll' -DestinationPath $zip -Force
+          $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash  KeeTheme-ModernDark-v1.1.18.zip" | Set-Content -Encoding ascii 'release\KeeTheme-ModernDark-v1.1.18.zip.sha256'
+          Write-Host "SHA256 $hash"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: KeeTheme-ModernDark-v1.1.18
+          path: |
+            release/KeeTheme.dll
+            release/KeeTheme-ModernDark-v1.1.18.zip
+            release/KeeTheme-ModernDark-v1.1.18.zip.sha256
+
+      - name: Create GitHub release
+        shell: powershell
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $notes = @'
+          KeeTheme Modern Dark 1.1.18 veröffentlicht den fertig abgestimmten Modern-Dark-Stand.
+
+          - Stabiler Funktionsstand aus 1.1.17 unverändert übernommen.
+          - Plugin-Metadaten auf "KeeTheme Modern Dark" aktualisiert.
+          - Marcin Kulmaczewski (kulmi84) als Maintainer des Forks eingetragen.
+          - Krzysztof Łaputa bleibt als ursprünglicher Autor von KeeTheme genannt.
+          - Build gegen KeePass 2.61.1.
+          - ZIP enthält die fertige KeeTheme.dll; separate SHA-256-Datei ist beigefügt.
+
+          Installation: KeePass vollständig schließen, ZIP entpacken und KeeTheme.dll in den KeePass-Plugins-Ordner kopieren. Eine vorhandene KeeTheme.dll/KeeTheme.plgx vorher sichern bzw. entfernen.
+          '@
+          gh release create v1.1.18 'release\KeeTheme-ModernDark-v1.1.18.zip' 'release\KeeTheme-ModernDark-v1.1.18.zip.sha256' --title 'KeeTheme Modern Dark 1.1.18' --notes $notes --target "$env:GITHUB_SHA"

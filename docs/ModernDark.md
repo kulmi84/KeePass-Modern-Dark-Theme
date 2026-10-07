@@ -1,6 +1,12 @@
-# KeeTheme Modern Dark – erste Testversion
+# KeeTheme Modern Dark – Dokumentation
 
-Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
+KeePass selbst wird nicht verändert.
+
+## Release 1.1.18: Fertiger Modern-Dark-Stand
+
+Version 1.1.18 veröffentlicht den bestätigten stabilen Modern-Dark-Stand ohne weitere funktionale Änderungen gegenüber 1.1.17. Die Plugin-Metadaten nennen nun **KeeTheme Modern Dark** sowie **Marcin Kulmaczewski (kulmi84)** als Maintainer des Forks; Krzysztof Łaputa bleibt als ursprünglicher Autor von KeeTheme ausdrücklich genannt.
+
+Der Release wird gegen die aktuelle offizielle KeePass-2-Version gebaut. Die vorhandenen Theme-, Icon-, Dialog-, Kalender- und Schlüsseldatei-Korrekturen aus 1.1.17 bleiben unverändert.
 
 ## Release 1.1.18: Suchfeld ohne hellen Zwischenrahmen
 
