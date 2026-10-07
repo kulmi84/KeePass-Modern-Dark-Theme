@@ -13,6 +13,12 @@ namespace KeeTheme.Theme
             string glyph;
             switch (name)
             {
+                case "m_menuToolsPwGenerator": glyph = "key"; break;
+                case "m_menuToolsGeneratePwList": glyph = "views"; break;
+                case "m_menuToolsTanWizard": glyph = "wand"; break;
+                case "m_menuToolsTriggers": glyph = "trigger"; break;
+                case "m_menuToolsPlugins": glyph = "plugin"; break;
+                case "m_menuToolsOptions": case "m_menuToolsOptionsEnf": glyph = "settings"; break;
                 case "m_tbNewDatabase": case "m_menuFileNew": glyph = "new"; break;
                 case "m_tbOpenDatabase": case "m_menuFileOpen": glyph = "open"; break;
                 case "m_tbSaveDatabase": case "m_menuFileSave": glyph = "save"; break;
@@ -78,6 +84,12 @@ namespace KeeTheme.Theme
                     p.LineJoin = LineJoin.Round;
                     switch (glyph)
                     {
+                        case "wand": g.DrawLine(p,4,17,14,7);g.DrawLine(p,11,10,14,13);g.DrawLine(p,5,2,5,6);g.DrawLine(p,3,4,7,4);g.DrawLine(p,16,2,16,6);g.DrawLine(p,14,4,18,4);break;
+                        case "trigger": g.DrawRectangle(p,2,3,5,5);g.DrawRectangle(p,13,12,5,5);g.DrawLines(p,new PointF[]{new PointF(7,5),new PointF(15,5),new PointF(15,12)});g.DrawLines(p,new PointF[]{new PointF(12,9),new PointF(15,12),new PointF(18,9)});break;
+                        case "plugin": g.DrawLines(p,new PointF[]{new PointF(6,3),new PointF(6,8),new PointF(3,8),new PointF(3,13),new PointF(8,13),new PointF(8,17),new PointF(13,17),new PointF(13,13),new PointF(17,13),new PointF(17,8),new PointF(13,8),new PointF(13,3),new PointF(6,3)});g.DrawArc(p,7,1,5,5,180,180);break;
+                        case "settings":
+                            g.DrawEllipse(p,5,5,10,10);g.DrawEllipse(p,8,8,4,4);
+                            for(int i=0;i<8;i++){double angle=i*System.Math.PI/4;g.DrawLine(p,10+(float)System.Math.Cos(angle)*5,10+(float)System.Math.Sin(angle)*5,10+(float)System.Math.Cos(angle)*8,10+(float)System.Math.Sin(angle)*8);}break;
                         case "more": g.DrawLine(p,4,10,4.3f,10);g.DrawLine(p,10,10,10.3f,10);g.DrawLine(p,16,10,16.3f,10);break;
                         case "folderAdd": case "folderEdit":
                             g.DrawLines(p,new PointF[]{new PointF(3,16),new PointF(3,5),new PointF(8,5),new PointF(10,7),new PointF(17,7),new PointF(17,10)});

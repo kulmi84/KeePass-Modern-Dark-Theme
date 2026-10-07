@@ -31,3 +31,17 @@ $r.DrawItemImage((New-Object Windows.Forms.ToolStripItemImageRenderEventArgs($g,
 for($x=0;$x -lt 24;$x++){for($y=0;$y -lt 24;$y++){$p=$b.GetPixel($x,$y);if($p.R -ne $p.G){throw 'Nested menu used original image'}}}
 $g.Dispose();$b.Dispose();$menu.Dispose();$source.Dispose()
 'PASS group/entry context aliases, detached and nested roots, disabled icons and unchanged source images'
+$extras=New-Object Windows.Forms.ToolStripMenuItem('Extras');$extras.Name='m_menuTools'
+$source=New-Object Drawing.Bitmap(16,16);$g=[Drawing.Graphics]::FromImage($source);$g.Clear([Drawing.Color]::Magenta);$g.Dispose()
+foreach($name in @('m_menuToolsPwGenerator','m_menuToolsGeneratePwList','m_menuToolsTanWizard','m_menuToolsTriggers','m_menuToolsPlugins','m_menuToolsOptions','thirdPartyPlugin')){
+ $item=New-Object Windows.Forms.ToolStripMenuItem($name);$item.Name=$name;$item.Image=$source;$extras.DropDownItems.Add($item)|Out-Null
+ foreach($enabled in @($true,$false)){
+  $item.Enabled=$enabled;$bitmap=New-Object Drawing.Bitmap(24,24);$g=[Drawing.Graphics]::FromImage($bitmap);$g.Clear([Drawing.Color]::Black)
+  $r.DrawItemImage((New-Object Windows.Forms.ToolStripItemImageRenderEventArgs($g,$item,$source,$rect)))
+  for($x=0;$x -lt 24;$x++){for($y=0;$y -lt 24;$y++){$pixel=$bitmap.GetPixel($x,$y);if($pixel.R -ne $pixel.G -or $pixel.G -ne $pixel.B){throw ('Color survived Extras rendering '+$name)}}}
+  $g.Dispose();$bitmap.Dispose()
+ }
+}
+if($source.GetPixel(8,8).ToArgb() -ne [Drawing.Color]::Magenta.ToArgb()){throw 'Plugin source icon mutated'}
+$extras.Dispose();$source.Dispose()
+'PASS Extras vector icons and third-party grayscale rendering, enabled/disabled, source preservation'

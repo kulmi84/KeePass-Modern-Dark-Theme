@@ -1,5 +1,6 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using KeePass.UI.ToolStripRendering;
 
@@ -25,8 +26,10 @@ namespace KeeTheme.Theme
         {
             var owner = e.Item.Owner;
             var dropdown = owner as ToolStripDropDown;
+            bool extrasMenu = e.Item.Name == "m_menuTools";
             while (dropdown != null && dropdown.OwnerItem != null)
             {
+                if (dropdown.OwnerItem.Name == "m_menuTools") extrasMenu = true;
                 owner = dropdown.OwnerItem.Owner;
                 dropdown = owner as ToolStripDropDown;
             }
@@ -37,9 +40,35 @@ namespace KeeTheme.Theme
             string name = mainMenu && context != null && string.IsNullOrEmpty(e.Item.Name) && e.Item.Text == KeePass.Resources.KPRes.MoreCommands ? "modernMoreCommands" : e.Item.Name;
             var color = e.Item.Enabled ? _customTheme.MenuItem.ForeColor : _customTheme.MenuItem.DisabledForeColor;
             if (color.IsEmpty) color = Color.FromArgb(190, 190, 190);
-            if (!_customTheme.MenuItem.ModernIcons || !mainMenu ||
-                !ModernToolbarIcons.Draw(e.Graphics, e.ImageRectangle, name, color))
-                base.OnRenderItemImage(e);
+            if (_customTheme.MenuItem.ModernIcons && (mainMenu || extrasMenu))
+            {
+                if (ModernToolbarIcons.Draw(e.Graphics, e.ImageRectangle, name, color)) return;
+                // Preserve third-party artwork and shared images; render only the
+                // Extras-menu copy in grayscale instead of replacing plugin logos.
+                if (extrasMenu && e.Image != null)
+                {
+                    using(var attributes=new ImageAttributes())
+                    {
+                        attributes.SetColorMatrix(new ColorMatrix(new float[][] {
+                            new float[]{.299f,.299f,.299f,0,0},new float[]{.587f,.587f,.587f,0,0},
+                            new float[]{.114f,.114f,.114f,0,0},new float[]{0,0,0,e.Item.Enabled?1f:.45f,0},new float[]{0,0,0,0,1}}));
+                        e.Graphics.DrawImage(e.Image,e.ImageRectangle,0,0,e.Image.Width,e.Image.Height,GraphicsUnit.Pixel,attributes);
+                    }
+                    return;
+                }
+            }
+            base.OnRenderItemImage(e);
+        }
+
+        protected override void OnRenderItemCheck(ToolStripItemImageRenderEventArgs e)
+        {
+            if (!_customTheme.MenuItem.ModernIcons) { base.OnRenderItemCheck(e); return; }
+            var bounds=e.ImageRectangle;
+            using(var pen=new Pen(e.Item.Enabled?_customTheme.MenuItem.ForeColor:_customTheme.MenuItem.DisabledForeColor,1.7f))
+            {
+                pen.StartCap=pen.EndCap=LineCap.Round;
+                e.Graphics.DrawLines(pen,new PointF[]{new PointF(bounds.Left+bounds.Width*.2f,bounds.Top+bounds.Height*.5f),new PointF(bounds.Left+bounds.Width*.43f,bounds.Top+bounds.Height*.75f),new PointF(bounds.Left+bounds.Width*.82f,bounds.Top+bounds.Height*.23f)});
+            }
         }
 
         protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
