@@ -187,6 +187,15 @@ namespace KeeTheme
                     border.Dispose(); _fieldBorders.Remove(target);
                 }
             }
+            control.VisibleChanged -= HandleInitialVisibility;
+            if (UseModernIcons && (control is TextBoxBase || control is DateTimePicker || control is ComboBox))
+                control.VisibleChanged += HandleInitialVisibility;
+            var dialog = control as Form;
+            if (dialog != null)
+            {
+                dialog.Shown -= HandleInitialDialogShown;
+                if (UseModernIcons) dialog.Shown += HandleInitialDialogShown;
+            }
             var datePicker = control as DateTimePicker;
             if (datePicker != null)
             {
@@ -204,6 +213,21 @@ namespace KeeTheme
             }
 		}
 
+        // Refresh native frames once after layout/visibility changes, not on every paint.
+        [DllImport("user32.dll")] private static extern bool RedrawWindow(IntPtr hwnd, IntPtr update, IntPtr region, uint flags);
+        private void RefreshInitialFrame(Control control)
+        {
+            if (!UseModernIcons || control.IsDisposed || !control.IsHandleCreated || !control.Visible || MonoWorkarounds.IsRequired()) return;
+            if (CanHaveScrollBars(control)) TrySetWindowTheme(control.Handle, _theme.ScrollBar.UseExplorerDarkMode);
+            RedrawWindow(control.Handle, IntPtr.Zero, IntPtr.Zero, 0x0400 | 0x0100 | 0x0080 | 0x0004 | 0x0001);
+        }
+        private void HandleInitialVisibility(object sender, EventArgs e) { RefreshInitialFrame((Control)sender); }
+        private void HandleInitialDialogShown(object sender, EventArgs e) { RefreshInitialFrames((Control)sender); }
+        private void RefreshInitialFrames(Control control)
+        {
+            RefreshInitialFrame(control);
+            foreach (Control child in control.Controls) RefreshInitialFrames(child);
+        }
         private void HandleModernBannerPaint(object sender, PaintEventArgs e)
         {
             if (!UseModernIcons) return;
