@@ -30,6 +30,17 @@ try {
   }
  }
 } finally {[PaintProbe]::DeleteDC($dc)|Out-Null;$decorator.Dispose()}
+$combo.Enabled=$true
+$decorator=[Activator]::CreateInstance($t,$f,$null,@($combo.PSObject.BaseObject,$true),$null)
+$form.Show();$combo.Focus()|Out-Null;[Windows.Forms.Application]::DoEvents()
+try {
+ foreach($msg in @(0x200,0x201,0x202,0x7,0x8,0x100,0x101)) {
+  [PaintProbe]::SendMessage($combo.Handle,$msg,[IntPtr]::Zero,[IntPtr]::Zero)|Out-Null
+  $dc=[PaintProbe]::GetWindowDC($combo.Handle)
+  try {if([PaintProbe]::GetPixel($dc,$combo.Width-7,4) -ne 0x262525){throw "Combo button became light after message $msg"}}
+  finally {[PaintProbe]::ReleaseDC($combo.Handle,$dc)|Out-Null}
+ }
+} finally {$decorator.Dispose()}
 $edit=New-Object Windows.Forms.TextBox;$edit.Location=New-Object Drawing.Point(0,40);$form.Controls.Add($edit)
 $decorator=[Activator]::CreateInstance($t,$f,$null,@($edit.PSObject.BaseObject,$true),$null)
 $form.Show();[Windows.Forms.Application]::DoEvents()

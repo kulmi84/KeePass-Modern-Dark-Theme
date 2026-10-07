@@ -23,18 +23,26 @@ Aktueller Banner: S/W-KeePass-Logo, scharfe lokalisierte Überschrift und dezent
 - Originales KeePass-Fensterlogo in Graustufen.
 - Moderne Icon-Vorschau und Passwortgenerator-Symbole im Eintragsdialog.
 - Dunkle Eingabefeld- und Suchfeldrahmen sowie ein kompakter S/W-Banner.
+- Dunkler Datumskalender mit grauem Popup-Rahmen und lesbaren Wochentagen.
+- Korrigierte Einblendereihenfolge ohne vorzeitiges Anzeigen auf einem anderen Monitor.
 
 Die vorhandenen KeeTheme-Themes und Funktionen bleiben verfügbar. Passwort- und KDBX-Logik werden nicht verändert.
 
 ## Installation und Einstellungen
 
-[**Version 1.1.0 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.0) – das ZIP enthält die fertige KeeTheme.dll.
+[**Version 1.1.13 herunterladen**](https://github.com/kulmi84/KeeTheme/releases/tag/v1.1.13) – das ZIP enthält die fertige KeeTheme.dll.
 
 [Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
 Die aktuelle Version aus diesem Fork bauen und KeeTheme.dll in den KeePass-Plugins-Ordner kopieren. Vor dem Austausch KeePass schließen und vorherige KeeTheme.dll/KeeTheme.plgx sichern und aus dem Plugins-Ordner nehmen. Unter **Extras → Optionen → KeeTheme** das Theme **Modern Dark** auswählen.
 
 Die dunklen Rahmen und das neue Banner wurden im laufenden KeePass vom Nutzer bestätigt. Automatisierte Prüfungen ergänzen die praktischen Tests; Details und verbleibende Grenzen stehen in der Dokumentation.
+
+## Kalender
+
+![Dunkler Kalender mit fiktivem Testdatum](docs/ModernDark-calendar-demo.png)
+
+Aufnahme eines echten Kalender-Popups mit fiktivem Testdatum. Bekannte Einschränkung: Die einheitliche dunkle Datumsdarstellung überdeckt beim Bearbeiten die native Markierung einzelner Datumssegmente.
 
 ## Ursprung
 

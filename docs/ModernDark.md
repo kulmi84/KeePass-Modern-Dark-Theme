@@ -2,6 +2,12 @@
 
 Branch: feature/windows11-dark-v1. KeePass selbst wird nicht verändert.
 
+## Version 1.1.13: Dropdown-Schaltflächen und Veröffentlichung
+
+Die native ComboBox zeichnet ihren Pfeil auch bei Fokus-, Maus- und Tastaturmeldungen neu, ohne zwingend WM_PAINT auszulösen. Diese Nachzeichnungen werden jetzt ebenfalls mit dunkler Schaltfläche und grauer Trennlinie abgeschlossen, insbesondere bei der Schlüsseldatei im Hauptschlüsseldialog. Der native Feldtest prüft die Buttonfarbe nach diesen Meldungen. Theme-/Icon-Prüfungen und die echte KeePass-Integration prüfen den fertigen Build.
+
+Der Nutzer bestätigt die Kalenderkorrektur aus 1.1.12. 1.1.13 bündelt die Änderungen seit dem vorherigen öffentlichen Release. Die README verweist auf den aktuellen Download und enthält zusätzlich eine echte Kalender-Popup-Aufnahme mit ausschließlich fiktivem Testdatum. Private Screenshots und Diagnoseprotokolle werden nicht veröffentlicht. Die bekannte Einschränkung der Datumssegment-Markierung bleibt dokumentiert; weitere Praxisbeobachtungen zum Einblenden auf mehreren Monitoren sind willkommen.
+
 ## Testbuild 1.1.12: Tatsächlicher DropDown-Rahmen und lesbare Wochentage
 
 1.1.11 änderte den sichtbaren Rahmen beim Nutzer nicht. Die Untersuchung eines tatsächlich geöffneten DateTimePicker zeigt zwei Fenster: SysMonthCal32 liegt innerhalb eines separaten Popup-Fensters der Klasse DropDown. Der helle Außenrand gehört zum DropDown-Fenster. Jetzt wird dessen Rahmen überzeichnet; der Kalender selbst bekommt einen getrennten Paint-Hook für die Wochentage. MCM_HITTEST bestimmt die Zeilenhöhe, MCM_GETFIRSTDAYOFWEEK die Reihenfolge; die Beschriftungen stammen aus der aktuellen Kultur.

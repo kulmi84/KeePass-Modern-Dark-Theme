@@ -152,7 +152,11 @@ namespace KeeTheme.Decorators
                     m.Result = IntPtr.Zero;
                 else base.WndProc(ref m);
                 bool dateInteraction = _combo is DateTimePicker && (m.Msg == 0x0007 || m.Msg == 0x0008 || m.Msg == 0x0100 || m.Msg == 0x0101 || m.Msg == 0x0201 || m.Msg == 0x0202);
-                if (m.Msg != 0x000F && m.Msg != 0x0085 && !dateInteraction) return;
+                // Native ComboBox button redraws during mouse/focus changes without
+                // necessarily sending another WM_PAINT (notably in KeyPromptForm).
+                bool comboInteraction = _combo is ComboBox && (m.Msg == 0x0007 || m.Msg == 0x0008 || m.Msg == 0x0100 || m.Msg == 0x0101 ||
+                    m.Msg == 0x0200 || m.Msg == 0x0201 || m.Msg == 0x0202 || m.Msg == 0x014F || m.Msg == 0x0111);
+                if (m.Msg != 0x000F && m.Msg != 0x0085 && !dateInteraction && !comboInteraction) return;
                 IntPtr dc = GetWindowDC(m.HWnd);
                 if (dc == IntPtr.Zero) return;
                 try
