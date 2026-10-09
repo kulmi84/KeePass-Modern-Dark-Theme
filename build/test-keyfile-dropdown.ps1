@@ -23,6 +23,11 @@ $combo.DropDownStyle='DropDownList';$combo.FlatStyle='Flat';$combo.Width=240
 $combo.BackColor=[Drawing.Color]::FromArgb(37,37,38);$combo.ForeColor=[Drawing.Color]::FromArgb(241,241,241)
 $combo.Items.Add('C:\Demo\Example Database Keys\Demo Family Vault\Example.keyx')|Out-Null;$combo.SelectedIndex=0
 $theme=[Runtime.Serialization.FormatterServices]::GetUninitializedObject($assembly.GetType("KeeTheme.KeeTheme"))
+$themeFlags=[Reflection.BindingFlags]'Instance,Static,Public,NonPublic'
+$ini=$assembly.GetType('KeeTheme.TemplateReader').GetMethod('GetFromResources',$themeFlags).Invoke($null,@('KeeTheme.Resources.ModernDark.ini'))
+$template=[Activator]::CreateInstance($assembly.GetType('KeeTheme.Theme.CustomThemeTemplate'),$themeFlags,$null,@($ini),$null)
+$paletteTheme=[Activator]::CreateInstance($assembly.GetType('KeeTheme.Theme.CustomTheme'),$themeFlags,$null,@($template),$null)
+$assembly.GetType('KeeTheme.KeeTheme').GetField('_theme',$themeFlags).SetValue($theme,$paletteTheme)
 $drawMethod=$assembly.GetType("KeeTheme.KeeTheme").GetMethod("HandleModernComboDrawItem",[Reflection.BindingFlags]"Instance,NonPublic")
 $combo.DrawMode="OwnerDrawFixed"
 $combo.add_DrawItem({param($drawSender,$drawArgs) $drawMethod.Invoke($theme,@($drawSender,$drawArgs))|Out-Null})
