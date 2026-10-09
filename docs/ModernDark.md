@@ -2,6 +2,12 @@
 
 KeePass selbst wird nicht verändert.
 
+## Testbuild 1.1.20: Zusätzliches Modern Gray
+
+Modern Gray ist als vierte eingebettete Theme-Vorlage wählbar. Grundfläche #B0B0B0, Eingabeflächen #B8B8B8, dunkle Schrift #202020, dezente graue Rahmen und zurückhaltende Auswahlfarben. Moderne Icons, Suchfeld-Pufferung, Schlüsseldatei-Pfeil und Kalenderkorrekturen sind auch dort vorhanden. Eine separate Palette passt die zuvor festen Farben moderner Bedienelemente ausschließlich für Modern Gray an.
+
+Die drei bisherigen Vorlagen und die Standardauswahl Modern Dark bleiben unverändert. Automatische Vergleiche mit der bisherigen DLL prüfen die alten Ressourcen, Theme-Erkennung und Editor-Roundtrip; Gray–Dark–Gray erhält den gewählten Schlüsseldateipfad. Bestehende Prüfungen für Suchfeld, Felder, Kalender, Checkboxen, Menü-Icons, Gruppen und eigene Datenbankicons bestehen. Die graue Darstellung wurde an isolierten Bedienelementen mit fiktiven Daten geprüft; der Praxistest in der Nutzerinstallation steht aus. Das öffentliche stabile Release bleibt 1.1.19.
+
 ## Release 1.1.19: Einheitliche Extras-Icons
 
 Der Nutzer bestätigt die neuen S/W-Symbole für Passwortgenerator, Passwortliste, TAN-Assistent, Trigger, Plugins und Optionen. Zusatzplugin-Logos im Extras-Menü werden in Graustufen gezeichnet, ohne die Originalbilder zu verändern. Der Modern-Dark-Menühaken ist neutral. Andere Themes behalten ihre bisherige Darstellung. Menü-, Theme-/Icon- und Suchfeld-Prüfungen bestehen. Die bestätigte Suchfeld-Korrektur aus 1.1.18 bleibt enthalten.

@@ -350,8 +350,8 @@ namespace KeeTheme.Decorators
 			var textBounds = new Rectangle(bounds.Location, bounds.Size);
             if (_theme.MenuItem.ModernIcons && e.Item.Selected)
             {
-                using (var brush = new SolidBrush(Color.FromArgb(56,101,138))) e.Graphics.FillRectangle(brush,bounds);
-                color = Color.FromArgb(241,241,241);
+                using (var brush = new SolidBrush(ModernPalette.ForTheme(_theme.Name).Color(Color.FromArgb(56,101,138)))) e.Graphics.FillRectangle(brush,bounds);
+                color = ModernPalette.ForTheme(_theme.Name).Color(Color.FromArgb(241,241,241));
             }
 
 			var listItem = e.Item.Tag as PwListItem;

@@ -178,9 +178,12 @@ namespace KeeTheme
                 var owner = target.FindForm();
                 IDisposable border;
                 bool modern = UseModernIcons && owner != null && (owner.GetType().FullName == "KeePass.Forms.PwEntryForm" || owner.GetType().FullName == "KeePass.Forms.KeyPromptForm" || owner.GetType().FullName == "KeePass.Forms.GroupForm" || owner.GetType().FullName == "KeePass.Forms.DatabaseSettingsForm");
+                if (modern && _fieldBorders.TryGetValue(target,out border) &&
+                    ((CenteredSearchDecorator.SearchBorderWindow)border).IsGray != (_theme.Name=="Modern Gray"))
+                { border.Dispose();_fieldBorders.Remove(target); }
                 if (modern && !_fieldBorders.ContainsKey(target))
                 {
-                    _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target, true));
+                    _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target,true,_theme.Name=="Modern Gray"));
                     target.Disposed += delegate { if (_fieldBorders.TryGetValue(target, out border)) { border.Dispose(); _fieldBorders.Remove(target); } };
                 }
                 else if (!modern && _fieldBorders.TryGetValue(target, out border))
@@ -230,7 +233,7 @@ namespace KeeTheme
                 using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(fade,_theme.Control.BackColor,Color.FromArgb(0,_theme.Control.BackColor),0f))
                     e.Graphics.FillRectangle(brush,fade);
             }
-            using (var pen = new Pen(Color.FromArgb(65,65,65)))
+            using (var pen = new Pen(ModernPalette.ForTheme(_theme.Name).Color(Color.FromArgb(65,65,65))))
                 e.Graphics.DrawLine(pen, 0, banner.Height-1, banner.Width-1, banner.Height-1);
             int padding = Math.Max(12, banner.Height/5);
             int textLeft = padding;
@@ -256,18 +259,19 @@ namespace KeeTheme
             var picker = (DateTimePicker)sender;
             IntPtr calendar = ListViewNativeWindow.SendMessage(picker.Handle,0x1008,IntPtr.Zero,IntPtr.Zero);
             if (calendar == IntPtr.Zero) return;
-            ApplyModernCalendarColors(calendar);
+            ApplyModernCalendarColorsWithPalette(calendar,ModernPalette.ForTheme(_theme.Name));
         }
 
-        internal static void ApplyModernCalendarColors(IntPtr calendar)
+        internal static void ApplyModernCalendarColors(IntPtr calendar) { ApplyModernCalendarColorsWithPalette(calendar,new ModernPalette(false)); }
+        internal static void ApplyModernCalendarColorsWithPalette(IntPtr calendar,ModernPalette palette)
         {
             if (calendar == IntPtr.Zero || MonoWorkarounds.IsRequired()) return;
             // Month calendars ignore most MCSC colors while visual styles are active.
             // Disable them on this transient popup only, not on the date picker.
             SetWindowTheme(calendar, "", "");
-            int[] colors = { ColorTranslator.ToWin32(Color.FromArgb(37,37,38)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
-                ColorTranslator.ToWin32(Color.FromArgb(45,45,48)), ColorTranslator.ToWin32(Color.FromArgb(241,241,241)),
-                ColorTranslator.ToWin32(Color.FromArgb(37,37,38)), ColorTranslator.ToWin32(Color.FromArgb(190,190,190)) };
+            int[] colors = { ColorTranslator.ToWin32(palette.Color(Color.FromArgb(37,37,38))), ColorTranslator.ToWin32(palette.Color(Color.FromArgb(241,241,241))),
+                ColorTranslator.ToWin32(palette.Color(Color.FromArgb(45,45,48))), ColorTranslator.ToWin32(palette.Color(Color.FromArgb(241,241,241))),
+                ColorTranslator.ToWin32(palette.Color(Color.FromArgb(37,37,38))), ColorTranslator.ToWin32(palette.Color(Color.FromArgb(190,190,190))) };
             // MCM_SETCOLOR updates the actual popup created for this opening.
             for (int i=0;i<colors.Length;i++) ListViewNativeWindow.SendMessage(calendar,0x100A,new IntPtr(i),new IntPtr(colors[i]));
         }
@@ -382,6 +386,7 @@ namespace KeeTheme
         private void HandleModernCheckBoxPaint(object sender, PaintEventArgs e)
         {
             if (!UseModernIcons) return;
+            var palette=ModernPalette.ForTheme(_theme.Name);
             var box = (CheckBox)sender;
             Size glyph = CheckBoxRenderer.GetGlyphSize(e.Graphics,CheckBoxState.UncheckedNormal);
             bool right = box.CheckAlign == System.Drawing.ContentAlignment.TopRight || box.CheckAlign == System.Drawing.ContentAlignment.MiddleRight || box.CheckAlign == System.Drawing.ContentAlignment.BottomRight;
@@ -392,15 +397,15 @@ namespace KeeTheme
             if (box.CheckAlign == System.Drawing.ContentAlignment.BottomLeft || box.CheckAlign == System.Drawing.ContentAlignment.BottomCenter || box.CheckAlign == System.Drawing.ContentAlignment.BottomRight) y = box.Height-glyph.Height;
             var r = new Rectangle(x,y,glyph.Width,glyph.Height);
             using (var brush = new SolidBrush(box.BackColor)) e.Graphics.FillRectangle(brush,r);
-            using (var brush = new SolidBrush(box.Checked ? Color.FromArgb(56,101,138) : Color.FromArgb(37,37,38))) e.Graphics.FillRectangle(brush,r);
-            using (var pen = new Pen(box.Enabled ? Color.FromArgb(110,110,110) : Color.FromArgb(65,65,65))) e.Graphics.DrawRectangle(pen,r.X,r.Y,r.Width-1,r.Height-1);
+            using (var brush = new SolidBrush(box.Checked ? palette.Color(Color.FromArgb(56,101,138)) : palette.Color(Color.FromArgb(37,37,38)))) e.Graphics.FillRectangle(brush,r);
+            using (var pen = new Pen(box.Enabled ? palette.Color(Color.FromArgb(110,110,110)) : palette.Color(Color.FromArgb(65,65,65)))) e.Graphics.DrawRectangle(pen,r.X,r.Y,r.Width-1,r.Height-1);
             if (box.CheckState == CheckState.Indeterminate)
-                using (var brush = new SolidBrush(Color.FromArgb(190,190,190))) e.Graphics.FillRectangle(brush,r.X+3,r.Y+r.Height/2-1,r.Width-6,2);
+                using (var brush = new SolidBrush(palette.Color(Color.FromArgb(190,190,190)))) e.Graphics.FillRectangle(brush,r.X+3,r.Y+r.Height/2-1,r.Width-6,2);
             else if (box.Checked)
               {
                   var state = e.Graphics.Save();
                   e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                using (var pen = new Pen(box.Enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),1.7f))
+                using (var pen = new Pen(box.Enabled ? palette.Color(Color.FromArgb(241,241,241)) : palette.Color(Color.FromArgb(190,190,190)),1.7f))
                   {
                       pen.StartCap = pen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
                       pen.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
@@ -467,14 +472,15 @@ namespace KeeTheme
 
         private void HandleModernComboDrawItem(object sender,DrawItemEventArgs e)
         {
+            var palette=ModernPalette.ForTheme(_theme.Name);
             var combo=(ComboBox)sender;
             bool display=(e.State & DrawItemState.ComboBoxEdit)!=0;
             bool selected=!display && (e.State & DrawItemState.Selected)!=0;
-            Color background=selected ? Color.FromArgb(56,101,138) : combo.BackColor;
+            Color background=selected ? palette.Color(Color.FromArgb(56,101,138)) : combo.BackColor;
             using(var brush=new SolidBrush(background))e.Graphics.FillRectangle(brush,e.Bounds);
             string text=e.Index>=0 && e.Index<combo.Items.Count ? combo.GetItemText(combo.Items[e.Index]) : combo.Text;
             var bounds=e.Bounds; bounds.Inflate(-3,0);
-            TextRenderer.DrawText(e.Graphics,text,combo.Font,bounds,combo.Enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),
+            TextRenderer.DrawText(e.Graphics,text,combo.Font,bounds,combo.Enabled ? palette.Color(Color.FromArgb(241,241,241)) : palette.Color(Color.FromArgb(190,190,190)),
                 TextFormatFlags.Left|TextFormatFlags.VerticalCenter|TextFormatFlags.SingleLine|TextFormatFlags.EndEllipsis|TextFormatFlags.NoPrefix);
         }
 
@@ -578,7 +584,7 @@ namespace KeeTheme
             if (_enabled && _theme.MenuItem.ModernIcons && search != null &&
                 toolStrip.FindForm() != null && toolStrip.FindForm().GetType().FullName == "KeePass.Forms.MainForm")
                 {
-                _centeredSearch.Add(toolStrip,new CenteredSearchDecorator(toolStrip, search));
+                _centeredSearch.Add(toolStrip,new CenteredSearchDecorator(toolStrip,search,_theme.Name=="Modern Gray"));
                 toolStrip.Disposed -= HandleCenteredStripDisposed;
                 toolStrip.Disposed += HandleCenteredStripDisposed;
             }
@@ -811,7 +817,7 @@ namespace KeeTheme
 			var bounds = new Rectangle((button.ClientSize.Width - image.Width) / 2,
 				(button.ClientSize.Height - image.Height) / 2, image.Width, image.Height);
 			using (var brush = new SolidBrush(button.BackColor)) e.Graphics.FillRectangle(brush, bounds);
-			var color = button.Enabled ? button.ForeColor : Color.FromArgb(190,190,190);
+			var color = button.Enabled ? button.ForeColor : ModernPalette.ForTheme(_theme.Name).Color(Color.FromArgb(190,190,190));
 			if (button.Name == "m_btnOpenKeyFile")
                 ModernToolbarIcons.Draw(e.Graphics, bounds, "m_tbOpenDatabase", color);
             else if (button.Name == "m_btnStandardExpires")

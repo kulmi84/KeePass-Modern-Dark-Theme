@@ -2,6 +2,7 @@ using System;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using KeeTheme.Theme;
 
 namespace KeeTheme.Decorators
 {
@@ -12,10 +13,11 @@ namespace KeeTheme.Decorators
         private readonly ToolStripLabel _space = new ToolStripLabel();
         private bool _layingOut;
         private readonly SearchBorderWindow _border;
-        internal CenteredSearchDecorator(ToolStrip strip, ToolStripComboBox search)
+        internal CenteredSearchDecorator(ToolStrip strip, ToolStripComboBox search) : this(strip,search,false) { }
+        internal CenteredSearchDecorator(ToolStrip strip, ToolStripComboBox search,bool gray)
         {
             _strip = strip; _search = search;
-            _border = new SearchBorderWindow(search.ComboBox);
+            _border = new SearchBorderWindow(search.ComboBox,false,gray);
             _space.Name = "KeeThemeCenterSearchSpacer";
             _space.AutoSize = false;
             _space.Margin = Padding.Empty;
@@ -80,7 +82,9 @@ namespace KeeTheme.Decorators
                     return text != null && text.Multiline && text.ScrollBars != ScrollBars.None;
                 }
             }
-            private readonly IntPtr _backgroundBrush = CreateSolidBrush(0x00262525);
+            private readonly ModernPalette palette;
+            internal bool IsGray { get { return palette.Gray; } }
+            private readonly IntPtr _backgroundBrush;
             private CalendarBorderWindow _calendarBorder;
             private CalendarBorderWindow _calendarHeader;
             private ComboEditEdgeWindow _comboEditEdge;
@@ -111,8 +115,11 @@ namespace KeeTheme.Decorators
             [StructLayout(LayoutKind.Sequential)] internal struct RectangleNative { public int Left, Top, Right, Bottom; }
             [DllImport("user32.dll")] internal static extern bool GetComboBoxInfo(IntPtr hwnd, ref ComboInfo info);
             internal SearchBorderWindow(Control combo) : this(combo, false) { }
-            internal SearchBorderWindow(Control combo, bool field)
+            internal SearchBorderWindow(Control combo, bool field) : this(combo,field,false) { }
+            internal SearchBorderWindow(Control combo,bool field,bool gray)
             {
+                palette=new ModernPalette(gray);
+                _backgroundBrush=CreateSolidBrush(ColorTranslator.ToWin32(palette.Color(Color.FromArgb(37,37,38))));
                 _combo = combo;
                 _field = field;
                 combo.HandleCreated += OnCreated;
@@ -125,7 +132,7 @@ namespace KeeTheme.Decorators
                 if (Handle == IntPtr.Zero) AssignHandle(handle);
                 AttachComboEditEdge();
                 if (field && combo is ComboBox && combo.Name == "m_cmbKeyFile")
-                    _comboArrow = new ComboArrowOverlay((ComboBox)combo);
+                    _comboArrow = new ComboArrowOverlay((ComboBox)combo,palette);
             }
             private void AttachComboEditEdge()
             {
@@ -136,7 +143,7 @@ namespace KeeTheme.Decorators
                     (_comboEditEdge == null || _comboEditEdge.Handle != info.Edit))
                 {
                     if (_comboEditEdge != null) _comboEditEdge.Dispose();
-                    _comboEditEdge = new ComboEditEdgeWindow(info.Edit);
+                    _comboEditEdge = new ComboEditEdgeWindow(info.Edit,palette);
                 }
             }
             private void OnCreated(object sender, EventArgs e) { AssignHandle(_combo.Handle); AttachComboEditEdge(); }
@@ -151,8 +158,8 @@ namespace KeeTheme.Decorators
                     IntPtr popup = GetParent(calendar);
                     // DateTimePicker hosts SysMonthCal32 in a separate popup window.
                     if (popup == IntPtr.Zero || (GetWindowLong(popup,-16) & unchecked((int)0x80000000)) == 0) popup = calendar;
-                    _calendarBorder = new CalendarBorderWindow(popup);
-                    if (popup != calendar) _calendarHeader = new CalendarBorderWindow(calendar,true);
+                    _calendarBorder = new CalendarBorderWindow(popup,false,palette);
+                    if (popup != calendar) _calendarHeader = new CalendarBorderWindow(calendar,true,palette);
                 }
             }
             private void OnCalendarClosed(object sender, EventArgs e)
@@ -176,8 +183,8 @@ namespace KeeTheme.Decorators
                 // Returning a dark brush also covers the modal login/locked state.
                 if (_combo is ComboBox && (m.Msg == 0x0133 || m.Msg == 0x0138))
                 {
-                    SetBkColor(m.WParam, 0x00262525);
-                    SetTextColor(m.WParam, _combo.Enabled ? 0x00F1F1F1 : 0x00BEBEBE);
+                    SetBkColor(m.WParam, ColorTranslator.ToWin32(palette.Color(Color.FromArgb(37,37,38))));
+                    SetTextColor(m.WParam, ColorTranslator.ToWin32(palette.Color(_combo.Enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190))));
                     m.Result = _backgroundBrush;
                     return;
                 }
@@ -200,20 +207,20 @@ namespace KeeTheme.Decorators
                     {
                         var date = _combo as DateTimePicker;
                         if (date != null)
-                            DrawDateField(graphics, date.ClientRectangle, date.Text, date.Font, date.Enabled);
+                            DrawDateFieldWithPalette(graphics, date.ClientRectangle, date.Text, date.Font, date.Enabled,palette);
                         if (_combo is ComboBox)
                         {
                             var info = new ComboInfo(); info.Size = Marshal.SizeOf(typeof(ComboInfo));
                             if (GetComboBoxInfo(m.HWnd, ref info))
                             {
                                 // The edit and arrow may have a native raised edge between them.
-                                using(var brush=new SolidBrush(Color.FromArgb(37,37,38)))
+                                using(var brush=new SolidBrush(palette.Color(Color.FromArgb(37,37,38))))
                                     graphics.FillRectangle(brush,info.Item.Right-2,info.Item.Top,Math.Max(2,info.Button.Left-info.Item.Right+2),info.Item.Bottom-info.Item.Top);
-                                DrawComboButton(graphics, Rectangle.FromLTRB(info.Button.Left, info.Button.Top, info.Button.Right, info.Button.Bottom));
+                                DrawComboButtonWithPalette(graphics, Rectangle.FromLTRB(info.Button.Left, info.Button.Top, info.Button.Right, info.Button.Bottom),palette);
                             }
                         }
-                        if (_field) DrawFieldBorder(graphics, _combo.Size, _combo.ContainsFocus);
-                        else DrawSearchBorder(graphics, _combo.Size);
+                        if (_field) DrawFieldBorderWithPalette(graphics, _combo.Size, _combo.ContainsFocus,palette);
+                        else DrawSearchBorderWithPalette(graphics, _combo.Size,palette);
                     }
                 }
                 finally { ReleaseDC(m.HWnd, dc); }
@@ -228,7 +235,7 @@ namespace KeeTheme.Decorators
                     using(var bitmap=new Bitmap(_combo.Width,_combo.Height))
                     using(var graphics=Graphics.FromImage(bitmap))
                     {
-                        graphics.Clear(Color.FromArgb(37,37,38));
+                        graphics.Clear(palette.Color(Color.FromArgb(37,37,38)));
                         IntPtr buffer=graphics.GetHdc();
                         try
                         {
@@ -236,12 +243,12 @@ namespace KeeTheme.Decorators
                             base.WndProc(ref native); // WM_PRINTCLIENT / PRF_CLIENT
                         }
                         finally { graphics.ReleaseHdc(buffer); }
-                        using(var pen=new Pen(Color.FromArgb(37,37,38),4))
+                        using(var pen=new Pen(palette.Color(Color.FromArgb(37,37,38)),4))
                             graphics.DrawRectangle(pen,0,0,bitmap.Width-1,bitmap.Height-1);
                         var info=new ComboInfo();info.Size=Marshal.SizeOf(typeof(ComboInfo));
                         if(GetComboBoxInfo(message.HWnd,ref info))
-                            DrawComboButton(graphics,Rectangle.FromLTRB(info.Button.Left,info.Button.Top,info.Button.Right,info.Button.Bottom));
-                        DrawSearchBorder(graphics,_combo.Size);
+                            DrawComboButtonWithPalette(graphics,Rectangle.FromLTRB(info.Button.Left,info.Button.Top,info.Button.Right,info.Button.Bottom),palette);
+                        DrawSearchBorderWithPalette(graphics,_combo.Size,palette);
                         using(var target=Graphics.FromHdc(dc))target.DrawImageUnscaled(bitmap,0,0);
                     }
                 }
@@ -260,6 +267,7 @@ namespace KeeTheme.Decorators
                 if(_comboEditEdge!=null){_comboEditEdge.Dispose();_comboEditEdge=null;}
                 if(_comboArrow!=null){_comboArrow.Dispose();_comboArrow=null;}
                 ReleaseHandle();
+                DeleteObject(_backgroundBrush);
                 if (!_combo.IsDisposed) _combo.Invalidate(true);
             }
         }
@@ -267,9 +275,10 @@ namespace KeeTheme.Decorators
         private sealed class ComboArrowOverlay : Control
         {
             private readonly ComboBox _combo;
-            internal ComboArrowOverlay(ComboBox combo)
+            private readonly ModernPalette palette;
+            internal ComboArrowOverlay(ComboBox combo,ModernPalette colors)
             {
-                _combo=combo;
+                _combo=combo;palette=colors;
                 Name="KeeThemeKeyFileArrow";
                 TabStop=false;
                 AccessibleRole=AccessibleRole.PushButton;
@@ -292,12 +301,12 @@ namespace KeeTheme.Decorators
             }
             protected override void OnPaintBackground(PaintEventArgs e)
             {
-                e.Graphics.Clear(Color.FromArgb(37,37,38));
+                e.Graphics.Clear(palette.Color(Color.FromArgb(37,37,38)));
             }
             protected override void OnPaint(PaintEventArgs e)
             {
                 int x=Width/2,y=Height/2;
-                using(var brush=new SolidBrush(_combo.Enabled ? Color.FromArgb(190,190,190) : Color.FromArgb(110,110,110)))
+                using(var brush=new SolidBrush(_combo.Enabled ? palette.Color(Color.FromArgb(190,190,190)) : palette.Color(Color.FromArgb(110,110,110))))
                     e.Graphics.FillPolygon(brush,new Point[]{new Point(x-3,y-1),new Point(x+3,y-1),new Point(x,y+2)});
             }
             protected override void OnMouseDown(MouseEventArgs e)
@@ -318,14 +327,15 @@ namespace KeeTheme.Decorators
             [DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr hwnd,out Rect rect);
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd,IntPtr dc);
-            internal ComboEditEdgeWindow(IntPtr handle){AssignHandle(handle);}
+            private readonly ModernPalette palette;
+            internal ComboEditEdgeWindow(IntPtr handle,ModernPalette colors){palette=colors;AssignHandle(handle);}
             protected override void WndProc(ref Message m)
             {
                 base.WndProc(ref m);
                 if(m.Msg!=0xF && m.Msg!=0x85 && m.Msg!=0x7 && m.Msg!=0x8 && m.Msg!=0x201 && m.Msg!=0x202 && m.Msg!=0x100 && m.Msg!=0x101)return;
                 Rect rect; if(!GetWindowRect(m.HWnd,out rect))return;
                 IntPtr dc=GetWindowDC(m.HWnd);if(dc==IntPtr.Zero)return;
-                try {using(var graphics=Graphics.FromHdc(dc))using(var brush=new SolidBrush(Color.FromArgb(37,37,38)))
+                try {using(var graphics=Graphics.FromHdc(dc))using(var brush=new SolidBrush(palette.Color(Color.FromArgb(37,37,38))))
                     graphics.FillRectangle(brush,Math.Max(0,rect.Right-rect.Left-2),0,2,rect.Bottom-rect.Top);
                 }finally{ReleaseDC(m.HWnd,dc);}
             }
@@ -346,7 +356,9 @@ namespace KeeTheme.Decorators
             [DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr hwnd);
             [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd,IntPtr dc);
             internal CalendarBorderWindow(IntPtr handle) : this(handle,false) { }
-            internal CalendarBorderWindow(IntPtr handle,bool weekdays) { _weekdays=weekdays; AssignHandle(handle); }
+            internal CalendarBorderWindow(IntPtr handle,bool weekdays) : this(handle,weekdays,new ModernPalette(false)) { }
+            private readonly ModernPalette palette;
+            internal CalendarBorderWindow(IntPtr handle,bool weekdays,ModernPalette colors) { palette=colors;_weekdays=weekdays; AssignHandle(handle); }
             protected override void WndProc(ref Message m)
             {
                 base.WndProc(ref m);
@@ -360,14 +372,14 @@ namespace KeeTheme.Decorators
                         int width=rect.Right-rect.Left,height=rect.Bottom-rect.Top;
                         if (_weekdays) { DrawWeekdays(graphics,m.HWnd); return; }
                         // Cover the classic raised edge, then draw one gray line.
-                        using(var pen=new Pen(Color.FromArgb(37,37,38),3))
+                        using(var pen=new Pen(palette.Color(Color.FromArgb(37,37,38)),3))
                             graphics.DrawRectangle(pen,1,1,width-3,height-3);
-                        using(var pen=new Pen(Color.FromArgb(65,65,65)))
+                        using(var pen=new Pen(palette.Color(Color.FromArgb(65,65,65))))
                             graphics.DrawRectangle(pen,0,0,width-1,height-1);
                     }
                 } finally { ReleaseDC(m.HWnd,dc); }
             }
-            private static void DrawWeekdays(Graphics graphics,IntPtr hwnd)
+            private void DrawWeekdays(Graphics graphics,IntPtr hwnd)
             {
                 Rect client;
                 if(!GetClientRect(hwnd,out client))return;
@@ -391,8 +403,8 @@ namespace KeeTheme.Decorators
                     // Header cells share the hit code; their widths follow the date grid.
                     int width=Math.Max(1,(client.Right-start)/ (7-index));
                     var bounds=new Rectangle(start,top,width,bottom-top);
-                    using(var brush=new SolidBrush(Color.FromArgb(37,37,38)))graphics.FillRectangle(brush,bounds);
-                    TextRenderer.DrawText(graphics,names[(first+1+index)%7],SystemFonts.MenuFont,bounds,Color.FromArgb(190,190,190),
+                    using(var brush=new SolidBrush(palette.Color(Color.FromArgb(37,37,38))))graphics.FillRectangle(brush,bounds);
+                    TextRenderer.DrawText(graphics,names[(first+1+index)%7],SystemFonts.MenuFont,bounds,palette.Color(Color.FromArgb(190,190,190)),
                         TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.NoPadding);
                     left=start+width;index++;
                 }
@@ -400,40 +412,44 @@ namespace KeeTheme.Decorators
             public void Dispose() { ReleaseHandle(); }
         }
 
-        internal static void DrawSearchBorder(Graphics graphics, Size size)
+        internal static void DrawSearchBorder(Graphics graphics, Size size) { DrawSearchBorderWithPalette(graphics,size,new ModernPalette(false)); }
+        internal static void DrawSearchBorderWithPalette(Graphics graphics, Size size,ModernPalette palette)
         {
             if (size.Width < 2 || size.Height < 2) return;
-            using (var pen = new Pen(Color.FromArgb(65,65,65)))
+            using (var pen = new Pen(palette.Color(Color.FromArgb(65,65,65))))
                 graphics.DrawRectangle(pen, 0, 0, size.Width - 1, size.Height - 1);
         }
-        internal static void DrawFieldBorder(Graphics graphics, Size size, bool focused)
+        internal static void DrawFieldBorder(Graphics graphics, Size size, bool focused) { DrawFieldBorderWithPalette(graphics,size,focused,new ModernPalette(false)); }
+        internal static void DrawFieldBorderWithPalette(Graphics graphics, Size size, bool focused,ModernPalette palette)
         {
             if (size.Width < 4 || size.Height < 4) return;
-            using (var pen = new Pen(focused ? Color.FromArgb(56,101,138) : Color.FromArgb(65,65,65)))
+            using (var pen = new Pen(focused ? palette.Color(Color.FromArgb(56,101,138)) : palette.Color(Color.FromArgb(65,65,65))))
             {
                 graphics.DrawRectangle(pen, 0, 0, size.Width-1, size.Height-1);
                 graphics.DrawRectangle(pen, 1, 1, size.Width-3, size.Height-3);
             }
         }
-        internal static void DrawComboButton(Graphics graphics, Rectangle bounds)
+        internal static void DrawComboButton(Graphics graphics, Rectangle bounds) { DrawComboButtonWithPalette(graphics,bounds,new ModernPalette(false)); }
+        internal static void DrawComboButtonWithPalette(Graphics graphics, Rectangle bounds,ModernPalette palette)
         {
             if (bounds.Width < 4 || bounds.Height < 4) return;
-            using (var brush = new SolidBrush(Color.FromArgb(37,37,38))) graphics.FillRectangle(brush, bounds);
-            using (var pen = new Pen(Color.FromArgb(65,65,65)))
+            using (var brush = new SolidBrush(palette.Color(Color.FromArgb(37,37,38)))) graphics.FillRectangle(brush, bounds);
+            using (var pen = new Pen(palette.Color(Color.FromArgb(65,65,65))))
                 graphics.DrawLine(pen, bounds.Left, bounds.Top, bounds.Left, bounds.Bottom-1);
             int x = bounds.Left + bounds.Width/2, y = bounds.Top + bounds.Height/2;
-            using (var brush = new SolidBrush(Color.FromArgb(190,190,190)))
+            using (var brush = new SolidBrush(palette.Color(Color.FromArgb(190,190,190))))
                 graphics.FillPolygon(brush, new Point[] { new Point(x-3,y-1), new Point(x+3,y-1), new Point(x,y+2) });
         }
-        internal static void DrawDateField(Graphics graphics, Rectangle bounds, string text, Font font, bool enabled)
+        internal static void DrawDateField(Graphics graphics, Rectangle bounds, string text, Font font, bool enabled) { DrawDateFieldWithPalette(graphics,bounds,text,font,enabled,new ModernPalette(false)); }
+        internal static void DrawDateFieldWithPalette(Graphics graphics, Rectangle bounds, string text, Font font, bool enabled,ModernPalette palette)
         {
-            using (var brush = new SolidBrush(Color.FromArgb(37,37,38))) graphics.FillRectangle(brush, bounds);
+            using (var brush = new SolidBrush(palette.Color(Color.FromArgb(37,37,38)))) graphics.FillRectangle(brush, bounds);
             int buttonWidth = SystemInformation.VerticalScrollBarWidth + 4;
             var button = new Rectangle(bounds.Right-buttonWidth, bounds.Top, buttonWidth, bounds.Height);
             var content = new Rectangle(bounds.Left+3,bounds.Top,Math.Max(0,bounds.Width-buttonWidth-6),bounds.Height);
-            TextRenderer.DrawText(graphics,text,font,content,enabled ? Color.FromArgb(241,241,241) : Color.FromArgb(190,190,190),
+            TextRenderer.DrawText(graphics,text,font,content,enabled ? palette.Color(Color.FromArgb(241,241,241)) : palette.Color(Color.FromArgb(190,190,190)),
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-            DrawComboButton(graphics,button);
+            DrawComboButtonWithPalette(graphics,button,palette);
         }
     }
 }

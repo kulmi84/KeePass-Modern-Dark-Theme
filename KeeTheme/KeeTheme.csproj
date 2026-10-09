@@ -108,6 +108,7 @@
     <Compile Include="KeeTheme.cs" />
     <Compile Include="KeeThemeExt.cs" />
     <Compile Include="Theme\CustomTheme.cs" />
+    <Compile Include="Theme\ModernPalette.cs" />
     <Compile Include="Theme\ITheme.cs" />
     <Compile Include="Theme\IniFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -141,6 +142,7 @@
     <EmbeddedResource Include="Resources\ModernWindow.ico" />
     <EmbeddedResource Include="Resources\ModernBanner.png" />
     <EmbeddedResource Include="Resources\ModernDark.ini" />
+    <EmbeddedResource Include="Resources\ModernGray.ini" />
     <EmbeddedResource Include="Resources\DarkTheme.ini" />
     <EmbeddedResource Include="Resources\DarkThemeWin11.ini" />
     <None Include="Resources\PluginIcon.png" />

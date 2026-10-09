@@ -9,9 +9,10 @@ namespace KeeTheme.Theme
     class CustomToolStripRenderer : ProExtTsr
     {
         private readonly CustomTheme _customTheme;
+        private readonly ModernPalette palette;
         protected override bool EnsureTextContrast { get { return false; } }
         public CustomToolStripRenderer(CustomTheme theme, ProfessionalColorTable table) : base(table)
-        { _customTheme = theme; }
+        { _customTheme = theme; palette=ModernPalette.ForTheme(theme.Name); }
 
         protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
         {
@@ -39,7 +40,7 @@ namespace KeeTheme.Theme
             if (context != null && (context.Name == "m_ctxGroupList" || context.Name == "m_ctxPwList")) mainMenu = true;
             string name = mainMenu && context != null && string.IsNullOrEmpty(e.Item.Name) && e.Item.Text == KeePass.Resources.KPRes.MoreCommands ? "modernMoreCommands" : e.Item.Name;
             var color = e.Item.Enabled ? _customTheme.MenuItem.ForeColor : _customTheme.MenuItem.DisabledForeColor;
-            if (color.IsEmpty) color = Color.FromArgb(190, 190, 190);
+            if (color.IsEmpty) color = palette.Color(Color.FromArgb(190, 190, 190));
             if (_customTheme.MenuItem.ModernIcons && (mainMenu || extrasMenu))
             {
                 if (ModernToolbarIcons.Draw(e.Graphics, e.ImageRectangle, name, color)) return;
@@ -79,13 +80,13 @@ namespace KeeTheme.Theme
         protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
         {
             if (!_customTheme.MenuItem.ModernIcons || !(e.ToolStrip is ToolStripDropDown)) { base.OnRenderToolStripBorder(e); return; }
-            using(var pen = new Pen(Color.FromArgb(65,65,65))) e.Graphics.DrawRectangle(pen,0,0,e.ToolStrip.Width-1,e.ToolStrip.Height-1);
+            using(var pen = new Pen(palette.Color(Color.FromArgb(65,65,65)))) e.Graphics.DrawRectangle(pen,0,0,e.ToolStrip.Width-1,e.ToolStrip.Height-1);
         }
         protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
         {
             if (!_customTheme.MenuItem.ModernIcons) { base.OnRenderMenuItemBackground(e); return; }
             if (!e.Item.Enabled || (!e.Item.Selected && !e.Item.Pressed)) return;
-            using(var brush = new SolidBrush(Color.FromArgb(56,101,138))) e.Graphics.FillRectangle(brush,new Rectangle(3,1,e.Item.Width-6,e.Item.Height-2));
+            using(var brush = new SolidBrush(palette.Color(Color.FromArgb(56,101,138)))) e.Graphics.FillRectangle(brush,new Rectangle(3,1,e.Item.Width-6,e.Item.Height-2));
         }
         private bool DrawToolbarButton(ToolStripItemRenderEventArgs e, bool isChecked)
         {
@@ -100,7 +101,7 @@ namespace KeeTheme.Theme
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using (var path = new GraphicsPath())
-                using (var brush = new SolidBrush(e.Item.Pressed ? Color.FromArgb(73,73,78) : Color.FromArgb(62,62,66)))
+                using (var brush = new SolidBrush(e.Item.Pressed ? palette.Color(Color.FromArgb(73,73,78)) : palette.Color(Color.FromArgb(62,62,66))))
                 {
                     float d = radius * 2;
                     path.AddArc(rect.X, rect.Y, d, d, 180, 90);
@@ -138,7 +139,7 @@ namespace KeeTheme.Theme
         protected override void OnRenderSeparator(ToolStripSeparatorRenderEventArgs e)
         {
             if (!_customTheme.MenuItem.ModernIcons) { base.OnRenderSeparator(e); return; }
-            using (var pen = new Pen(Color.FromArgb(65,65,69)))
+            using (var pen = new Pen(palette.Color(Color.FromArgb(65,65,69))))
             {
                 if (e.Vertical) e.Graphics.DrawLine(pen,e.Item.Width/2,5,e.Item.Width/2,e.Item.Height-5);
                 else e.Graphics.DrawLine(pen,6,e.Item.Height/2,e.Item.Width-6,e.Item.Height/2);
