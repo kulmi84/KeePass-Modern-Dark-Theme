@@ -97,7 +97,93 @@ namespace KeeTheme
 				colorEditError.SetValue(null, _theme.Other.ColorEditError);
 		}
 
-		public void Apply(Control control)
+		private static bool UsesGraySettingsStyle(Form form)
+        {
+            return form != null && (form.GetType().FullName == "KeePass.Forms.OptionsForm" || form.GetType().FullName == "KeePass.Forms.PwEntryForm");
+        }
+        private CustomTheme _grayLoginTheme;
+        private ITheme GetGrayLoginTheme()
+        {
+            if (_grayLoginTheme == null) _grayLoginTheme = new CustomTheme(new CustomThemeTemplate(TemplateReader.GetDefaultTemplate()));
+            _grayLoginTheme.CheckBoxButton.ForeColor = Color.FromArgb(241,241,241);
+            return _grayLoginTheme;
+        }
+        private CustomTheme _grayOptionsTheme;
+        private ITheme GetGrayOptionsTheme()
+        {
+            if (_grayOptionsTheme == null)
+            {
+                _grayOptionsTheme = new CustomTheme(new CustomThemeTemplate(TemplateReader.GetDefaultTemplate()));
+                var background = Color.FromArgb(82,82,82);
+                _grayOptionsTheme.Control.BackColor = background;
+                _grayOptionsTheme.Form.BackColor = background;
+                _grayOptionsTheme.TabControl.BackColor = background;
+                _grayOptionsTheme.TabControl.UnselectedTabColor = background;
+                _grayOptionsTheme.TabControl.SelectedTabColor = Color.FromArgb(104,104,104);
+                _grayOptionsTheme.Button.BackColor = Color.FromArgb(145,145,145);
+                _grayOptionsTheme.Button.ForeColor = Color.FromArgb(16,16,16);
+                _grayOptionsTheme.ListView.BackColor = background;
+                _grayOptionsTheme.ListView.OddRowColor = background;
+                _grayOptionsTheme.ListView.EvenRowColor = background;
+                _grayOptionsTheme.ListView.GroupBackColor = background;
+                _grayOptionsTheme.ListView.HeaderBackColor = background;
+                _grayOptionsTheme.RichTextBox.BackColor = Color.FromArgb(145,145,145);
+                _grayOptionsTheme.RichTextBox.ForeColor = Color.FromArgb(16,16,16);
+                _grayOptionsTheme.RichTextBox.SelectionColor = Color.FromArgb(16,16,16);
+                _grayOptionsTheme.CheckBoxButton.BackColor = Color.FromArgb(145,145,145);
+                _grayOptionsTheme.CheckBoxButton.ForeColor = Color.FromArgb(16,16,16);
+            }
+            return _grayOptionsTheme;
+        }
+                private CustomTheme _greenDialogTheme;
+        private ITheme GetGreenDialogTheme()
+        {
+            if (_greenDialogTheme == null)
+            {
+                _greenDialogTheme = new CustomTheme(new CustomThemeTemplate(TemplateReader.Get("KeeTheme.Resources.ModernGreen.ini")));
+                var background=Color.FromArgb(41,79,67);
+                var text=Color.FromArgb(241,241,241);
+                _greenDialogTheme.Control.BackColor=background;
+                _greenDialogTheme.Control.ForeColor=text;
+                _greenDialogTheme.Form.BackColor=background;
+                _greenDialogTheme.Form.ForeColor=text;
+                _greenDialogTheme.TabControl.BackColor=background;
+                _greenDialogTheme.TabControl.ForeColor=text;
+                _greenDialogTheme.TabControl.UnselectedTabColor=background;
+                _greenDialogTheme.TabControl.SelectedTabColor=Color.FromArgb(67,125,101);
+                _greenDialogTheme.Button.BackColor=Color.FromArgb(129,241,180);
+                _greenDialogTheme.Button.ForeColor=Color.FromArgb(23,59,44);
+                _greenDialogTheme.CheckBoxButton.BackColor=Color.FromArgb(129,241,180);
+                _greenDialogTheme.CheckBoxButton.CheckedBackColor=Color.FromArgb(129,241,180);
+                _greenDialogTheme.CheckBoxButton.ForeColor=Color.FromArgb(23,59,44);
+                _greenDialogTheme.SecureTextBox.BackColor=Color.FromArgb(129,241,180);
+                _greenDialogTheme.SecureTextBox.ForeColor=Color.FromArgb(23,59,44);
+                _greenDialogTheme.ListView.BackColor=background;
+                _greenDialogTheme.ListView.OddRowColor=background;
+                _greenDialogTheme.ListView.EvenRowColor=background;
+                _greenDialogTheme.ListView.ForeColor=text;
+                _greenDialogTheme.ListView.GroupBackColor=background;
+                _greenDialogTheme.ListView.GroupForeColor=text;
+                _greenDialogTheme.RichTextBox.BackColor=Color.FromArgb(129,241,180);
+                _greenDialogTheme.RichTextBox.ForeColor=Color.FromArgb(23,59,44);
+                _greenDialogTheme.RichTextBox.SelectionColor=Color.FromArgb(23,59,44);
+            }
+            return _greenDialogTheme;
+        }
+        public void Apply(Control control)
+        {
+            var owner = control.FindForm();
+            var original = _theme;
+            if (original.Name == "Modern Gray" && UsesGraySettingsStyle(owner))
+                _theme = GetGrayOptionsTheme();
+            if (original.Name == "Modern Gray" && owner != null && owner.GetType().FullName == "KeePass.Forms.KeyPromptForm")
+                _theme = GetGrayLoginTheme();
+            if (original.Name == "Modern Green" && owner != null && owner.GetType().Namespace == "KeePass.Forms" && owner.GetType().FullName != "KeePass.Forms.MainForm")
+                _theme=GetGreenDialogTheme();
+            try { ApplyControl(control); }
+            finally { _theme = original; }
+        }
+        private void ApplyControl(Control control)
 		{
 			if (control.InvokeRequired)
 			{
@@ -171,7 +257,23 @@ namespace KeeTheme
 			if (propertyGrid != null) Apply(propertyGrid);
 
 			OverrideResetBackground(control);
-			OverrideScrollBarsSetExplorerTheme(control);
+            var whiteOwner = control.FindForm();
+            if ((_theme.Name == "Modern Gray" || _theme.Name == "Modern Green") && whiteOwner != null && whiteOwner.GetType().FullName == "KeePass.Forms.MainForm" &&
+                (control is SplitContainer || control is SplitterPanel || control is Splitter))
+                control.BackColor = _theme.MenuItem.BackColor;
+            if (_theme.Name == "Modern Gray" && whiteOwner != null && whiteOwner.GetType().FullName == "KeePass.Forms.KeyPromptForm" &&
+                (control is TextBoxBase || control is ComboBox || control is Button))
+            {
+                control.BackColor = Color.White;
+                control.ForeColor = Color.FromArgb(16,16,16);
+                var whiteButton = control as Button;
+                if (whiteButton != null) { whiteButton.UseVisualStyleBackColor=false; whiteButton.FlatAppearance.MouseOverBackColor=Color.FromArgb(235,235,235); whiteButton.FlatAppearance.MouseDownBackColor=Color.FromArgb(220,220,220); }
+            }
+			if (Object.ReferenceEquals(_theme,_grayOptionsTheme) && whiteOwner != null && whiteOwner.GetType().FullName == "KeePass.Forms.PwEntryForm" && (control is TextBoxBase || control is ComboBox || control is DateTimePicker))
+            { control.BackColor=Color.FromArgb(145,145,145); control.ForeColor=Color.FromArgb(16,16,16); }
+            if (Object.ReferenceEquals(_theme,_greenDialogTheme) && (control is TextBoxBase || control is ComboBox || control is DateTimePicker || control is NumericUpDown))
+            { control.BackColor=Color.FromArgb(129,241,180); control.ForeColor=Color.FromArgb(23,59,44); }
+            OverrideScrollBarsSetExplorerTheme(control);
 			if (control is TextBoxBase || control is DateTimePicker || control is ComboBox)
             {
                 var target = control is RichTextBox && control.Parent is RichTextBoxDecorator ? control.Parent : control;
@@ -183,7 +285,7 @@ namespace KeeTheme
                 { border.Dispose();_fieldBorders.Remove(target); }
                 if (modern && !_fieldBorders.ContainsKey(target))
                 {
-                    _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target,true,_theme.Name=="Modern Gray"));
+                    _fieldBorders.Add(target, new CenteredSearchDecorator.SearchBorderWindow(target,true,_theme.Name=="Modern Gray" || (Object.ReferenceEquals(_theme,_grayOptionsTheme) && owner.GetType().FullName == "KeePass.Forms.PwEntryForm")));
                     target.Disposed += delegate { if (_fieldBorders.TryGetValue(target, out border)) { border.Dispose(); _fieldBorders.Remove(target); } };
                 }
                 else if (!modern && _fieldBorders.TryGetValue(target, out border))
@@ -212,9 +314,13 @@ namespace KeeTheme
         {
             if (!UseModernIcons) return;
             var banner = (PictureBox)sender;
+            var paintTheme = _theme.Name == "Modern Green" && banner.FindForm().GetType().FullName != "KeePass.Forms.MainForm" ? GetGreenDialogTheme() : _theme;
+            if (_theme.Name == "Modern Gray")
+                paintTheme = UsesGraySettingsStyle(banner.FindForm()) ? GetGrayOptionsTheme() :
+                    (banner.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm" ? GetGrayLoginTheme() : _theme);
             bool group = banner.FindForm().GetType().FullName == "KeePass.Forms.GroupForm";
             bool unlock = banner.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm";
-            using (var brush = new SolidBrush(_theme.Control.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
+            using (var brush = new SolidBrush(paintTheme.Control.BackColor)) e.Graphics.FillRectangle(brush, banner.ClientRectangle);
             if (_bannerArtwork == null)
                 using (var stream = typeof(KeeTheme).Assembly.GetManifestResourceStream("KeeTheme.Resources.ModernBanner.png"))
                     if (stream != null) using (var image = Image.FromStream(stream)) _bannerArtwork = new Bitmap(image);
@@ -230,10 +336,10 @@ namespace KeeTheme
                     e.Graphics.DrawImage(_bannerArtwork,target,_bannerArtwork.Width-sourceWidth,0,sourceWidth,_bannerArtwork.Height,GraphicsUnit.Pixel,attributes);
                 }
                 var fade = new Rectangle(target.Left,0,Math.Max(1,width/3),target.Height);
-                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(fade,_theme.Control.BackColor,Color.FromArgb(0,_theme.Control.BackColor),0f))
+                using (var brush = new System.Drawing.Drawing2D.LinearGradientBrush(fade,paintTheme.Control.BackColor,Color.FromArgb(0,paintTheme.Control.BackColor),0f))
                     e.Graphics.FillRectangle(brush,fade);
             }
-            using (var pen = new Pen(ModernPalette.ForTheme(_theme.Name).Color(Color.FromArgb(65,65,65))))
+            using (var pen = new Pen(ModernPalette.ForTheme(paintTheme.Name).Color(Color.FromArgb(65,65,65))))
                 e.Graphics.DrawLine(pen, 0, banner.Height-1, banner.Width-1, banner.Height-1);
             int padding = Math.Max(12, banner.Height/5);
             int textLeft = padding;
@@ -250,7 +356,7 @@ namespace KeeTheme
             }
             using (var font = new Font(banner.Font.FontFamily, banner.Font.Size * 1.3f, FontStyle.Bold))
                 TextRenderer.DrawText(e.Graphics, unlock ? KeePass.Resources.KPRes.EnterCompositeKey : group ? KeePass.Resources.KPRes.EditGroup : KeePass.Resources.KPRes.EditEntry,
-                    font, new Rectangle(textLeft,padding,Math.Max(0,banner.Width-textLeft-padding),banner.Height-padding*2), _theme.Form.ForeColor,
+                    font, new Rectangle(textLeft,padding,Math.Max(0,banner.Width-textLeft-padding),banner.Height-padding*2), paintTheme.Form.ForeColor,
                     TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
         }
         private void HandleModernCalendarDropDown(object sender, EventArgs e)
@@ -378,15 +484,45 @@ namespace KeeTheme
 
 			checkBox.EnabledChanged -= HandleCheckBoxEnabledChanged;
 			checkBox.EnabledChanged += HandleCheckBoxEnabledChanged;
+            checkBox.Paint -= HandleGrayPasswordButtonPaint;
+            if (IsPasswordToggle(checkBox) && (_theme.Name == "Modern Gray" || _theme.Name == "Modern Green" || Object.ReferenceEquals(_theme,_grayOptionsTheme) || Object.ReferenceEquals(_theme,_grayLoginTheme)))
+                checkBox.Paint += HandleGrayPasswordButtonPaint;
             checkBox.Paint -= HandleModernCheckBoxPaint;
             if (UseModernIcons && checkBox.Appearance == Appearance.Normal)
                 checkBox.Paint += HandleModernCheckBoxPaint;
 		}
 
+        private static bool IsPasswordToggle(CheckBox control)
+        {
+            if(control.Name == "m_cbHidePassword") return true;
+            var owner=control.FindForm();
+            if(owner==null)return false;
+            var field=owner.GetType().GetField("m_cbHidePassword",BindingFlags.Instance|BindingFlags.NonPublic);
+            return field!=null && Object.ReferenceEquals(field.GetValue(owner),control);
+        }
+        private void HandleGrayPasswordButtonPaint(object sender, PaintEventArgs e)
+        {
+            var button = (CheckBox)sender;
+            var area = Rectangle.Inflate(button.ClientRectangle,-3,-3);
+            using (var background = new SolidBrush(button.Checked ? button.FlatAppearance.CheckedBackColor : button.BackColor))
+                e.Graphics.FillRectangle(background,area);
+            var drawingState = e.Graphics.Save();
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.None;
+            e.Graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+            int size = Math.Max(3,button.Height/7);
+            int spacing = size+3;
+            int centerX = button.ClientSize.Width/2;
+            int y = (button.ClientSize.Height-size)/2;
+            using (var brush = new SolidBrush(button.Enabled ? (button.BackColor.GetBrightness() > 0.45f ? Color.FromArgb(16,16,16) : Color.FromArgb(241,241,241)) : Color.FromArgb(110,110,110)))
+                for(int i=-1;i<=1;i++) e.Graphics.FillRectangle(brush,centerX+i*spacing-size/2,y,size,size);
+            e.Graphics.Restore(drawingState);
+        }
         private void HandleModernCheckBoxPaint(object sender, PaintEventArgs e)
         {
             if (!UseModernIcons) return;
             var palette=ModernPalette.ForTheme(_theme.Name);
+            var paintedControl = sender as Control;
+            if (_theme.Name == "Modern Gray" && paintedControl != null && paintedControl.FindForm() != null && (UsesGraySettingsStyle(paintedControl.FindForm()) || paintedControl.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm")) palette = new ModernPalette(false);
             var box = (CheckBox)sender;
             Size glyph = CheckBoxRenderer.GetGlyphSize(e.Graphics,CheckBoxState.UncheckedNormal);
             bool right = box.CheckAlign == System.Drawing.ContentAlignment.TopRight || box.CheckAlign == System.Drawing.ContentAlignment.MiddleRight || box.CheckAlign == System.Drawing.ContentAlignment.BottomRight;
@@ -473,6 +609,8 @@ namespace KeeTheme
         private void HandleModernComboDrawItem(object sender,DrawItemEventArgs e)
         {
             var palette=ModernPalette.ForTheme(_theme.Name);
+            var paintedControl = sender as Control;
+            if (_theme.Name == "Modern Gray" && paintedControl != null && paintedControl.FindForm() != null && (UsesGraySettingsStyle(paintedControl.FindForm()) || paintedControl.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm")) palette = new ModernPalette(false);
             var combo=(ComboBox)sender;
             bool display=(e.State & DrawItemState.ComboBoxEdit)!=0;
             bool selected=!display && (e.State & DrawItemState.Selected)!=0;
@@ -492,7 +630,8 @@ namespace KeeTheme
 			}
 
 			var comboBox = (ComboBox) sender;
-			if (comboBox.BackColor == SystemColors.Window)
+			if (_theme.Name == "Modern Gray" && comboBox.FindForm() != null && comboBox.FindForm().GetType().FullName == "KeePass.Forms.KeyPromptForm") return;
+            if (comboBox.BackColor == SystemColors.Window)
 				comboBox.BackColor = _theme.Control.BackColor;
 		}
 
@@ -671,6 +810,14 @@ namespace KeeTheme
                 }
                 item.ForeColor = _theme.MenuItem.ForeColor;
 				item.BackColor = _theme.MenuItem.BackColor;
+                var mintSearch = item as ToolStripComboBox;
+                if (_theme.Name == "Modern Green" && mintSearch != null && (item.Name == "m_tbQuickFind" || item.Name == "m_tbQuickSearch"))
+                {
+                    mintSearch.BackColor = _theme.Control.BackColor;
+                    mintSearch.ForeColor = _theme.Control.ForeColor;
+                    mintSearch.ComboBox.BackColor = _theme.Control.BackColor;
+                    mintSearch.ComboBox.ForeColor = _theme.Control.ForeColor;
+                }
 
 				var menuItem = item as ToolStripMenuItem;
 				if (menuItem != null)
@@ -708,6 +855,20 @@ namespace KeeTheme
 			}
 
 			var textBox = (SecureTextBoxEx) sender;
+            if (_theme.Name == "Modern Green" && textBox.FindForm() != null && textBox.FindForm().GetType().FullName != "KeePass.Forms.MainForm")
+            {
+                var mint=Color.FromArgb(129,241,180);
+                if(textBox.BackColor!=mint)textBox.BackColor=mint;
+                textBox.ForeColor=Color.FromArgb(23,59,44);
+                return;
+            }
+            if ((_theme.Name == "Modern Gray" || Object.ReferenceEquals(_theme,_grayOptionsTheme)) && textBox.FindForm() != null && textBox.FindForm().GetType().FullName == "KeePass.Forms.PwEntryForm")
+            {
+                var fieldColor = Color.FromArgb(145,145,145);
+                if (textBox.BackColor != fieldColor) textBox.BackColor=fieldColor;
+                textBox.ForeColor=Color.FromArgb(16,16,16);
+                return;
+            }
 			if (textBox.BackColor == SystemColors.Window)
 				textBox.BackColor = _theme.SecureTextBox.BackColor;
 		}
@@ -822,7 +983,20 @@ namespace KeeTheme
                 ModernToolbarIcons.Draw(e.Graphics, bounds, "m_tbOpenDatabase", color);
             else if (button.Name == "m_btnStandardExpires")
 				ModernToolbarIcons.Draw(e.Graphics, bounds, "m_tbViewsShowExpired", color);
-			else ModernStandardIcons.Draw(e.Graphics, bounds, icon, color);
+			else if (button.Name == "m_btnGenPw" && (_theme.Name == "Modern Gray" || _theme.Name == "Modern Green" || Object.ReferenceEquals(_theme,_grayOptionsTheme)))
+            {
+                var state=e.Graphics.Save();
+                e.Graphics.SmoothingMode=System.Drawing.Drawing2D.SmoothingMode.None;
+                using(var pen=new Pen(color,2f)) {
+                    int x=bounds.Left+3,y=bounds.Top+3;
+                    e.Graphics.DrawEllipse(pen,x,y,5,5);
+                    e.Graphics.DrawLine(pen,x+6,y+6,x+12,y+12);
+                    e.Graphics.DrawLine(pen,x+9,y+9,x+11,y+7);
+                    e.Graphics.DrawLine(pen,x+11,y+11,x+13,y+9);
+                }
+                e.Graphics.Restore(state);
+            }
+            else ModernStandardIcons.Draw(e.Graphics, bounds, icon, color);
 		}
 
 		private void HandleButtonEnabledChanged(object sender, EventArgs e)

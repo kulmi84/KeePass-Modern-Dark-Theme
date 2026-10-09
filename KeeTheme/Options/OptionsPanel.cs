@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -99,7 +99,9 @@ namespace KeeTheme.Options
 				}
 			}
 
-			themeTemplateComboBox.Items.Clear();
+			templates.RemoveAll(x => x.Path == "KeeTheme.Resources.DarkTheme.ini" || x.Path == "KeeTheme.Resources.DarkThemeWin11.ini");
+            if (selectedTemplate != null && !templates.Contains(selectedTemplate)) selectedTemplate = null;
+            themeTemplateComboBox.Items.Clear();
 			foreach (var template in templates)
 			{
 				themeTemplateComboBox.Items.Add(template);

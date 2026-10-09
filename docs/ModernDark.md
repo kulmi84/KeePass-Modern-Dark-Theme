@@ -214,3 +214,9 @@ Banner-Motiv: Dezentes S/W-Tresormotiv nur rechts in der ursprünglichen Bannerh
 Praxistest: Nutzer bestätigt dunkle Rahmen und das kompakte S/W-Tresor-Banner im laufenden KeePass. Dieser bestätigte Stand wird auf den Hauptbranch übernommen; die README zeigt die deutsche Banner-Vorschau aus dem Plugin-Zeichner.
 
 Version 1.1.0: Moderne Checkboxen für ungeprüft/geprüft/unbestimmt; Kennzeichnung #38658A für Auswahl und Menü-Hover. Dunkle Rahmen auch in PwGroupForm und DatabaseSettingsForm. Kalender-Dropdown erhält Windows-Dark-Theme und native Kalenderfarben; Windows kann diese Farben je nach Version ignorieren. Alle acht Prüfskripte bestanden. Die neuen Checkboxen, weiteren Dialoge und Kalenderdarstellung benötigen noch einen Live-Test.
+
+## Version 1.1.43
+
+Modern Gray und Modern Green ergänzen Modern Dark. Gray verwendet abgestufte Grautöne; Green eine helle Mint-Mitte, dunklere grüne Leisten und Dialoge sowie Mint-Felder und Buttons. Alte Dark-Theme-Einträge sind aus der Auswahlliste entfernt, ihre Konfigurationen bleiben ladbar. Die Einblendereihenfolge der Optionen, Passwortfelder, Suchfeld und kleinen Symbole wurde überarbeitet.
+
+Die neuen Screenshots wurden mit einer isolierten KeePass-Instanz und fiktiven Daten aufgenommen. Die Veröffentlichung enthält keine privaten Datenbanken oder Diagnoselogs. Automatisch geprüft: Theme-Ressourcen und Roundtrip, eigene Icons, Menüs, Checkboxen, Suchfeld und Einblendereihenfolge.

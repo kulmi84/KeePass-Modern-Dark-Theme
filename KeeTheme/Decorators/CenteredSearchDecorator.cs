@@ -118,7 +118,11 @@ namespace KeeTheme.Decorators
             internal SearchBorderWindow(Control combo, bool field) : this(combo,field,false) { }
             internal SearchBorderWindow(Control combo,bool field,bool gray)
             {
-                palette=new ModernPalette(gray);
+                palette=new ModernPalette(gray,gray && combo.FindForm()!=null && (combo.FindForm().GetType().FullName=="KeePass.Forms.KeyPromptForm" || combo.FindForm().GetType().FullName=="KeePass.Forms.PwEntryForm"));
+                if(combo.BackColor.ToArgb()==Color.FromArgb(227,255,240).ToArgb() || combo.BackColor.ToArgb()==Color.FromArgb(129,241,180).ToArgb()) {
+                    palette=ModernPalette.ForTheme("Modern Green");
+                    palette.MintFields=combo.BackColor.ToArgb()==Color.FromArgb(129,241,180).ToArgb();
+                }
                 _backgroundBrush=CreateSolidBrush(ColorTranslator.ToWin32(palette.Color(Color.FromArgb(37,37,38))));
                 _combo = combo;
                 _field = field;

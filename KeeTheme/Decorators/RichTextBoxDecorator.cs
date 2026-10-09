@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
@@ -140,7 +140,7 @@ namespace KeeTheme.Decorators
 				{
 					graphics.FillRectangle(brush, new Rectangle(startPoint, textSize));
 				}
-				TextRenderer.DrawText(graphics, linkText, font, startPoint, _theme.LinkLabel.LinkColor, TextFormatFlags.NoPrefix);
+				TextRenderer.DrawText(graphics, linkText, font, startPoint, GrayMainDetails ? Color.FromArgb(159,207,237) : _theme.LinkLabel.LinkColor, TextFormatFlags.NoPrefix);
 			}
 		}
 
@@ -205,13 +205,15 @@ namespace KeeTheme.Decorators
 			}
 		}
 
-		private void ApplyFontColor(RichTextBox richTextBox)
+		private bool GrayMainDetails { get { return (_theme.Name == "Modern Gray" || _theme.Name == "Modern Green") && _richTextBox.FindForm() is MainForm; } }
+
+        private void ApplyFontColor(RichTextBox richTextBox)
 		{
 			var selectionStart = richTextBox.SelectionStart;
 			var selectionLength = richTextBox.SelectionLength;
 
 			richTextBox.SelectAll();
-			richTextBox.SelectionColor = _theme.RichTextBox.SelectionColor;
+			richTextBox.SelectionColor = GrayMainDetails ? Color.FromArgb(241,241,241) : _theme.RichTextBox.SelectionColor;
 			richTextBox.Select(selectionStart, selectionLength);
 		}
 
@@ -219,6 +221,12 @@ namespace KeeTheme.Decorators
 		{
 			_theme = theme;
 			_enabled = enabled;
+            if (enabled && GrayMainDetails) {
+                _richTextBox.BackColor = _theme.Name == "Modern Green" ? Color.FromArgb(41,79,67) : Color.FromArgb(82,82,82);
+                _richTextBox.ForeColor = Color.FromArgb(241,241,241);
+                BackColor = _richTextBox.BackColor;
+                ApplyFontColor(_richTextBox);
+            }
 			if (!enabled)
 				ApplyFontColor(_richTextBox);
 

@@ -13,7 +13,8 @@ namespace KeeTheme.Decorators
 {
 	class ListViewDecorator : Control
 	{
-		private readonly ListView _listView;
+		private GrayOptionsScrollBar _grayScrollBar;
+        private readonly ListView _listView;
 		private readonly ListViewHeaderPainter _headerPainter;
 		private readonly ListViewGroupsPainter _groupsPainter;
 
@@ -347,6 +348,7 @@ namespace KeeTheme.Decorators
 			var text = e.ItemIndex == -1 ? e.Item.Text : e.SubItem.Text;
 			var font = e.ItemIndex == -1 ? e.Item.Font : e.SubItem.Font;
 			var color = e.ItemIndex == -1 ? e.Item.ForeColor : e.SubItem.ForeColor;
+            if (_theme.Name == "Modern Gray" || _theme.Name == "Modern Green") color = _theme.ListView.ForeColor;
 			var textBounds = new Rectangle(bounds.Location, bounds.Size);
             if (_theme.MenuItem.ModernIcons && e.Item.Selected)
             {
@@ -445,7 +447,10 @@ namespace KeeTheme.Decorators
 		}
 
 		public void EnableTheme(bool enabled, ITheme theme)
-		{
+		{            var owner = _listView.FindForm();
+            bool grayOptions = enabled && theme.Control.BackColor == Color.FromArgb(82,82,82) && owner != null && owner.GetType().FullName == "KeePass.Forms.OptionsForm";
+            if (grayOptions && _grayScrollBar == null) _grayScrollBar = new GrayOptionsScrollBar(_listView);
+            if (!grayOptions && _grayScrollBar != null) { _grayScrollBar.Dispose(); _grayScrollBar=null; }
 			_enabled = enabled;
 			_theme = theme;
 
@@ -453,5 +458,41 @@ namespace KeeTheme.Decorators
 			HandleListViewResize(_listView, EventArgs.Empty);
 			_listView.Invalidate();
 		}
-	}
+	        private sealed class GrayOptionsScrollBar : NativeWindow, IDisposable
+        {
+            private readonly Control control;
+            [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+            private struct Rect { public int Left,Top,Right,Bottom; }
+            [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+            private struct ScrollInfo { public int Size; public Rect Bounds; public int Line,Top,Bottom,Reserved; [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.ByValArray,SizeConst=6)] public int[] State; }
+            [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool GetScrollBarInfo(IntPtr window,int id,ref ScrollInfo info);
+            [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern bool GetWindowRect(IntPtr window,out Rect rect);
+            [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern IntPtr GetWindowDC(IntPtr window);
+            [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr window,IntPtr dc);
+            internal GrayOptionsScrollBar(Control target) { control=target; control.HandleCreated+=Created; control.HandleDestroyed+=Destroyed; control.Disposed+=Disposed; if(control.IsHandleCreated) AssignHandle(control.Handle); }
+            private void Created(object sender,EventArgs args) { AssignHandle(control.Handle); }
+            private void Destroyed(object sender,EventArgs args) { ReleaseHandle(); }
+            private void Disposed(object sender,EventArgs args) { Dispose(); }
+            public void Dispose() { control.HandleCreated-=Created; control.HandleDestroyed-=Destroyed; control.Disposed-=Disposed; ReleaseHandle(); control.Invalidate(); }
+            protected override void WndProc(ref Message message)
+            {
+                base.WndProc(ref message);
+                if(message.Msg!=0x85 && message.Msg!=0xF && message.Msg!=0x115 && message.Msg!=0x20A && message.Msg!=0x200) return;
+                var info=new ScrollInfo(); info.Size=System.Runtime.InteropServices.Marshal.SizeOf(typeof(ScrollInfo)); info.State=new int[6]; Rect window;
+                if(!GetScrollBarInfo(Handle,-5,ref info) || (info.State[0]&0x8000)!=0 || !GetWindowRect(Handle,out window)) return;
+                var bounds=new Rectangle(info.Bounds.Left-window.Left,info.Bounds.Top-window.Top,info.Bounds.Right-info.Bounds.Left,info.Bounds.Bottom-info.Bounds.Top);
+                if(bounds.Width<=0 || bounds.Height<=0)return;
+                IntPtr dc=GetWindowDC(Handle); if(dc==IntPtr.Zero)return;
+                try { using(var graphics=Graphics.FromHdc(dc)) {
+                    using(var brush=new SolidBrush(Color.FromArgb(82,82,82)))graphics.FillRectangle(brush,bounds);
+                    if(info.Bottom>info.Top) using(var brush=new SolidBrush(Color.FromArgb(151,151,151))) graphics.FillRectangle(brush,bounds.Left+4,bounds.Top+info.Top,Math.Max(2,bounds.Width-8),info.Bottom-info.Top);
+                    using(var pen=new Pen(Color.FromArgb(225,225,225),1.4f)) {
+                        int x=bounds.Left+bounds.Width/2; int y=bounds.Top+info.Line/2;
+                        graphics.DrawLines(pen,new Point[]{new Point(x-3,y+2),new Point(x,y-1),new Point(x+3,y+2)});
+                        y=bounds.Bottom-info.Line/2;
+                        graphics.DrawLines(pen,new Point[]{new Point(x-3,y-2),new Point(x,y+1),new Point(x+3,y-2)});
+                    }
+                }} finally { ReleaseDC(Handle,dc); }
+            }
+        }}
 }
