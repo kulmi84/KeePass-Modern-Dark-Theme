@@ -81,6 +81,14 @@ namespace KeeTheme
 
 		private void HandleOpenFormsAdded(object sender, FormAddedEventArgs args)
 		{
+            // Build and theme the plugin tab while the options first frame is
+            // still hidden. Register before the guard's Shown/reveal handler.
+            var optionsForm = args.Form as OptionsForm;
+            if (optionsForm != null)
+            {
+                optionsForm.Shown -= HandleOptionsFormShown;
+                optionsForm.Shown += HandleOptionsFormShown;
+            }
             PrepareFirstFrame(args.Form);
 			if (!_initialized)
 				InitializeTheme();
@@ -90,12 +98,6 @@ namespace KeeTheme
 			
 			Win10ThemeMonitor.UseImmersiveDarkMode(args.Form, _theme.Enabled);
 			
-			var optionsForm = args.Form as OptionsForm;
-			if (optionsForm != null)
-			{
-				optionsForm.Shown -= HandleOptionsFormShown;
-				optionsForm.Shown += HandleOptionsFormShown;
-			}
 
 			var editStringForm = args.Form as EditStringForm;
 			if (editStringForm != null)
@@ -122,7 +124,7 @@ namespace KeeTheme
             if (!_options.Enabled || MonoWorkarounds.IsRequired() || FirstFrameDecorator.IsNativeVisible(form) || _firstFrames.ContainsKey(form)) return;
             string name = form.GetType().FullName;
             if (name != "KeePass.Forms.MainForm" && name != "KeePass.Forms.PwEntryForm" && name != "KeePass.Forms.GroupForm" &&
-                name != "KeePass.Forms.KeyPromptForm" && name != "KeePass.Forms.DatabaseSettingsForm") return;
+                name != "KeePass.Forms.KeyPromptForm" && name != "KeePass.Forms.DatabaseSettingsForm" && name != "KeePass.Forms.OptionsForm") return;
             FirstFrameDecorator frame = new FirstFrameDecorator(form);
             _firstFrames.Add(form, frame);
             form.Disposed += delegate { frame.Dispose(); _firstFrames.Remove(form); };
@@ -226,6 +228,7 @@ namespace KeeTheme
 		{
 			var optionsForm = (OptionsForm) sender;
 			OptionsPanel.Create(optionsForm, _options);
+            if (_theme.Enabled) _controlVisitor.Visit(optionsForm);
 		}
 
 		public override string UpdateUrl

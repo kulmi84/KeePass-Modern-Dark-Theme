@@ -30,7 +30,20 @@ namespace APaintProbe {
   private void OnWindowAdded(object sender, GwmWindowEventArgs e) {
    Log("WindowAdded "+e.Form.GetType().Name+" visible="+e.Form.Visible+" opacity="+e.Form.Opacity+NativeState.Read(e.Form));
    Attach(e.Form);
-   e.Form.Shown += delegate { Log("Shown "+e.Form.GetType().Name+" opacity="+e.Form.Opacity+NativeState.Read(e.Form)); };
+   e.Form.Shown += delegate {
+    Log("Shown "+e.Form.GetType().Name+" opacity="+e.Form.Opacity+NativeState.Read(e.Form));
+    if(e.Form is OptionsForm) {
+     int pluginTabs=0;foreach(Control control in e.Form.Controls) {
+      TabControl tabs=control as TabControl;if(tabs==null)continue;
+      foreach(TabPage tab in tabs.TabPages) if(tab.Text=="KeeTheme") {
+       ++pluginTabs;
+       if(tab.Controls.Count==0 || tab.Controls[0].BackColor.R>80)Log("ERROR Options panel still has a light background");
+      }
+     }
+     if(pluginTabs!=1)Log("ERROR Expected exactly one KeeTheme options tab");
+     Log("OptionsTab ready count="+pluginTabs);
+    }
+   };
   }
   private void Attach(Control c) {
    if(c.IsHandleCreated) windows.Add(new PaintWindow(c,Log));
@@ -55,6 +68,8 @@ namespace APaintProbe {
     PwEntryForm ef=new PwEntryForm(); ef.InitEx(entry,PwEditMode.EditExistingEntry,db,host.MainWindow.ClientIcons,false,false); Display(ef);
     GroupForm gf=new GroupForm(); gf.InitEx(db.RootGroup,host.MainWindow.ClientIcons,db); Display(gf);
     KeyPromptForm kf=new KeyPromptForm(); kf.InitEx(new IOConnectionInfo { Path="Synthetic.kdbx" },false,false); Display(kf);
+    OptionsForm of=new OptionsForm();
+    Display(of);
     db.Close(); Log("DONE");
    } catch(Exception ex) { Log("ERROR "+ex.ToString()); }
    host.MainWindow.Close();

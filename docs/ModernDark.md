@@ -2,6 +2,12 @@
 
 KeePass selbst wird nicht verändert.
 
+## Lokaler Testbuild 1.1.21: Erstbildschutz für Einstellungen
+
+Die Aufnahme zeigt helle native Flächen beim Öffnen des OptionsForm-Dialogs. Dieser Dialog wird nun ebenfalls vor der ersten sichtbaren Zeichnung geschützt. Der KeeTheme-Reiter wird im Shown-Ablauf vor dem Wiederherstellen der Sichtbarkeit erstellt und vollständig besucht/eingefärbt. Die übrigen Dialoge behalten ihren bisherigen Ablauf. Modern Gray aus dem lokalen Testbuild 1.1.20 bleibt zusätzlich enthalten.
+
+Der isolierte echte KeePass-Integrationstest prüft OptionsForm einschließlich unsichtbarer erster Zeichnung (native Alpha 0), anschließender Sichtbarkeit (Alpha 255), genau eines KeeTheme-Reiters und dessen dunkler Panel-Fläche. Bestehende Hauptfenster-, Eintrags-, Gruppen- und Schlüsseldatei-Dialoge bestehen dieselbe Prüfung. Modern-Gray- und Suchfeld-Prüfungen bestehen. Die Nutzeraufnahme wird damit nicht vollständig reproduziert; Bestätigung beim Nutzer steht aus. Diese Entwicklung bleibt lokal; kein neues GitHub-Release.
+
 ## Testbuild 1.1.20: Zusätzliches Modern Gray
 
 Modern Gray ist als vierte eingebettete Theme-Vorlage wählbar. Grundfläche #B0B0B0, Eingabeflächen #B8B8B8, dunkle Schrift #202020, dezente graue Rahmen und zurückhaltende Auswahlfarben. Moderne Icons, Suchfeld-Pufferung, Schlüsseldatei-Pfeil und Kalenderkorrekturen sind auch dort vorhanden. Eine separate Palette passt die zuvor festen Farben moderner Bedienelemente ausschließlich für Modern Gray an.

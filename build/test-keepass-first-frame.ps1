@@ -30,10 +30,11 @@ if(!$process.WaitForExit(30000)) {
 $trace=[IO.File]::ReadAllText((Join-Path $testDir 'trace.txt'))
 if($trace -match 'ERROR' -or $trace -notmatch 'DONE'){throw "Integration failed; artifacts: $testDir"}
 if($trace -notmatch 'Main queued opacity=1 alpha=255'){throw 'Main window opacity was not restored'}
-foreach($name in @('PwEntryForm','GroupForm','KeyPromptForm')) {
+foreach($name in @('PwEntryForm','GroupForm','KeyPromptForm','OptionsForm')) {
     if($trace -notmatch ('WindowAdded '+$name+' visible=True opacity=1 alpha=0 nativeVisible=False')){throw "$name first-frame guard was skipped"}
     if($trace -notmatch ('FirstPaint '+$name+'/[^\r\n]*alpha=0')){throw "$name initial paint was visible"}
     if($trace -notmatch ('Shown '+$name+' opacity=1 alpha=255')){throw "$name opacity was not restored"}
 }
+if($trace -notmatch 'OptionsTab ready count=1'){throw 'Options plugin tab missing, duplicated or not themed before reveal'}
 Write-Output "PASS actual KeePass: initial dialog painting at native alpha 0; no premature native visibility; main and dialogs restored to alpha 255. Trace: $testDir\trace.txt"
 Write-Output 'LIMIT: uses synthetic data and offscreen dialogs; user-visible white flash still requires manual confirmation.'
