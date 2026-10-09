@@ -12,15 +12,15 @@ namespace KeeTheme.Theme
         {
             if(!Gray)return original;
             int value=original.ToArgb();
-            if(value==System.Drawing.Color.FromArgb(37,37,38).ToArgb())return System.Drawing.Color.FromArgb(184,184,184);
-            if(value==System.Drawing.Color.FromArgb(241,241,241).ToArgb())return System.Drawing.Color.FromArgb(32,32,32);
-            if(value==System.Drawing.Color.FromArgb(190,190,190).ToArgb())return System.Drawing.Color.FromArgb(80,80,80);
+            if(value==System.Drawing.Color.FromArgb(37,37,38).ToArgb())return System.Drawing.Color.FromArgb(135,135,135);
+            if(value==System.Drawing.Color.FromArgb(241,241,241).ToArgb())return System.Drawing.Color.FromArgb(16,16,16);
+            if(value==System.Drawing.Color.FromArgb(190,190,190).ToArgb())return System.Drawing.Color.FromArgb(48,48,48);
             if(value==System.Drawing.Color.FromArgb(56,101,138).ToArgb())return System.Drawing.Color.FromArgb(160,176,192);
-            if(value==System.Drawing.Color.FromArgb(45,45,48).ToArgb())return System.Drawing.Color.FromArgb(176,176,176);
-            if(value==System.Drawing.Color.FromArgb(73,73,78).ToArgb())return System.Drawing.Color.FromArgb(152,152,152);
-            if(value==System.Drawing.Color.FromArgb(62,62,66).ToArgb())return System.Drawing.Color.FromArgb(164,164,164);
-            if(value==System.Drawing.Color.FromArgb(110,110,110).ToArgb())return System.Drawing.Color.FromArgb(96,96,96);
-            if(value==System.Drawing.Color.FromArgb(65,65,65).ToArgb() || value==System.Drawing.Color.FromArgb(65,65,69).ToArgb())return System.Drawing.Color.FromArgb(128,128,128);
+            if(value==System.Drawing.Color.FromArgb(45,45,48).ToArgb())return System.Drawing.Color.FromArgb(127,127,127);
+            if(value==System.Drawing.Color.FromArgb(73,73,78).ToArgb())return System.Drawing.Color.FromArgb(111,111,111);
+            if(value==System.Drawing.Color.FromArgb(62,62,66).ToArgb())return System.Drawing.Color.FromArgb(119,119,119);
+            if(value==System.Drawing.Color.FromArgb(110,110,110).ToArgb())return System.Drawing.Color.FromArgb(72,72,72);
+            if(value==System.Drawing.Color.FromArgb(65,65,65).ToArgb() || value==System.Drawing.Color.FromArgb(65,65,69).ToArgb())return System.Drawing.Color.FromArgb(96,96,96);
             return original;
         }
     }

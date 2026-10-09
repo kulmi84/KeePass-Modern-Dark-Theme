@@ -10,11 +10,11 @@ if($reader.GetField('DefaultTemplatePath',$f).GetRawConstantValue() -ne 'KeeThem
 $ini=$reader.GetMethod('GetFromResources',$f).Invoke($null,@('KeeTheme.Resources.ModernGray.ini'))
 $template=[Activator]::CreateInstance($a.GetType('KeeTheme.Theme.CustomThemeTemplate'),$f,$null,@($ini),$null)
 $theme=[Activator]::CreateInstance($a.GetType('KeeTheme.Theme.CustomTheme'),$f,$null,@($template),$null)
-if($theme.Form.BackColor.R -ne 176 -or $theme.Control.BackColor.R -ne 184 -or $theme.Form.ForeColor.R -ne 32){throw 'Gray palette incorrect'}
+if($theme.Form.BackColor.R -ne 127 -or $theme.Control.BackColor.R -ne 135 -or $theme.Form.ForeColor.R -ne 16){throw 'Gray palette incorrect'}
 if(!$theme.MenuItem.ModernIcons -or $theme.ScrollBar.UseExplorerDarkMode){throw 'Modern icons or gray scrollbar settings incorrect'}
 $round=$template.GetType().GetMethod('GetIniFile',$f).Invoke($template,@())
 $round=[Activator]::CreateInstance($template.GetType(),$f,$null,@($round),$null)
-if($round.Name -ne 'Modern Gray' -or $round.Form.BackColor.R -ne 176){throw 'Gray editor roundtrip failed'}
+if($round.Name -ne 'Modern Gray' -or $round.Form.BackColor.R -ne 127){throw 'Gray editor roundtrip failed'}
 if($PreviousPluginPath){
  $old=[Reflection.Assembly]::LoadFile($PreviousPluginPath)
  foreach($resource in @('ModernDark.ini','DarkTheme.ini','DarkThemeWin11.ini')){
@@ -62,7 +62,7 @@ try {
  $draw=$a.GetType('KeeTheme.Decorators.CenteredSearchDecorator').GetMethod('DrawDateFieldWithPalette',$f)
  $bounds=New-Object Drawing.Rectangle(0,0,470,25)
  $draw.Invoke($null,@($g.PSObject.BaseObject,$bounds.PSObject.BaseObject,'09.10.2026 00:00:00',[Drawing.SystemFonts]::MenuFont,$true,$palette))|Out-Null
- if($bitmap.GetPixel(200,12).R -ne 184){throw 'Gray date field still dark'}
+ if($bitmap.GetPixel(200,12).R -ne 135){throw 'Gray date field still dark'}
  $date=New-Object Windows.Forms.DateTimePicker;$date.Location=New-Object Drawing.Point(205,130);$date.Width=470;$date.Value=New-Object DateTime(2026,10,9);$form.Controls.Add($date)
  $dateGuard=[Activator]::CreateInstance($type,$f,$null,@($date.PSObject.BaseObject,$true,$true),$null)
  $note=New-Object Windows.Forms.Label;$note.Text='Fiktive Daten · vorhandene Themes bleiben erhalten';$note.AutoSize=$true;$note.Location=New-Object Drawing.Point(205,175);$form.Controls.Add($note)
