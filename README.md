@@ -1,6 +1,8 @@
-# KeePass Modern Dark Theme
+# KeePass Dark Mode – KeePass Modern Dark Theme
 
-Ein KeeTheme-Fork für KeePass 2 mit Modern Dark, Modern Gray und Modern Green, einheitlichen Standardicons und einer aufgeräumten Symbolleiste.
+**KeePass Modern Dark Theme** is a free, MIT-licensed KeeTheme plugin for **KeePass Password Safe 2.x on Windows**. Its Modern Dark theme adds a dark UI with dark menus and dialogs, monochrome standard icons and a streamlined toolbar. Modern Gray and Modern Green offer alternative color schemes.
+
+Ein kostenloses **KeePass Dark Theme** für den Passwortmanager **KeePass 2.x unter Windows**: Dieser weiterentwickelte KeeTheme-Fork ergänzt einen **dunklen Modus (Dark Mode)** mit Modern Dark, einheitlichen Standardicons und einer aufgeräumten Symbolleiste. Modern Gray und Modern Green stehen als weitere Farbvarianten zur Auswahl. Das Plugin passt die Oberfläche an; Passwort- und KDBX-Logik bleiben unverändert.
 
 ![Modern Dark mit Testeinträgen](docs/ModernDark-main-test.png)
 
