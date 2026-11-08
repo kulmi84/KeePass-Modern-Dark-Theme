@@ -29,12 +29,14 @@ if(!$process.WaitForExit(30000)) {
 }
 $trace=[IO.File]::ReadAllText((Join-Path $testDir 'trace.txt'))
 if($trace -match 'ERROR' -or $trace -notmatch 'DONE'){throw "Integration failed; artifacts: $testDir"}
-if($trace -notmatch 'Main queued opacity=1 alpha=255'){throw 'Main window opacity was not restored'}
-foreach($name in @('PwEntryForm','GroupForm','KeyPromptForm','OptionsForm')) {
+if($trace -notmatch 'Main shown opacity=1 alpha=255'){throw 'Main window was transparent at startup'}
+if($trace -notmatch 'WindowAdded KeyPromptForm visible=True opacity=1 alpha=255'){throw 'Unlock prompt was transparent during initialization'}
+if($trace -notmatch 'Shown KeyPromptForm opacity=1 alpha=255 nativeVisible=True'){throw 'Unlock prompt was not visible'}
+foreach($name in @('PwEntryForm','GroupForm','OptionsForm')) {
     if($trace -notmatch ('WindowAdded '+$name+' visible=True opacity=1 alpha=0 nativeVisible=False')){throw "$name first-frame guard was skipped"}
     if($trace -notmatch ('FirstPaint '+$name+'/[^\r\n]*alpha=0')){throw "$name initial paint was visible"}
     if($trace -notmatch ('Shown '+$name+' opacity=1 alpha=255')){throw "$name opacity was not restored"}
 }
 if($trace -notmatch 'OptionsTab ready count=1'){throw 'Options plugin tab missing, duplicated or not themed before reveal'}
-Write-Output "PASS actual KeePass: initial dialog painting at native alpha 0; no premature native visibility; main and dialogs restored to alpha 255. Trace: $testDir\trace.txt"
+Write-Output "PASS actual KeePass: startup windows stay opaque; guarded dialogs reveal after first paint. Trace: $testDir\trace.txt"
 Write-Output 'LIMIT: uses synthetic data and offscreen dialogs; user-visible white flash still requires manual confirmation.'

@@ -50,7 +50,6 @@ namespace KeeTheme
 
 			_win10ThemeMonitor = new Win10ThemeMonitor(_options);
 			_win10ThemeMonitor.Initialize();
-            PrepareFirstFrame(host.MainWindow);
 
 			if (Program.TriggerSystem.Enabled)
 			{
@@ -121,10 +120,11 @@ namespace KeeTheme
 
         private void PrepareFirstFrame(Form form)
         {
-            if (!_options.Enabled || MonoWorkarounds.IsRequired() || FirstFrameDecorator.IsNativeVisible(form) || _firstFrames.ContainsKey(form)) return;
+            // Keep the startup windows visible even if WinForms does not deliver Shown.
             string name = form.GetType().FullName;
-            if (name != "KeePass.Forms.MainForm" && name != "KeePass.Forms.PwEntryForm" && name != "KeePass.Forms.GroupForm" &&
-                name != "KeePass.Forms.KeyPromptForm" && name != "KeePass.Forms.DatabaseSettingsForm" && name != "KeePass.Forms.OptionsForm") return;
+            if (name != "KeePass.Forms.PwEntryForm" && name != "KeePass.Forms.GroupForm" &&
+                name != "KeePass.Forms.DatabaseSettingsForm" && name != "KeePass.Forms.OptionsForm") return;
+            if (!_options.Enabled || MonoWorkarounds.IsRequired() || FirstFrameDecorator.IsNativeVisible(form) || _firstFrames.ContainsKey(form)) return;
             FirstFrameDecorator frame = new FirstFrameDecorator(form);
             _firstFrames.Add(form, frame);
             form.Disposed += delegate { frame.Dispose(); _firstFrames.Remove(form); };

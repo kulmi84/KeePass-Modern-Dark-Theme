@@ -61,7 +61,7 @@ In der Theme-Auswahl stehen Modern Dark, Modern Gray und Modern Green. Alte Them
 
 [Installation, Build-Anleitung, Prüfungen und Plugin-Grenzen](docs/ModernDark.md).
 
-Die aktuelle Version aus diesem Fork bauen und KeeTheme.dll in den KeePass-Plugins-Ordner kopieren. Vor dem Austausch KeePass schließen und vorherige KeeTheme.dll/KeeTheme.plgx sichern und aus dem Plugins-Ordner nehmen. Unter **Extras → Optionen → KeeTheme** **Modern Dark**, **Modern Gray** oder **Modern Green** auswählen.
+Vor dem Update KeePass schließen und vorhandene `KeeTheme.dll`, `KeeTheme.plgx` sowie ein eventuell installiertes Diagnose-Plugin `KeeThemePaintTrace.dll` außerhalb des `Plugins`-Ordners sichern. Anschließend die neue `KeeTheme.dll` aus dem ZIP in den KeePass-Plugins-Ordner kopieren. Unter **Extras → Optionen → KeeTheme** **Modern Dark**, **Modern Gray** oder **Modern Green** auswählen.
 
 Die dunklen Rahmen und das neue Banner wurden im laufenden KeePass vom Nutzer bestätigt. Automatisierte Prüfungen ergänzen die praktischen Tests; Details und verbleibende Grenzen stehen in der Dokumentation.
 
